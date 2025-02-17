@@ -1,30 +1,67 @@
-name: Deploy
+name: CI & Deploy
 
-# Trigger on push to the main branch (adjust to your workflow)
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  deploy:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Make wp-up-ci
+      - name: Check for changed paths
+        id: path_filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            docker:
+              - 'docker/Dockerfile'
+            deploy:
+              - 'woocommerce-koban-sync/**'
+              - '.github/workflows/deploy.yml'
+
+      - name: Set up Docker Buildx
+        if: steps.path_filter.outputs.docker == 'true'
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+
+      - name: Restore build cache
+        if: steps.path_filter.outputs.docker == 'true'
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('docker/Dockerfile') }}
+          restore-keys: ${{ runner.os }}-docker-
+
+      - name: Build Docker Image (cached)
+        if: steps.path_filter.outputs.docker == 'true'
+        run: |
+          echo "Docker-related files changed. Rebuilding image with Buildx cache..."
+          docker buildx build \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            --tag your-docker-image:latest \
+            --load \
+            docker
+
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Start containers (CI mode)
         run: make wp-up-ci
 
-      - name: Wait for WordPress to be ready
+      - name: Wait for WordPress
         run: |
-          echo "Waiting for WordPress to respond on http://localhost:8080 ..."
+          echo "Waiting for WordPress at http://localhost:8000 ..."
           for i in {1..30}; do
-            if curl -sSf http://localhost:8080/wp-admin/install.php > /dev/null; then
+            if curl -sSf http://localhost:8000/wp-admin/install.php >/dev/null; then
               echo "WordPress is up!"
               break
             else
-              echo "WordPress not ready yet. Sleeping..."
+              echo "Still not ready. Sleeping..."
               sleep 5
             fi
           done
@@ -35,12 +72,12 @@ jobs:
       - name: Tests
         run: make tests
 
-      - name: Tear down Docker containers
+      - name: Tear down
         if: always()
         run: make wp-down
 
       - name: Deploy via SFTP
-        if: success()
+        if: ${{ success() && steps.changes.outputs.wck == 'true' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.SFTP_USER }}
