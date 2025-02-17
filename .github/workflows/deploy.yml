@@ -41,13 +41,11 @@ jobs:
 
       - name: Deploy via SFTP
         if: success()
-        uses: appleboy/scp-action@v0.1.3
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
-          host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
-          port: ${{ secrets.SFTP_PORT }}
-          key: ${{ secrets.SFTP_KEY }}
-
-          source: "../../woocommerce-koban-sync/"
-          target: "/var/www/ybera-groupe.dev/public_html/wp-content/plugins/woocommerce-koban-sync"
-          overwrite: true
+          server: ${{ secrets.SFTP_HOST }}
+          ssh_private_key: ${{ secrets.SFTP_KEY }}
+          local_path: 'woocommerce-koban-sync'
+          remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
+          sftpArgs: '-o ConnectTimeout=5'
