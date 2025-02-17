@@ -21,6 +21,7 @@ jobs:
               - 'docker/Dockerfile'
             deploy:
               - 'woocommerce-koban-sync/**'
+              - '.github/workflows/test-and-deploy.yml'
 
       - name: Set up Docker Buildx
         if: steps.path_filter.outputs.docker == 'true'
@@ -86,3 +87,12 @@ jobs:
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
           rSyncArgs: '--exclude=phpunit.xml.dist'
+
+      - name: Create plugin zip
+        run: zip -r woocommerce-koban-sync.zip woocommerce-koban-sync
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: woocommerce-koban-sync.zip
+          path: woocommerce-koban-sync.zip
