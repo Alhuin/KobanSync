@@ -39,16 +39,15 @@ jobs:
         if: always()
         run: make wp-down
 
-#      - name: Deploy via SFTP
-#        if: success()
-#        uses: appleboy/scp-action@v0.1.3
-#        with:
-#          host: ${{ secrets.SFTP_HOST }}
-#          username: ${{ secrets.SFTP_USERNAME }}
-#          port: ${{ secrets.SFTP_PORT }}          # e.g., 22
-#          key: ${{ secrets.SFTP_KEY }}            # if using an SSH key
-          # or password: ${{ secrets.SFTP_PASSWORD }}  # if using a password
+      - name: Deploy via SFTP
+        if: success()
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          port: ${{ secrets.SFTP_PORT }}
+          key: ${{ secrets.SFTP_KEY }}
 
-#          source: "path/to/deploy/*"
-#          target: "/path/on/remote/server"
-#          overwrite: true
+          source: "../../woocommerce-koban-sync/"
+          target: "/var/www/ybera-groupe.dev/public_html/wp-content/plugins/woocommerce-koban-sync"
+          overwrite: true
