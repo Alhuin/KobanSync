@@ -24,13 +24,13 @@ jobs:
               - '.github/workflows/deploy.yml'
 
       - name: Set up Docker Buildx
-#        if: steps.path_filter.outputs.docker == 'true'
+        if: steps.path_filter.outputs.docker == 'true'
         uses: docker/setup-buildx-action@v2
         with:
           install: true
 
       - name: Restore build cache
-#        if: steps.path_filter.outputs.docker == 'true'
+        if: steps.path_filter.outputs.docker == 'true'
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
@@ -38,7 +38,7 @@ jobs:
           restore-keys: ${{ runner.os }}-docker-
 
       - name: Build Docker Image (cached)
-#        if: steps.path_filter.outputs.docker == 'true'
+        if: steps.path_filter.outputs.docker == 'true'
         run: |
           echo "Docker-related files changed. Rebuilding image with Buildx cache..."
           docker buildx build \
