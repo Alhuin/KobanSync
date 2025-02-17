@@ -16,19 +16,6 @@ jobs:
       - name: Make wp-up-ci
         run: make wp-up-ci
 
-      - name: Wait for WordPress to be ready
-        run: |
-          echo "Waiting for WordPress to respond on http://localhost:8080 ..."
-          for i in {1..30}; do
-            if curl -sSf http://localhost:8080/wp-admin/install.php > /dev/null; then
-              echo "WordPress is up!"
-              break
-            else
-              echo "WordPress not ready yet. Sleeping..."
-              sleep 5
-            fi
-          done
-
       - name: Lint
         run: make lint
 
