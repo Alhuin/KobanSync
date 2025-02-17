@@ -29,3 +29,7 @@ ifdef $(test)
 else
 	cd docker && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit'
 endif
+
+lint:
+	vendor/bin/phpcbf --standard=phpcs.xml tests/ woocommerce-koban-sync
+	vendor/bin/phpcs --warning-severity=0 --standard=phpcs.xml tests/ woocommerce-koban-sync
