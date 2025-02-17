@@ -92,5 +92,5 @@ jobs:
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: woocommerce-koban-sync.zip
+          name: woocommerce-koban-sync
           path: woocommerce-koban-sync
