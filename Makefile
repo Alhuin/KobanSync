@@ -27,6 +27,7 @@ tests:
 ifdef $(test)
 	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit --filter $(test)'
 else
+	cd $(DOCKER_DIR) && docker compose exec bash -c 'cat /var/www/tests/phpunit.xml'
 	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit'
 endif
 
