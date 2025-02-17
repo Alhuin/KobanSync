@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-deploy:
+  tests-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,14 +17,38 @@ jobs:
         uses: dorny/paths-filter@v2
         with:
           filters: |
+            docker:
+              - 'docker/Dockerfile'
             deploy:
               - 'woocommerce-koban-sync/**'
               - '.github/workflows/deploy.yml'
 
       - name: Set up Docker Buildx
+        if: steps.path_filter.outputs.docker == 'true'
         uses: docker/setup-buildx-action@v2
         with:
           install: true
+
+      - name: Restore build cache
+        if: steps.path_filter.outputs.docker == 'true'
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('docker/Dockerfile') }}
+          restore-keys: ${{ runner.os }}-docker-
+
+      - name: Build Docker Image (cached)
+        if: steps.path_filter.outputs.docker == 'true'
+        run: |
+          echo "Docker-related files changed. Rebuilding image with Buildx cache..."
+          docker buildx build \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            --tag your-docker-image:latest \
+            --load \
+            docker
+
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Start containers (CI mode)
         run: make wp-up-ci
@@ -53,7 +77,7 @@ jobs:
         run: make wp-down
 
       - name: Deploy via SFTP
-        if: ${{ success() && steps.changes.outputs.wck == 'true' }}
+        if: ${{ success() && steps.path_filter.outputs.docker == 'true' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.SFTP_USER }}
