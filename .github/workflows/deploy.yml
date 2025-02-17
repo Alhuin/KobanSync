@@ -57,7 +57,7 @@ jobs:
         run: |
           echo "Waiting for WordPress at http://localhost:8080 ..."
           for i in {1..30}; do
-            if curl -sSf http://localhost:8000/wp-admin/install.php >/dev/null; then
+            if curl -sSf http://localhost:8080/wp-admin/install.php >/dev/null; then
               echo "WordPress is up!"
               break
             else
