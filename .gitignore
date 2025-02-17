@@ -6,3 +6,5 @@
 /tests/bin
 /tests/.circleci
 /tests/.phpunit.result.cache
+/vendor/
+/tests/composer.lock
