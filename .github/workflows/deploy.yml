@@ -77,7 +77,7 @@ jobs:
         run: make wp-down
 
       - name: Deploy via SFTP
-        if: ${{ success() && steps.path_filter.outputs.docker == 'true' }}
+        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.SFTP_USER }}
