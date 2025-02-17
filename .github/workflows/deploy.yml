@@ -1,0 +1,54 @@
+name: Deploy
+
+# Trigger on push to the main branch (adjust to your workflow)
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Make wp-up-ci
+        run: make wp-up-ci
+
+      - name: Wait for WordPress to be ready
+        run: |
+          echo "Waiting for WordPress to respond on http://localhost:8080 ..."
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8080/wp-admin/install.php > /dev/null; then
+              echo "WordPress is up!"
+              break
+            else
+              echo "WordPress not ready yet. Sleeping..."
+              sleep 5
+            fi
+          done
+
+      - name: Lint
+        run: make lint
+
+      - name: Tests
+        run: make tests
+
+      - name: Tear down Docker containers
+        if: always()
+        run: make wp-down
+
+#      - name: Deploy via SFTP
+#        if: success()
+#        uses: appleboy/scp-action@v0.1.3
+#        with:
+#          host: ${{ secrets.SFTP_HOST }}
+#          username: ${{ secrets.SFTP_USERNAME }}
+#          port: ${{ secrets.SFTP_PORT }}          # e.g., 22
+#          key: ${{ secrets.SFTP_KEY }}            # if using an SSH key
+          # or password: ${{ secrets.SFTP_PASSWORD }}  # if using a password
+
+#          source: "path/to/deploy/*"
+#          target: "/path/on/remote/server"
+#          overwrite: true

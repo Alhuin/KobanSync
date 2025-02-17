@@ -1,7 +1,7 @@
 .PHONY: clean tests wp-up wp-down
 
 DOCKER_DIR=docker
-CLEAN_DIRS=tests/vendor tests/phpunit.xml tests/.phpcs.xml.dist tests/bin tests/.circleci tests/.phpunit.result.cache
+CLEAN_DIRS=tests/vendor tests/bin tests/.circleci tests/.phpunit.result.cache tests/.phpcs.xml.dist
 
 help:
 	@echo "Available make targets:"
@@ -12,11 +12,11 @@ help:
 
 wp-up:
 	@echo "Starting the WordPress and DB containers..."
-	cd docker && docker compose up -d && docker compose logs -f
+	cd $(DOCKER_DIR) && docker compose up -d && docker compose logs -f
 
 wp-down:
 	@echo "Stopping the WordPress and DB containers..."
-	cd docker && docker compose down -v
+	cd $(DOCKER_DIR) && docker compose down -v
 
 clean:
 	@echo "Cleaning the test directory..."
@@ -25,11 +25,15 @@ clean:
 tests:
 	@echo "Running tests $(test)"
 ifdef $(test)
-	cd docker && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit --filter $(test)'
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit --filter $(test)'
 else
-	cd docker && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit'
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit'
 endif
 
 lint:
-	vendor/bin/phpcbf --standard=phpcs.xml tests/ woocommerce-koban-sync
-	vendor/bin/phpcs --warning-severity=0 --standard=phpcs.xml tests/ woocommerce-koban-sync
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpcbf --standard=phpcs.xml'
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpcs --warning-severity=0 --standard=phpcs.xml'
+
+wp-up-ci:
+	@echo "Starting the WordPress and DB containers (CI mode)..."
+	cd $(DOCKER_DIR) && docker compose up -d

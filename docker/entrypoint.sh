@@ -27,21 +27,16 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   echo "Création de la suite de tests..."
   wp --allow-root scaffold plugin-tests woocommerce-koban-sync --path="$WP_CORE_DIR"
 
-  # Move automatically created test scaffolding to the /tests directory at project root.
+  # Remove test scaffolding files except the binary
   rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/tests
+  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpcs.xml.dist
+  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpunit.xml.dist
+  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.circleci
 
   if [ ! -d "$PLUGIN_TESTS_DIR"/bin ]; then
     mv "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin "$PLUGIN_TESTS_DIR"
-    mv "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.circleci "$PLUGIN_TESTS_DIR"
-    mv "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpcs.xml.dist "$PLUGIN_TESTS_DIR"
-    mv "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/phpunit.xml.dist "$PLUGIN_TESTS_DIR"/phpunit.xml
-    sed -i 's|\(>\.\/\)tests/|\1|g' "$PLUGIN_TESTS_DIR"/phpunit.xml
-    sed -i 's|bootstrap="tests/bootstrap.php"|bootstrap="bootstrap.php"|g' "$PLUGIN_TESTS_DIR"/phpunit.xml
   else
-    rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpcs.xml.dist
-    rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/phpunit.xml.dist
     rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin
-    rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.circleci
   fi
 
   echo "Installation de la suite de tests..."
