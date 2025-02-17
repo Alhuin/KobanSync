@@ -1,3 +1,9 @@
 <ruleset name="MyCodingStandards">
     <rule ref="WordPress"/>
+    <rule ref="WordPress">
+        <exclude-pattern>tests/*</exclude-pattern>
+             <exclude name="WordPress.Security.EscapeOutput.OutputNotEscaped" />
+             <exclude name="Generic.Files.OneObjectStructurePerFile" />
+             <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+    </rule>
 </ruleset>
