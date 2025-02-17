@@ -86,3 +86,4 @@ jobs:
           local_path: 'woocommerce-koban-sync'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
+          rSyncArgs: '--exclude=phpunit.xml.dist'
