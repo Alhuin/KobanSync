@@ -115,7 +115,7 @@ if ( is_admin() ) {
  * @return array Modified action links.
  */
 function wckoban_sync_action_links( array $links ): array {
-	$settings_link = '<a href="' . esc_url( admin_url( 'wckoban-sync-settings.php' ) ) . '">Settings</a>';
+	$settings_link = '<a href="' . esc_url( admin_url( 'admin.php?page=wckoban-sync-settings' ) ) . '">Settings</a>';
 	array_unshift( $links, $settings_link );
 
 	return $links;
