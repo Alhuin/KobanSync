@@ -82,9 +82,7 @@ A Docker-based environment is included:
     ```
    - Stops and removes the Docker containers (WordPress and MySQL).
 
----
-
-## Notes
-- PHPCS (PHP_CodeSniffer) is configured via phpcs.xml for code style checks.
-- Use make lint to apply style fixes (via phpcbf) and to run style checks (via phpcs).
-- If you wish to ignore certain rules in tests/, adjust your PHPCS configuration accordingly.
+> **Note**:
+> - PHPCS (PHP_CodeSniffer) is configured via phpcs.xml for code style checks.
+> - Use make lint to apply style fixes (via phpcbf) and to run style checks (via phpcs).
+> - If you wish to ignore certain rules in tests/, adjust your PHPCS configuration accordingly.
