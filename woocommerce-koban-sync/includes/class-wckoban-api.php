@@ -1,18 +1,38 @@
 <?php
+/**
+ * WCKoban_API class file.
+ *
+ * Handles interactions with the Koban CRM API.
+ *
+ * @package WooCommerceKobanSync
+ */
 
-if ( ! class_exists( "WCKoban_API" ) ) {
+if ( ! class_exists( 'WCKoban_API' ) ) {
 	/**
 	 * A client class for interacting with the Koban CRM API.
 	 */
 	class WCKoban_API {
 
-		/** @var string The base URL for Koban API. */
+
+		/**
+		 * The base URL for Koban API.
+		 *
+		 * @var string
+		 */
 		private $api_url;
 
-		/** @var string The API key credential for Koban. */
+		/**
+		 * The API key credential for Koban.
+		 *
+		 * @var string
+		 */
 		private $api_key;
 
-		/** @var string The user key credential for Koban. */
+		/**
+		 * The user key credential for Koban.
+		 *
+		 * @var string
+		 */
 		private $user_key;
 
 		/**
@@ -28,47 +48,53 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 		/**
 		 * Executes a generic API request (POST, GET, etc.) to Koban.
 		 *
-		 * @param string $url The Koban API endpoint URL.
-		 * @param string $method HTTP method (e.g. 'GET', 'POST').
-		 * @param array|null $body Request body, which will be JSON-encoded if provided.
+		 * @param string     $url    The Koban API endpoint URL.
+		 * @param string     $method HTTP method (e.g. 'GET', 'POST').
+		 * @param array|null $body   Request body, which will be JSON-encoded if provided.
 		 *
 		 * @return array|false        The decoded JSON response or false on error.
 		 * TODO: Handle retries
 		 */
 		private function make_request( string $url, string $method = 'GET', ?array $body = null ): ?array {
-			$headers = [
+			$headers = array(
 				'X-ncApi'      => $this->api_key,
 				'X-ncUser'     => $this->user_key,
-				'Content-Type' => 'application/json'
-			];
+				'Content-Type' => 'application/json',
+			);
 
-			$args = [
+			$args = array(
 				'method'    => $method,
 				'headers'   => $headers,
 				'timeout'   => 15,
 				'sslverify' => true,
-			];
+			);
 
-			WCKoban_Logger::info( 'Sending request to Koban', [
-				'url'    => $url,
-				'method' => $method,
-				'body'   => $body,
-			] );
+			WCKoban_Logger::info(
+				'Sending request to Koban',
+				array(
+					'url'    => $url,
+					'method' => $method,
+					'body'   => $body,
+				)
+			);
 
 			if ( $body ) {
-				$args['body'] = json_encode( $body );
+				$args['body'] = wp_json_encode( $body );
 			}
 
 			$response = wp_remote_request( $url, $args );
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
-				WCKoban_Logger::error( 'HTTP error while calling Koban API', [
-					'url'    => $url,
-					'method' => $method,
-					'body'   => $body,
-					'error'  => $error_message,
-				] );
+				WCKoban_Logger::error(
+					'HTTP error while calling Koban API',
+					array(
+						'url'    => $url,
+						'method' => $method,
+						'body'   => $body,
+						'error'  => $error_message,
+					)
+				);
 
 				return false;
 			}
@@ -76,11 +102,14 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 			$response_body = wp_remote_retrieve_body( $response );
 
 			if ( empty( $response_body ) ) {
-				WCKoban_Logger::error( 'Empty response from Koban API', [
-					'url'    => $url,
-					'method' => $method,
-					'body'   => $body,
-				] );
+				WCKoban_Logger::error(
+					'Empty response from Koban API',
+					array(
+						'url'    => $url,
+						'method' => $method,
+						'body'   => $body,
+					)
+				);
 
 				return false;
 			}
@@ -88,12 +117,15 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 			$response_data = json_decode( $response_body, true );
 
 			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				WCKoban_Logger::error( 'JSON decoding error from Koban API', [
-					'url'      => $url,
-					'method'   => $method,
-					'body'     => $body,
-					'response' => $response_body,
-				] );
+				WCKoban_Logger::error(
+					'JSON decoding error from Koban API',
+					array(
+						'url'      => $url,
+						'method'   => $method,
+						'body'     => $body,
+						'response' => $response_body,
+					)
+				);
 
 				return false;
 			}
@@ -104,8 +136,8 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 		/**
 		 * Creates or updates a Third (user) record in Koban.
 		 *
-		 * @param array $user_payload Data to upsert in Koban.
-		 * @param string|null $koban_guid Optional existing GUID to update, or null to create a new record.
+		 * @param array       $user_payload Data to upsert in Koban.
+		 * @param string|null $koban_guid   Optional existing GUID to update, or null to create a new record.
 		 *
 		 * @return string|false             Returns the Third GUID on success, false on failure.
 		 */
@@ -114,18 +146,24 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 
 			$response_data = $this->make_request( $url, 'POST', $user_payload );
 
-			WCKoban_Logger::info( 'upsert_user response', [
-				'user_payload' => $user_payload,
-				'koban_guid'   => $koban_guid,
-				'response'     => $response_data,
-			] );
+			WCKoban_Logger::info(
+				'upsert_user response',
+				array(
+					'user_payload' => $user_payload,
+					'koban_guid'   => $koban_guid,
+					'response'     => $response_data,
+				)
+			);
 
-			if ( ! $response_data || empty( $response_data['Success'] ) || $response_data['Success'] !== true ) {
-				WCKoban_Logger::error( 'Invalid API response for user upsert', [
-					'user_payload'  => $user_payload,
-					'koban_guid'    => $koban_guid,
-					'response_data' => $response_data,
-				] );
+			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+				WCKoban_Logger::error(
+					'Invalid API response for user upsert',
+					array(
+						'user_payload'  => $user_payload,
+						'koban_guid'    => $koban_guid,
+						'response_data' => $response_data,
+					)
+				);
 
 				return false;
 			}
@@ -141,15 +179,18 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 		 * @return string|false The found Third GUID, or false if not found.
 		 */
 		public function find_user_by_email( string $email ): ?string {
-			$url = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . urlencode( $email );
+			$url = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . rawurlencode( $email );
 
 			$response_data = $this->make_request( $url, 'GET' );
 
 			if ( ! $response_data || ! isset( $response_data['Guid'] ) ) {
-				WCKoban_Logger::info( 'User not found in Koban by email', [
-					'email' => $email,
-					'data'  => $response_data,
-				] );
+				WCKoban_Logger::info(
+					'User not found in Koban by email',
+					array(
+						'email' => $email,
+						'data'  => $response_data,
+					)
+				);
 
 				return false;
 			}
@@ -169,11 +210,14 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 
 			$response_data = $this->make_request( $url, 'POST', $invoice_payload );
 
-			if ( ! $response_data || empty( $response_data['Success'] ) || $response_data['Success'] !== true ) {
-				WCKoban_Logger::error( 'Failed to create invoice in Koban', [
-					'invoice_payload' => $invoice_payload,
-					'response_data'   => $response_data,
-				] );
+			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+				WCKoban_Logger::error(
+					'Failed to create invoice in Koban',
+					array(
+						'invoice_payload' => $invoice_payload,
+						'response_data'   => $response_data,
+					)
+				);
 
 				return false;
 			}
@@ -195,22 +239,25 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 			$response_data = $this->make_request( $url, 'GET' );
 
 			if ( ! $response_data || empty( $response_data['link'] ) ) {
-				WCKoban_Logger::error( 'Failed to retrieve invoice pdf url in Koban', [
-					'invoice_guid'  => $invoice_guid,
-					'response_data' => $response_data,
-				] );
+				WCKoban_Logger::error(
+					'Failed to retrieve invoice pdf url in Koban',
+					array(
+						'invoice_guid'  => $invoice_guid,
+						'response_data' => $response_data,
+					)
+				);
 
 				return false;
 			}
 
-			return $response_data["link"];
+			return $response_data['link'];
 		}
 
 		/**
 		 * Creates or updates a Product in Koban by reference.
 		 *
-		 * @param array $product_payload The product data to upsert.
-		 * @param string|null $product_guid Optional existing GUID, if relevant.
+		 * @param array       $product_payload The product data to upsert.
+		 * @param string|null $product_guid    Optional existing GUID, if relevant.
 		 *
 		 * @return bool                        True on success, false on failure.
 		 */
@@ -219,12 +266,15 @@ if ( ! class_exists( "WCKoban_API" ) ) {
 
 			$response_data = $this->make_request( $url, 'POST', $product_payload );
 
-			if ( ! $response_data || empty( $response_data['Success'] ) || $response_data['Success'] !== true ) {
-				WCKoban_Logger::error( 'Invalid API response for product upsert', [
-					'productPayload' => $product_payload,
-					'product_guid'   => $product_guid,
-					'response_data'  => $response_data,
-				] );
+			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+				WCKoban_Logger::error(
+					'Invalid API response for product upsert',
+					array(
+						'productPayload' => $product_payload,
+						'product_guid'   => $product_guid,
+						'response_data'  => $response_data,
+					)
+				);
 
 				return false;
 			}

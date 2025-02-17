@@ -1,4 +1,12 @@
 <?php
+/**
+ * WCKoban_Admin class file.
+ *
+ * Handles the admin interface for Koban Sync, including settings and logs display.
+ *
+ * @package WooCommerceKobanSync
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -7,12 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Admin class for managing Koban Sync plugin settings and displaying logs.
  */
 class WCKoban_Admin {
+
 	/**
 	 * Constructor that sets up the admin menu and registers settings.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'add_settings_page' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
+		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_footer', array( $this, 'render_custom_admin_footer' ) );
 	}
 
 	/**
@@ -20,11 +30,11 @@ class WCKoban_Admin {
 	 */
 	public function add_settings_page(): void {
 		add_menu_page(
-			'Koban Sync Settings',  // Page title
-			'Koban Sync',           // Menu label
-			'manage_options',       // Capability
-			'wckoban-sync-settings',// Slug
-			[ $this, 'render_settings_page' ],
+			'Koban Sync Settings',  // Page title.
+			'Koban Sync',           // Menu label.
+			'manage_options',       // Capability.
+			'wckoban-sync-settings', // Slug.
+			array( $this, 'render_settings_page' ),
 			'dashicons-admin-generic'
 		);
 	}
@@ -36,20 +46,20 @@ class WCKoban_Admin {
 		register_setting(
 			'wckoban_sync_settings_group',
 			'wckoban_sync_options',
-			[ 'sanitize_callback' => [ $this, 'sanitize_options' ] ]
+			array( 'sanitize_callback' => array( $this, 'sanitize_options' ) )
 		);
 
 		add_settings_section(
 			'wckoban_sync_section',
 			'Koban API Settings',
-			[ $this, 'render_settings_section' ],
+			array( $this, 'render_settings_section' ),
 			'wckoban-sync-settings-page'
 		);
 
 		add_settings_field(
 			'koban_api_key',
 			'API Key',
-			[ $this, 'render_api_key_field' ],
+			array( $this, 'render_api_key_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
 		);
@@ -57,7 +67,7 @@ class WCKoban_Admin {
 		add_settings_field(
 			'koban_user_key',
 			'User Key',
-			[ $this, 'render_user_key_field' ],
+			array( $this, 'render_user_key_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
 		);
@@ -65,7 +75,7 @@ class WCKoban_Admin {
 		add_settings_field(
 			'koban_url',
 			'Koban API URL',
-			[ $this, 'render_api_url_field' ],
+			array( $this, 'render_api_url_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
 		);
@@ -113,19 +123,19 @@ class WCKoban_Admin {
 	 * @return array The sanitized settings array.
 	 */
 	public function sanitize_options( array $input ): array {
-		$clean = [];
+		$clean = array();
 
 		$clean['koban_api_key'] = isset( $input['koban_api_key'] )
-			? sanitize_text_field( $input['koban_api_key'] )
-			: '';
+		? sanitize_text_field( $input['koban_api_key'] )
+		: '';
 
 		$clean['koban_user_key'] = isset( $input['koban_user_key'] )
-			? sanitize_text_field( $input['koban_user_key'] )
-			: '';
+		? sanitize_text_field( $input['koban_user_key'] )
+		: '';
 
 		$clean['koban_url'] = isset( $input['koban_url'] )
-			? esc_url_raw( $input['koban_url'] )
-			: '';
+		? esc_url_raw( $input['koban_url'] )
+		: '';
 
 		return $clean;
 	}
@@ -135,37 +145,37 @@ class WCKoban_Admin {
 	 * Renders the main settings page, including a tab for logs.
 	 */
 	public function render_settings_page(): void {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'settings';
 		?>
-        <div class="wrap">
-            <h1>Koban Sync</h1>
+		<div class="wrap">
+			<h1>Koban Sync</h1>
 
-            <h2 class="nav-tab-wrapper">
-                <a href="?page=wckoban-sync-settings&tab=settings"
-                   class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
-                    Réglages
-                </a>
-                <a href="?page=wckoban-sync-settings&tab=logs"
-                   class="nav-tab <?php echo $active_tab === 'logs' ? 'nav-tab-active' : ''; ?>">
-                    Logs
-                </a>
-            </h2>
-			<?php
-			if ( 'settings' === $active_tab ) {
-				?>
-                <form method="post" action="options.php">
-					<?php
-					settings_fields( 'wckoban_sync_settings_group' );
-					do_settings_sections( 'wckoban-sync-settings-page' );
-					submit_button( 'Save Changes' );
-					?>
-                </form>
-				<?php
-			} else {
-				$this->display_logs_table();
-			}
+			<h2 class="nav-tab-wrapper">
+				<a href="?page=wckoban-sync-settings&tab=settings"
+					class="nav-tab <?php echo 'settings' === $active_tab ? 'nav-tab-active' : ''; ?>">
+					Réglages
+				</a>
+				<a href="?page=wckoban-sync-settings&tab=logs"
+					class="nav-tab <?php echo 'logs' === $active_tab ? 'nav-tab-active' : ''; ?>">
+					Logs
+				</a>
+			</h2>
+		<?php
+		if ( 'settings' === $active_tab ) {
 			?>
-        </div>
+				<form method="post" action="options.php">
+			<?php
+			settings_fields( 'wckoban_sync_settings_group' );
+			do_settings_sections( 'wckoban-sync-settings-page' );
+			submit_button( 'Save Changes' );
+			?>
+				</form>
+			<?php
+		} else {
+			$this->display_logs_table();
+		}
+		?>
+		</div>
 		<?php
 	}
 
@@ -179,6 +189,7 @@ class WCKoban_Admin {
 
 		$table_name = $wpdb->prefix . 'koban_sync_logs';
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$logs = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC LIMIT 50" );
 
 		echo '<h2>Synchronization Logs</h2>';
@@ -197,7 +208,7 @@ class WCKoban_Admin {
 				echo '<td>' . esc_html( $log->message ) . '</td>';
 
 				$context_decoded = json_decode( $log->context, true );
-				$context_json    = json_encode( $context_decoded );
+				$context_json    = wp_json_encode( $context_decoded );
 
 				echo '<td>';
 				echo '<button type="button" class="open-context-btn" data-context="' . esc_attr( $context_json ) . '">View Context</button>';
@@ -212,44 +223,45 @@ class WCKoban_Admin {
 		echo '</table>';
 	}
 
-}
+	/**
+	 * Renders a custom admin footer script via the "admin_footer" hook.
+	 */
+	public function render_custom_admin_footer(): void {
+		?>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function () {
+				document.querySelectorAll('.open-context-btn').forEach(button => {
+					button.addEventListener('click', function () {
+						const contextRow = this.closest('tr').nextElementSibling;
+						const context = this.getAttribute('data-context');
+						const contextObj = JSON.parse(context);
 
-add_action( 'admin_footer', 'wckoban_sync_custom_admin_footer' );
-function wckoban_sync_custom_admin_footer(): void {
-	?>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.open-context-btn').forEach(button => {
-                button.addEventListener('click', function () {
-                    const contextRow = this.closest('tr').nextElementSibling;
-                    const context = this.getAttribute('data-context');
-                    const contextObj = JSON.parse(context);
+						contextRow.querySelector('.context-content').textContent = JSON.stringify(contextObj, null, 2);
 
-                    contextRow.querySelector('.context-content').textContent = JSON.stringify(contextObj, null, 2);
+						if (contextRow.style.display === 'table-row') {
+							contextRow.style.display = 'none';
+							this.textContent = 'View Context';
+						} else {
+							contextRow.style.display = 'table-row';
+							this.textContent = 'Hide Context';
+						}
+					});
+				});
+			});
+		</script>
+		<style>
+			.context-content {
+				background-color: #f9f9f9;
+				padding: 10px;
+				word-wrap: break-word;
+			}
 
-                    if (contextRow.style.display === 'table-row') {
-                        contextRow.style.display = 'none';
-                        this.textContent = 'View Context';
-                    } else {
-                        contextRow.style.display = 'table-row';
-                        this.textContent = 'Hide Context';
-                    }
-                });
-            });
-        });
-    </script>
-    <style>
-        .context-content {
-            background-color: #f9f9f9;
-            padding: 10px;
-            word-wrap: break-word;
-        }
-
-        .context-conten pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            margin: 0;
-        }
-    </style>
-	<?php
+			.context-conten pre {
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				margin: 0;
+			}
+		</style>
+		<?php
+	}
 }
