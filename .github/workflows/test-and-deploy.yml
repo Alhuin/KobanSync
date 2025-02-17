@@ -92,7 +92,7 @@ jobs:
         run: zip -r woocommerce-koban-sync.zip woocommerce-koban-sync
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: woocommerce-koban-sync.zip
           path: woocommerce-koban-sync.zip
