@@ -1,2 +1,8 @@
 /.idea/
 /KobanSync.iml
+/tests/vendor
+/tests/phpunit.xml
+/tests/.phpcs.xml.dist
+/tests/bin
+/tests/.circleci
+/tests/.phpunit.result.cache
