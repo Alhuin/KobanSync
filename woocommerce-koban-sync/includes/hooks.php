@@ -148,20 +148,13 @@ function wckoban_get_invoice_pdf( string $koban_invoice_guid ): ?string {
  */
 function wckoban_upsert_product( array $product_paylaod ): bool {
 	$koban_api = new WCKoban_API();
-	$success   = $koban_api->upsert_product( $product_paylaod );
 
-	if ( ! $success ) {
-		WCKoban_Logger::error(
-			'Failed to upsert Koban Product',
-			array( 'payload' => $product_paylaod )
-		);
+	if ( isset( $product_paylaod['Guid'] ) ) {
+		$success = $koban_api->update_product( $product_paylaod );
 	} else {
-		WCKoban_Logger::info(
-			'Successfully upserted the Koban Product',
-			array( 'payload' => $product_paylaod )
-		);
-	}
+		$success = $koban_api->create_product( $product_paylaod );
 
+	}
 	return $success;
 }
 
@@ -370,7 +363,8 @@ function wckoban_on_product_update( int $product_id ): void {
 		array( 'serialized' => $product_paylaod )
 	);
 
-	wckoban_upsert_product( $product_paylaod );
+	$koban_product_guid = wckoban_upsert_product( $product_paylaod );
+	wckoban_add_koban_product_guid_to_product_meta( $product, $koban_product_guid );
 }
 add_action( 'woocommerce_new_product', 'wckoban_on_product_update', 10, 1 );
 add_action( 'woocommerce_update_product', 'wckoban_on_product_update', 10, 1 );

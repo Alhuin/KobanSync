@@ -5,11 +5,13 @@
  * @package WooCommerceKobanSync\Tests
  */
 
+use mocks\api\CreateProductSuccess;
 use mocks\api\CreateThirdSuccess;
 use mocks\api\FindUserByEmailSuccess;
 use mocks\api\CreateInvoiceSuccess;
 use mocks\api\GetInvoicePdfSuccess;
 use mocks\api\FindUserByEmailNotFound;
+use mocks\api\UpdateProductSuccess;
 use mocks\api\UpdateThirdSuccess;
 
 // phpcs:ignore Squiz.Commenting.ClassComment.Missing
@@ -67,6 +69,24 @@ class HooksTest extends WP_UnitTestCase {
 		$this->assertCount( $expected, $wp_remote_requests, "Expected {$expected} HTTP requests to be made." );
 	}
 
+
+	/**
+	 * Creates a Product in database with required default arguments and returns its ID.
+	 *
+	 * @param array $data The optional additional parameters.
+	 *
+	 * @return int the Product ID.
+	 */
+	public function create_product( array $data = array() ): int {
+		$defaults = array(
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+			'post_title'   => 'Product Title',
+			'post_content' => 'Product Description',
+		);
+
+		return wp_insert_post( array_merge( $defaults, $data ) );
+	}
 
 	/**
 	 * Test: payment completed for a registered user with no Koban GUID, and the email exists in Koban.
@@ -141,17 +161,23 @@ class HooksTest extends WP_UnitTestCase {
 			)
 		);
 
-		$order    = wc_create_order(
+		$order = wc_create_order(
 			array(
 				'customer_id'        => $user_id,
-				'billing_first_name' => 'Alice',
-				'billing_last_name'  => 'Wonderland',
-				'billing_email'      => 'alice@example.com',
-				'billing_phone'      => '0606060606',
-				'billing_address_1'  => '4 place marc sangnier',
-				'billing_city'       => 'Lyon',
-				'billing_country'    => 'FR',
 			)
+		);
+
+		$order->set_address(
+			array(
+				'first_name' => 'Alice',
+				'last_name'  => 'Wonderland',
+				'email'      => 'alice@example.com',
+				'phone'      => '0606060606',
+				'address_1'  => '4 place marc sangnier',
+				'city'       => 'Lyon',
+				'country'    => 'FR',
+			),
+			'billing'
 		);
 		$order_id = $order->get_id();
 
@@ -373,53 +399,52 @@ class HooksTest extends WP_UnitTestCase {
 		$this->assertRequests( $expected_requests );
 	}
 
-	// TODO: Product tests
-	// **
-	// * Teste la création d'un produit (sans guid existant).
-	// */
-	// public function test_create_product() {
-	// Créer un produit simple via la factory WooCommerce.
-	// $product_id = $this->factory->product->create_simple( [
-	// 'name'          => 'Fake Product Name',
-	// 'regular_price' => '10',
-	// ] );
-	//
-	// Définir un SKU
-	// update_post_meta( $product_id, '_sku', 'FAKE-SKU-222' );
-	//
-	// Appeler le hook sur le produit
-	// wckoban_on_product_update( $product_id );
-	//
-	// Vérifier que le produit a désormais un meta 'koban_guid'
-	// $koban_guid = get_post_meta( $product_id, 'koban_guid', true );
-	// $this->assertNotEmpty( $koban_guid, 'Expected a koban_guid to be set for the product' );
-	// }
-	//
-	// **
-	// * Teste la mise à jour d'un produit ayant déjà un guid.
-	// */
-	// public function test_update_product() {
-	// Créer un produit simple.
-	// $product_id = $this->factory->product->create_simple( [
-	// 'name'          => 'Fake Product Old Name',
-	// 'regular_price' => '10',
-	// ] );
-	// update_post_meta( $product_id, '_sku', 'FAKE-SKU-222' );
-	//
-	// Simuler qu'il possède déjà un guid Koban
-	// update_post_meta( $product_id, 'koban_guid', 'OLD_GUID' );
-	//
-	// Modifier le nom du produit
-	// $product = wc_get_product( $product_id );
-	// $product->set_name( 'Fake Product Name Changed' );
-	// $product->save();
-	//
-	// Appeler le hook
-	// wckoban_on_product_update( $product_id );
-	//
-	// Vérifier que le produit a été mis à jour (par exemple, le nom est passé à la nouvelle valeur)
-	// Ici, la fonction de sérialisation du produit dans votre plugin devrait refléter le nouveau nom
-	// $payload = WCKoban_Serializer::product_to_koban( $product );
-	// $this->assertEquals( 'Fake Product Name Changed', $payload['Label'], 'Expected updated product label' );
-	// }
+	/**
+	 * Teste la création d'un produit (sans guid existant).
+	 */
+	public function test_create_product() {
+		$expected_requests = array(
+			new CreateProductSuccess(),
+		);
+
+		$product_id = $this->create_product();
+
+		set_next_responses( $expected_requests );
+
+		wckoban_on_product_update( $product_id );
+
+		$this->assertRequestsCount( 1 );
+
+		$this->assertRequests( $expected_requests );
+
+		$this->assertNotEmpty(
+			get_post_meta( $product_id, 'koban_guid', true ),
+			'Expected a koban_guid to be set for the product'
+		);
+	}
+
+	/**
+	 * Teste la création d'un produit (sans guid existant).
+	 */
+	public function test_update_product() {
+		$expected_requests = array(
+			new UpdateProductSuccess(),
+		);
+
+		$product_id = $this->create_product();
+		update_post_meta( $product_id, 'koban_guid', 'test_koban_guid' );
+
+		set_next_responses( $expected_requests );
+
+		wckoban_on_product_update( $product_id );
+
+		$this->assertRequestsCount( 1 );
+
+		$this->assertRequests( $expected_requests );
+
+		$this->assertNotEmpty(
+			get_post_meta( $product_id, 'koban_guid', true ),
+			'Expected a koban_guid to be set for the product'
+		);
+	}
 }

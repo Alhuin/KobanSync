@@ -153,3 +153,23 @@ class UpdateThirdSuccess extends MockResponse {
 	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Extcode';
 	public string $json_path = 'update_third_success.json';
 }
+
+/**
+ * Successful "createProduct" response from Koban.
+ */
+class CreateProductSuccess extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Reference';
+	public string $json_path = 'create_product_success.json';
+}
+
+/**
+ * Successful "updateProduct" response from Koban.
+ */
+class UpdateProductSuccess extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Guid';
+	public string $json_path = 'update_product_success.json';
+}

@@ -87,8 +87,8 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 			WCKoban_Logger::info(
 				'Received response from Koban',
 				array(
-					'code' => $response['code'],
-					'body' => $response['body'],
+					'response' => $response,
+					'body'     => json_decode( $response['body'], true ),
 				)
 			);
 
@@ -150,23 +150,12 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 * @return string|false             Returns the Third GUID on success, false on failure.
 		 */
 		public function upsert_user( array $user_payload, ?string $koban_guid = null ): ?string {
-			$url = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
-
+			$url           = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
 			$response_data = $this->make_request( $url, 'POST', $user_payload );
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-				WCKoban_Logger::error(
-					'Invalid API response for user upsert',
-					array(
-						'user_payload'  => $user_payload,
-						'koban_guid'    => $koban_guid,
-						'response_data' => $response_data,
-					)
-				);
-
 				return false;
 			}
-
 			return $response_data['Result'];
 		}
 
@@ -178,22 +167,12 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 * @return string|false The found Third GUID, or false if not found.
 		 */
 		public function find_user_by_email( string $email ): ?string {
-			$url = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . rawurlencode( $email );
-
+			$url           = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . rawurlencode( $email );
 			$response_data = $this->make_request( $url, 'GET' );
 
 			if ( ! $response_data || ! isset( $response_data['Guid'] ) ) {
-				WCKoban_Logger::info(
-					'User not found in Koban by email',
-					array(
-						'email' => $email,
-						'data'  => $response_data,
-					)
-				);
-
 				return false;
 			}
-
 			return $response_data['Guid'];
 		}
 
@@ -205,22 +184,12 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 * @return string|false The newly created invoice GUID, or false on failure.
 		 */
 		public function create_invoice( array $invoice_payload ): ?string {
-			$url = $this->api_url . '/ncInvoice';
-
+			$url           = $this->api_url . '/ncInvoice';
 			$response_data = $this->make_request( $url, 'POST', $invoice_payload );
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-				WCKoban_Logger::error(
-					'Failed to create invoice in Koban',
-					array(
-						'invoice_payload' => $invoice_payload,
-						'response_data'   => $response_data,
-					)
-				);
-
 				return false;
 			}
-
 			return $response_data['Result'];
 		}
 
@@ -233,51 +202,46 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 * @return string|false Link to the invoice PDF, or false if unavailable.
 		 */
 		public function get_invoice_pdf( string $invoice_guid ): ?string {
-			$url = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
-
+			$url           = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
 			$response_data = $this->make_request( $url, 'GET' );
 
 			if ( ! $response_data || empty( $response_data['link'] ) ) {
-				WCKoban_Logger::error(
-					'Failed to retrieve invoice pdf url in Koban',
-					array(
-						'invoice_guid'  => $invoice_guid,
-						'response_data' => $response_data,
-					)
-				);
-
 				return false;
 			}
-
 			return $response_data['link'];
 		}
 
 		/**
-		 * Creates or updates a Product in Koban by reference.
+		 * Creates a Product in Koban by reference.
 		 *
-		 * @param array       $product_payload The product data to upsert.
-		 * @param string|null $product_guid    Optional existing GUID, if relevant.
+		 * @param array $product_payload The product data to upsert.
 		 *
 		 * @return bool                        True on success, false on failure.
 		 */
-		public function upsert_product( array $product_payload, ?string $product_guid = null ): bool {
-			$url = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
-
+		public function create_product( array $product_payload ): bool {
+			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Guid';
 			$response_data = $this->make_request( $url, 'POST', $product_payload );
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-				WCKoban_Logger::error(
-					'Invalid API response for product upsert',
-					array(
-						'productPayload' => $product_payload,
-						'product_guid'   => $product_guid,
-						'response_data'  => $response_data,
-					)
-				);
-
 				return false;
 			}
+			return true;
+		}
 
+		/**
+		 * Updates a Product in Koban by Guid.
+		 *
+		 * @param array $product_payload The product data to upsert.
+		 *
+		 * @return bool                        True on success, false on failure.
+		 */
+		public function update_product( array $product_payload ): bool {
+			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Guid';
+			$response_data = $this->make_request( $url, 'POST', $product_payload );
+
+			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+				return false;
+			}
 			return true;
 		}
 	}

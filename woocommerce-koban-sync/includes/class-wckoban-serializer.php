@@ -155,24 +155,42 @@ if ( ! class_exists( 'WCKoban_Serializer' ) ) {
 		 * TODO: Tax and prices Handling
 		 */
 		public static function product_to_koban( \WC_Product $product ): array {
-			$reference = $product->get_sku();
-			if ( empty( $reference ) ) {
-				$reference = 'PROD-' . $product->get_id();
+			$koban_product_guid  = get_post_meta( $product->get_id(), 'koban_guid', true );
+			$categories          = get_the_terms( $product->get_id(), 'product_cat' );
+			$koban_category_guid = null;
+			$price_excl_tax      = $product->get_price();
+			$vat_rate            = 20; // or parse from product’s tax_class if you have more advanced logic.
+			$ttc                 = (float) $price_excl_tax * ( 1 + ( $vat_rate / 100 ) );
+
+			WCKoban_Logger::info(
+				'Serializer',
+				array(
+					'product_meta' => get_post_meta( $product->get_id() ),
+				)
+			);
+
+			if ( ! empty( $categories ) ) {
+				$category            = array_pop( $categories );
+				$koban_category_guid = get_field( 'koban_category_guid', $category );
 			}
 
-			$price_excl_tax = $product->get_price();
-			$vat_rate       = 20; // or parse from product’s tax_class if you have more advanced logic.
-			$ttc            = (float) $price_excl_tax * ( 1 + ( $vat_rate / 100 ) );
-
-			return array(
-				'Reference' => $reference,
-				'Label'     => $product->get_name(),
-				'Comments'  => $product->get_description(),
-				'Ht'        => (float) $price_excl_tax,
-				'Vat'       => $vat_rate,
-				'Ttc'       => round( $ttc, 2 ),
-				'IsSelling' => true,
+			$data = array(
+				'Label'      => $product->get_name(),
+				'Comments'   => $product->get_description(),
+				'Catproduct' => array( 'Guid' => $koban_category_guid ),
+				'Ht'         => (float) $price_excl_tax,
+				'Vat'        => $vat_rate,
+				'Ttc'        => round( $ttc, 2 ),
+				'IsSelling'  => true,
 			);
+
+			if ( $koban_product_guid ) {  // Update.
+				$data['Guid'] = $koban_product_guid;
+			} else {    // Create.
+				$data['Reference'] = 'WKS-' . $product->get_id();
+
+			}
+			return $data;
 		}
 	}
 
