@@ -84,6 +84,14 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 
 			$response = wp_remote_request( $url, $args );
 
+			WCKoban_Logger::info(
+				'Received response from Koban',
+				array(
+					'code' => $response['code'],
+					'body' => $response['body'],
+				)
+			);
+
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
 				WCKoban_Logger::error(
@@ -145,15 +153,6 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 			$url = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
 
 			$response_data = $this->make_request( $url, 'POST', $user_payload );
-
-			WCKoban_Logger::info(
-				'upsert_user response',
-				array(
-					'user_payload' => $user_payload,
-					'koban_guid'   => $koban_guid,
-					'response'     => $response_data,
-				)
-			);
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
 				WCKoban_Logger::error(

@@ -336,7 +336,10 @@ add_action( 'woocommerce_customer_save_address', 'wckoban_on_customer_save_addre
 function wckoban_on_product_update( int $product_id ): void {
 	WCKoban_Logger::info(
 		'Detected product create/update',
-		array( 'product_id' => $product_id )
+		array(
+			'product_id' => $product_id,
+			'meta'       => get_post_meta( $product_id ),
+		)
 	);
 
 	$transient_key = 'wckoban_product_processing_' . $product_id;
