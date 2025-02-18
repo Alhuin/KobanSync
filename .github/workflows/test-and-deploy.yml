@@ -93,4 +93,12 @@ jobs:
           local_path: 'woocommerce-koban-sync'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
-          rSyncArgs: '--exclude=phpunit.xml.dist --chown=www-data:www-data'
+          rSyncArgs: '--exclude=phpunit.xml.dist'
+
+      - name: Fix permissions (post-deploy)
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          key: ${{ secrets.SFTP_KEY }}
+          script: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync
