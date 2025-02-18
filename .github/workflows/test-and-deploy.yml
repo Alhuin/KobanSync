@@ -102,4 +102,4 @@ jobs:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           key: ${{ secrets.SFTP_KEY }}
-          script: sudo chown -R www-data:www-data ${{ format('{0}/woocommerce-koban-sync', secrets.SFTP_REMOTE_PATH ) }}
+          script: sudo chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync'
