@@ -96,9 +96,10 @@ jobs:
           rSyncArgs: '--exclude=phpunit.xml.dist'
 
       - name: Fix permissions (post-deploy)
+        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           key: ${{ secrets.SFTP_KEY }}
-          script: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync
+          script: sudonchown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync
