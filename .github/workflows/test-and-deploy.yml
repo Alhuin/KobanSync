@@ -76,6 +76,13 @@ jobs:
         if: always()
         run: make wp-down
 
+      - name: Upload artifact
+        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: woocommerce-koban-sync
+          path: woocommerce-koban-sync
+
       - name: Deploy via SFTP
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
@@ -88,9 +95,10 @@ jobs:
           sftpArgs: '-o ConnectTimeout=5'
           rSyncArgs: '--exclude=phpunit.xml.dist'
 
-      - name: Upload artifact
+      - name: Fix permissions (post-deploy)
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
-        uses: actions/upload-artifact@v4
         with:
-          name: woocommerce-koban-sync
-          path: woocommerce-koban-sync
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          key: ${{ secrets.SFTP_KEY }}
+          run: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync
