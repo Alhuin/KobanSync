@@ -93,12 +93,4 @@ jobs:
           local_path: 'woocommerce-koban-sync'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
-          rSyncArgs: '--exclude=phpunit.xml.dist'
-
-      - name: Fix permissions (post-deploy)
-        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
-        with:
-          host: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USER }}
-          key: ${{ secrets.SFTP_KEY }}
-          run: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}/woocommerce-koban-sync
+          rSyncArgs: '-og --chown=www-data:www-data --exclude=phpunit.xml.dist'
