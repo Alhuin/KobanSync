@@ -21,7 +21,6 @@ jobs:
               - 'docker/Dockerfile'
             deploy:
               - 'woocommerce-koban-sync/**'
-              - '.github/workflows/test-and-deploy.yml'
 
       - name: Set up Docker Buildx
         if: steps.path_filter.outputs.docker == 'true'
