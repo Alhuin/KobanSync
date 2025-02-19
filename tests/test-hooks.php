@@ -43,16 +43,23 @@ class HooksTest extends WP_UnitTestCase {
 	/**
 	 * Asserts that the expected requests and their order match the actual requests
 	 *
-	 * @param array $mockResponses The expected mock response containing the endpoint.
+	 * @param array $mock_responses The expected mock response containing the endpoint.
 	 */
-	public function assertRequests( array $mockResponses ): void {
+	public function assertRequests( array $mock_responses ): void {
 		global $wp_remote_requests, $request_index;
 
-		foreach ( $mockResponses as $reponse ) {
+		foreach ( $mock_responses as $expected_request ) {
+			$remote_request = $wp_remote_requests[ $request_index ];
+
 			$this->assertStringContainsString(
-				$reponse->endpoint,
-				$wp_remote_requests[ $request_index ]['url'],
-				"Request {$request_index} should be sent to endpoint: " . $reponse->endpoint
+				$expected_request->endpoint,
+				$remote_request['url'],
+				"Expected request {$request_index} to be sent to endpoint: {$expected_request->endpoint}, found {$remote_request["url"]} instead."
+			);
+			$this->assertSame(
+				$expected_request->method,
+				$remote_request['method'],
+				"Expected request {$request_index} to have method {$expected_request->method}, found {$remote_request["method"]} instead."
 			);
 			++$request_index;
 		}
