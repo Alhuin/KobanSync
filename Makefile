@@ -1,4 +1,4 @@
-.PHONY: clean fclen tests wp-up wp-up-ci wp-down lint format lint-format test-all
+.PHONY: clean fclean tests wp-up wp-up-ci wp-down lint format lint-format test-all
 
 DOCKER_DIR=docker
 CLEAN_DIRS=tests/vendor tests/bin tests/.circleci tests/.phpunit.result.cache tests/.phpcs.xml.dist
@@ -6,30 +6,27 @@ CLEAN_DIRS=tests/vendor tests/bin tests/.circleci tests/.phpunit.result.cache te
 help:
 	@echo "Available make targets:"
 	@echo "  wp-up         Start the WordPress and DB containers"
+	@echo "  wp-up-ci      Start containers (CI mode)"
 	@echo "  wp-down       Stop the WordPress and DB containers"
-	@echo "  clean         Clean up the test directory"
-	@echo "  fclean        Run clean + wp-down"
 	@echo "  tests         Run the tests via Docker"
 	@echo "  format        Format code via phpcbf"
 	@echo "  lint          Run lint checks via phpcs"
-	@echo "  test-all      Run format, lint and tests"
 	@echo "  lint-format   Run both format and lint"
-	@echo "  wp-up-ci      Start containers (CI mode)"
+	@echo "  test-all      Run format, lint and tests"
+	@echo "  clean         Clean up the test directory"
+	@echo "  fclean        Run clean + wp-down"
 
 wp-up:
 	@echo "Starting the WordPress and DB containers..."
 	cd $(DOCKER_DIR) && docker compose up -d && docker compose logs -f
 
+wp-up-ci:
+	@echo "Starting the WordPress and DB containers (CI mode)..."
+	cd $(DOCKER_DIR) && docker compose up -d
+
 wp-down:
 	@echo "Stopping the WordPress and DB containers..."
 	cd $(DOCKER_DIR) && docker compose down -v
-
-clean:
-	@echo "Cleaning the test directory..."
-	rm -rf $(CLEAN_DIRS)
-
-fclean: clean wp-down
-	@echo "Done cleaning artifcats and stoping containers."
 
 tests:
 	@echo "Running tests $(test)"
@@ -50,8 +47,11 @@ lint:
 lint-format: format lint
 	@echo "Done formatting and linting."
 
-wp-up-ci:
-	@echo "Starting the WordPress and DB containers (CI mode)..."
-	cd $(DOCKER_DIR) && docker compose up -d
-
 test-all: lint-format tests
+
+clean:
+	@echo "Cleaning the test directory..."
+	rm -rf $(CLEAN_DIRS)
+
+fclean: clean wp-down
+	@echo "Done cleaning artifacts and stopping containers."
