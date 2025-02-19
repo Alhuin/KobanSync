@@ -138,24 +138,33 @@ function wckoban_get_invoice_pdf( string $koban_invoice_guid ): ?string {
 	return $pdf_link;
 }
 
-
 /**
- * Creates or updates a product record in Koban and returns a success boolean.
+ * Updates a product record in Koban and returns a success boolean.
  *
  * @param array $product_paylaod Product data serialized for Koban.
  *
  * @return bool  True if upsert was successful, false otherwise.
  */
-function wckoban_upsert_product( array $product_paylaod ): bool {
+function wckoban_update_product( array $product_paylaod ): bool {
 	$koban_api = new WCKoban_API();
+	$success   = $koban_api->update_product( $product_paylaod );
 
-	if ( isset( $product_paylaod['Guid'] ) ) {
-		$success = $koban_api->update_product( $product_paylaod );
-	} else {
-		$success = $koban_api->create_product( $product_paylaod );
-
-	}
 	return $success;
+}
+
+
+/**
+ * Creates a product in Koban and returns the product guid.
+ *
+ * @param array $product_paylaod Product data serialized for Koban.
+ *
+ * @return string  True product guid.
+ */
+function wckoban_create_product( array $product_paylaod ): string {
+	$koban_api          = new WCKoban_API();
+	$koban_product_guid = $koban_api->create_product( $product_paylaod );
+
+	return $koban_product_guid;
 }
 
 /**
@@ -363,9 +372,14 @@ function wckoban_on_product_update( int $product_id ): void {
 		array( 'serialized' => $product_paylaod )
 	);
 
-	$koban_product_guid = wckoban_upsert_product( $product_paylaod );
-	wckoban_add_koban_product_guid_to_product_meta( $product, $koban_product_guid );
+	if ( isset( $product_paylaod['Guid'] ) ) {
+		wckoban_update_product( $product_paylaod );
+	} else {
+		$koban_product_guid = wckoban_create_product( $product_paylaod );
+		wckoban_add_koban_product_guid_to_product_meta( $product, $koban_product_guid );
+	}
 }
 add_action( 'woocommerce_new_product', 'wckoban_on_product_update', 10, 1 );
 add_action( 'woocommerce_update_product', 'wckoban_on_product_update', 10, 1 );
+
 // TODO: Listen to Koban event customer updated / created.

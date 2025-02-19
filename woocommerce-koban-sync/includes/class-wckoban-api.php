@@ -216,16 +216,16 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 *
 		 * @param array $product_payload The product data to upsert.
 		 *
-		 * @return bool                        True on success, false on failure.
+		 * @return string  The created Product GUID
 		 */
-		public function create_product( array $product_payload ): bool {
-			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Guid';
+		public function create_product( array $product_payload ): string {
+			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
 			$response_data = $this->make_request( $url, 'POST', $product_payload );
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
 				return false;
 			}
-			return true;
+			return $response_data['Result'];
 		}
 
 		/**
@@ -233,10 +233,10 @@ if ( ! class_exists( 'WCKoban_API' ) ) {
 		 *
 		 * @param array $product_payload The product data to upsert.
 		 *
-		 * @return bool                        True on success, false on failure.
+		 * @return bool  True on success, false on failure.
 		 */
 		public function update_product( array $product_payload ): bool {
-			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Guid';
+			$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Reference';
 			$response_data = $this->make_request( $url, 'POST', $product_payload );
 
 			if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {

@@ -417,9 +417,9 @@ class HooksTest extends WP_UnitTestCase {
 
 		$this->assertRequests( $expected_requests );
 
-		$this->assertNotEmpty(
-			get_post_meta( $product_id, 'koban_guid', true ),
-			'Expected a koban_guid to be set for the product'
+		$this->assertSame(
+			( new CreateProductSuccess() )->guid,
+			get_post_meta( $product_id, 'koban_guid', true )
 		);
 	}
 
@@ -441,10 +441,5 @@ class HooksTest extends WP_UnitTestCase {
 		$this->assertRequestsCount( 1 );
 
 		$this->assertRequests( $expected_requests );
-
-		$this->assertNotEmpty(
-			get_post_meta( $product_id, 'koban_guid', true ),
-			'Expected a koban_guid to be set for the product'
-		);
 	}
 }
