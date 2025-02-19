@@ -71,18 +71,6 @@ function wckoban_upsert_koban_third( array $third_payload, ?string $koban_third_
 	$koban_api        = new WCKoban_API();
 	$koban_third_guid = $koban_api->upsert_user( $third_payload, $koban_third_guid_to_update );
 
-	if ( ! $koban_third_guid ) {
-		WCKoban_Logger::error(
-			'Failed to upsert Koban Third',
-			array( 'payload' => $third_payload )
-		);
-	} else {
-		WCKoban_Logger::info(
-			'Successfully upserted the Koban Third',
-			array( 'payload' => $third_payload )
-		);
-	}
-
 	return $koban_third_guid;
 }
 
@@ -97,18 +85,6 @@ function wckoban_create_invoice( array $invoice_payload ): ?string {
 	$koban_api          = new WCKoban_API();
 	$koban_invoice_guid = $koban_api->create_invoice( $invoice_payload );
 
-	if ( ! $koban_invoice_guid ) {
-		WCKoban_Logger::error(
-			'Failed to create the Koban Invoice',
-			array( 'payload' => $invoice_payload )
-		);
-	} else {
-		WCKoban_Logger::info(
-			'Successfully created the Koban Invoice',
-			array( 'payload' => $invoice_payload )
-		);
-	}
-
 	return $koban_invoice_guid;
 }
 
@@ -122,18 +98,6 @@ function wckoban_create_invoice( array $invoice_payload ): ?string {
 function wckoban_get_invoice_pdf( string $koban_invoice_guid ): ?string {
 	$koban_api = new WCKoban_API();
 	$pdf_link  = $koban_api->get_invoice_pdf( $koban_invoice_guid );
-
-	if ( ! $pdf_link ) {
-		WCKoban_Logger::error(
-			'Failed to retrieve Koban Invoice PDF',
-			array( 'invoice_guid' => $koban_invoice_guid )
-		);
-	} else {
-		WCKoban_Logger::info(
-			'Successfully retrieved Koban Invoice PDF',
-			array( 'pdf_link' => $pdf_link )
-		);
-	}
 
 	return $pdf_link;
 }
@@ -208,7 +172,7 @@ function wckoban_add_koban_product_guid_to_product_meta( WC_Product $product, st
  */
 function wckoban_on_payment_complete( int $order_id ): void {
 	WCKoban_Logger::info(
-		'Payment complete hook triggered',
+		'Detected payment complete',
 		array( 'order_id' => $order_id )
 	);
 
@@ -340,7 +304,6 @@ function wckoban_on_product_update( int $product_id ): void {
 		'Detected product create/update',
 		array(
 			'product_id' => $product_id,
-			'meta'       => get_post_meta( $product_id ),
 		)
 	);
 

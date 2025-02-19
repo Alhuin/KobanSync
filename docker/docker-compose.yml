@@ -24,5 +24,4 @@ services:
       WORDPRESS_DB_NAME: wordpress_test
     ports:
       - "8080:80"
-    # On utilise notre script d'entrypoint personnalisé qui gère l'initialisation
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
