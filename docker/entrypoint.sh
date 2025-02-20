@@ -32,6 +32,7 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
       --path="$WP_CORE_DIR" \
       --dir=/tmp/scaffold-tests
 
+  mkdir -p "$PLUGIN_DIR"/bin
   cp -r bin/install-wp-tests.sh "$PLUGIN_DIR"/bin/install-wp-tests.sh
 
   cd ~
