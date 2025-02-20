@@ -1,6 +1,6 @@
 <?php
 /**
- * TODO: Test class-wckoban-api.php
+ * TODO: Test API.php
  *
  * @package WooCommerceKobanSync\Tests
  **/

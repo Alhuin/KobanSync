@@ -1,5 +1,7 @@
 {
-  "code": 200,
+  "response": {
+    "code": 200
+  },
   "body": {
     "Label": "Alice Wonderland",
     "Structure": null,
@@ -81,7 +83,7 @@
     "Geo": null,
     "AccountToInvoice": null,
     "IBAN": null,
-    "Guid": "59b69ed00dc40e0e78c26a77",
+    "Guid": "59b69ed00dc40e0e78c26a90",
     "DUpdated": 1739538760.924,
     "DCreated": 1505147632.347
   }

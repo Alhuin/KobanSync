@@ -7,7 +7,7 @@
  * @package WooCommerceKobanSync\Tests
  */
 
-namespace mocks;
+namespace WCKoban\Tests\mocks;
 
 /**
  * Simple mock logger for tests, printing messages to stdout or handling them in any needed way.
@@ -27,21 +27,21 @@ class MockLogger {
 		if ( ! $debug ) {
 			return;
 		}
-		$jsonContext = is_array( $context ) ? json_encode( $context ) : $context;
+		$json_context = is_array( $context ) ? json_encode( $context ) : $context;
 
 		if ( strtolower( $level ) === 'error' ) {
 			printf(
 				"\e[31m[MockLogger] %s: %s | context=%s\e[0m\n",
 				strtoupper( $level ),
 				$message,
-				$jsonContext
+				$json_context
 			);
 		} else {
 			printf(
 				"[MockLogger] %s: %s | context=%s\n",
 				strtoupper( $level ),
 				$message,
-				$jsonContext
+				$json_context
 			);
 		}
 	}

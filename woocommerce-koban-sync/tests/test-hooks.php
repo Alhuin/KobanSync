@@ -5,17 +5,23 @@
  * @package WooCommerceKobanSync\Tests
  */
 
-use mocks\api\CreateProductSuccess;
-use mocks\api\CreateThirdSuccess;
-use mocks\api\FindUserByEmailSuccess;
-use mocks\api\CreateInvoiceSuccess;
-use mocks\api\GetInvoicePdfSuccess;
-use mocks\api\FindUserByEmailNotFound;
-use mocks\api\UpdateProductSuccess;
-use mocks\api\UpdateThirdSuccess;
+namespace WCKoban\Tests;
+
+use WCKoban\Hooks\WCKoban_CustomerSaveAddress;
+use WCKoban\Hooks\WCKoban_PaymentComplete;
+use WCKoban\Hooks\WCKoban_ProductUpdate;
+use WCKoban\Tests\Mocks\CreateInvoiceSuccess;
+use WCKoban\Tests\Mocks\CreateProductSuccess;
+use WCKoban\Tests\Mocks\CreateThirdSuccess;
+use WCKoban\Tests\Mocks\FindUserByEmailNotFound;
+use WCKoban\Tests\Mocks\FindUserByEmailSuccess;
+use WCKoban\Tests\Mocks\GetInvoicePdfSuccess;
+use WCKoban\Tests\Mocks\UpdateProductSuccess;
+use WCKoban\Tests\Mocks\UpdateThirdSuccess;
+use function WCKoban\Tests\Mocks\set_next_responses;
 
 // phpcs:ignore Squiz.Commenting.ClassComment.Missing
-class HooksTest extends WP_UnitTestCase {
+class HooksTest extends \WP_UnitTestCase {
 
 
 	/**
@@ -86,8 +92,8 @@ class HooksTest extends WP_UnitTestCase {
 	 */
 	public function create_product( array $data = array() ): int {
 		$defaults = array(
-			'post_type'   => 'product',
-			'post_status' => 'publish',
+			'post_type'    => 'product',
+			'post_status'  => 'publish',
 			'post_title'   => 'Product Title',
 			'post_content' => 'Product Description',
 		);
@@ -129,7 +135,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_payment_complete( $order_id );
+		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 3 );
 
@@ -170,7 +176,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		$order = wc_create_order(
 			array(
-				'customer_id'        => $user_id,
+				'customer_id' => $user_id,
 			)
 		);
 
@@ -190,7 +196,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_payment_complete( $order_id );
+		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 4 );
 
@@ -198,7 +204,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		$this->assertSame(
 			get_user_meta( $user_id, 'koban_guid', true ),
-			( new FindUserByEmailSuccess() )->guid,
+			( new CreateThirdSuccess() )->guid,
 			"Expected 'koban_guid' user_meta to match the GUID for the newly created user in Koban."
 		);
 
@@ -243,7 +249,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_payment_complete( $order_id );
+		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 2 );
 
@@ -287,7 +293,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_payment_complete( $order_id );
+		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 3 );
 
@@ -327,7 +333,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_payment_complete( $order_id );
+		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 4 );
 
@@ -354,7 +360,7 @@ class HooksTest extends WP_UnitTestCase {
 		);
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		wckoban_on_customer_save_address( $user_id, 'billing' );
+		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -374,7 +380,7 @@ class HooksTest extends WP_UnitTestCase {
 		update_user_meta( $user_id, 'koban_guid', 'testKobanGuid' );
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		wckoban_on_customer_save_address( $user_id, 'shipping' );
+		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'shipping' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -400,7 +406,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_customer_save_address( $user_id, 'billing' );
+		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );
@@ -418,7 +424,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_product_update( $product_id );
+		( new WCKoban_ProductUpdate() )->handle_product_update( $product_id );
 
 		$this->assertRequestsCount( 1 );
 
@@ -443,7 +449,7 @@ class HooksTest extends WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		wckoban_on_product_update( $product_id );
+		( new WCKoban_ProductUpdate() )->handle_product_update( $product_id );
 
 		$this->assertRequestsCount( 1 );
 

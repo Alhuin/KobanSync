@@ -11,20 +11,13 @@ if ( ! defined( 'WP_ADMIN' ) ) {
 }
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
-
-// Load WordPress test functions.
 require_once $_tests_dir . '/includes/functions.php';
 require_once $_tests_dir . '/includes/bootstrap.php';
 
-// Load mock logging and mock response functions for testing.
-require_once __DIR__ . '/mocks/class-mocklogger.php';
-class_alias( 'mocks\MockLogger', 'WCKoban_Logger' );
-
-// Load mock responses and mock HTTP configuration.
-require_once __DIR__ . '/mocks/class-mockresponse.php';
 require_once __DIR__ . '/mocks/mock-http.php';
 
-// Update plugin settings with API credentials for tests.
+class_alias( 'WCKoban\\Tests\\Mocks\\MockLogger', 'WCKoban\\Logger' );
+
 update_option(
 	'wckoban_sync_options',
 	array(
@@ -34,7 +27,6 @@ update_option(
 	)
 );
 
-// Ensure WooCommerce is loaded.
 if ( ! class_exists( 'WooCommerce' ) ) {
 	$woo_path = WP_CONTENT_DIR . '/plugins/woocommerce/woocommerce.php';
 	if ( file_exists( $woo_path ) ) {
@@ -44,20 +36,11 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	}
 }
 
-// Run WooCommerce installation.
 if ( class_exists( 'WC_Install' ) ) {
 	WC_Install::install();
 }
 
+require_once WP_PLUGIN_DIR . '/woocommerce-koban-sync/src/woocommerce-koban-sync.php';
+activate_plugin( 'woocommerce-koban-sync/woocommerce-koban-sync.php' );
+
 do_action( 'init' );
-
-// Load and activate the plugin.
-require_once WP_PLUGIN_DIR . '/woocommerce-koban-sync/woocommerce-koban-sync.php';
-
-// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
-function _manually_load_plugin() {
-	include WP_CONTENT_DIR . '/plugins/woocommerce-koban-sync/woocommerce-koban-sync.php';
-}
-
-activate_plugin( WP_CONTENT_DIR . '/plugins/woocommerce-koban-sync/woocommerce-koban-sync.php' );
-tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );

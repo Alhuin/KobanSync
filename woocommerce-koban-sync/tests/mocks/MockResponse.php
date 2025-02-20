@@ -6,7 +6,7 @@
  * @package WooCommerceKobanSync\Tests
  */
 
-namespace mocks\api;
+namespace WCKoban\Tests\Mocks;
 
 /**
  * Class MockResponse
@@ -87,14 +87,14 @@ abstract class MockResponse {
 		}
 
 		$this->response = array(
-			'code' => $data['code'],
-			'body' => wp_json_encode( $data['body'] ),
+			'response' => $data['response'],
+			'body'     => wp_json_encode( $data['body'] ),
 		);
 	}
 }
 
 // phpcs:disable Squiz.Commenting.VariableComment.Missing
-
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 /**
  * Successful "find user by email" response from Koban.
  */

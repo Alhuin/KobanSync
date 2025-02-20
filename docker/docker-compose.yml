@@ -16,7 +16,6 @@ services:
     build: .
     volumes:
       - ../woocommerce-koban-sync:/var/www/html/wp-content/plugins/woocommerce-koban-sync
-      - ../tests:/var/www/tests
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wpuser

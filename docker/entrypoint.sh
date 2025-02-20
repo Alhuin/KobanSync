@@ -22,7 +22,7 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   wp --allow-root core install --url="http://localhost:8080" --title="TestSite" --admin_user=admin --admin_password=admin --admin_email=admin@example.org --skip-email --path="$WP_CORE_DIR"
 
   echo "Installation de WooCommerce..."
-  wp --allow-root plugin install woocommerce --activate
+  wp --allow-root plugin install woocommerce --activate --path="$WP_CORE_DIR"
 
   echo "Création de la suite de tests..."
   wp --allow-root scaffold plugin-tests woocommerce-koban-sync --path="$WP_CORE_DIR"
@@ -30,23 +30,16 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   # Remove test scaffolding files except the binary
   rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/tests
   rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpcs.xml.dist
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpunit.xml.dist
+  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/phpunit.xml.dist
   rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.circleci
-
-  if [ ! -d "$PLUGIN_TESTS_DIR"/bin ]; then
-    mv "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin "$PLUGIN_TESTS_DIR"
-  else
-    rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin
-  fi
 
   echo "Installation de la suite de tests..."
   # Vider complètement le répertoire de tests pour repartir sur une base propre
   rm -rf "$WP_TESTS_DIR"
-  cd "$PLUGIN_TESTS_DIR"
-#  sed -i "s/svn export --quiet/svn export/g" "$PLUGIN_TESTS_DIR"/bin/install-wp-tests.sh
-  yes | bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
-#  cp "$PLUGIN_TESTS_DIR/wp-tests-config.php" "$WP_TESTS_DIR/wp-tests-config.php"
+  yes | $WP_CORE_DIR/wp-content/plugins/woocommerce-koban-sync/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
+  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin/
 
+  cd "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync
   echo "Installation des dépendances..."
   composer install
 

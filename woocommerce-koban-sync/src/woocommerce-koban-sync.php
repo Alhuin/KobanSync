@@ -13,13 +13,27 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
 
+use WCKoban\Admin\WCKoban_Admin;
+use WCKoban\Hooks\WCKoban_CustomerSaveAddress;
+use WCKoban\Hooks\WCKoban_PaymentComplete;
+use WCKoban\Hooks\WCKoban_ProductUpdate;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-wckoban-logger.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/hooks.php';
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	error_log( __DIR__ . '/vendor/autoload.php' );
+	require_once __DIR__ . '/vendor/autoload.php';
+}
 
+if ( is_admin() ) {
+	new WCKoban_Admin();
+}
+
+( new WCKoban_CustomerSaveAddress() )->register();
+( new WCKoban_PaymentComplete() )->register();
+( new WCKoban_ProductUpdate() )->register();
 
 /**
  * Checks if WooCommerce is active. If not, the plugin is deactivated.
@@ -100,12 +114,6 @@ function wckoban_sync_deactivate(): void {
 	wp_clear_scheduled_hook( 'wckoban_sync_purge_logs' );
 }
 register_deactivation_hook( __FILE__, 'wckoban_sync_deactivate' );
-
-require_once plugin_dir_path( __FILE__ ) . 'admin/class-wckoban-admin.php';
-
-if ( is_admin() ) {
-	new WCKoban_Admin();
-}
 
 /**
  * Adds a shortcut link to the settings page on the Plugins screen.

@@ -1,5 +1,7 @@
 {
-  "code": 200,
+  "response": {
+    "code": 200
+  },
   "body": {
     "link": "https://example.com/invoice.pdf"
   }

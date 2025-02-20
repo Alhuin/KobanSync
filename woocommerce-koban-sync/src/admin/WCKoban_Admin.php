@@ -7,6 +7,8 @@
  * @package WooCommerceKobanSync
  */
 
+namespace WCKoban\Admin;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

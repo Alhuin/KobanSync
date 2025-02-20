@@ -2,7 +2,7 @@ name: CI & Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "refacto-upload" ]
 
 jobs:
   test-and-deploy:
@@ -20,7 +20,7 @@ jobs:
             docker:
               - 'docker/Dockerfile'
             deploy:
-              - 'woocommerce-koban-sync/**'
+              - 'woocommerce-koban-sync/src/**'
 
       - name: Set up Docker Buildx
         if: steps.path_filter.outputs.docker == 'true'
@@ -89,7 +89,7 @@ jobs:
           username: ${{ secrets.SFTP_USER }}
           server: ${{ secrets.SFTP_HOST }}
           ssh_private_key: ${{ secrets.SFTP_KEY }}
-          local_path: 'woocommerce-koban-sync/*'
+          local_path: 'woocommerce-koban-sync/src/*'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
           rSyncArgs: '--exclude=phpunit.xml.dist'
