@@ -8,7 +8,7 @@ set -e
 
 export WP_CORE_DIR="/var/www/html"
 export WP_TESTS_DIR="/tmp/wordpress-tests-lib"
-PLUGIN_TESTS_DIR="/var/www/tests"
+PLUGIN_DIR="$WP_CORE_DIR/wp-content/plugins/woocommerce-koban-sync"
 
 # Check if WordPress is already installed.
 if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; then
@@ -25,21 +25,25 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   wp --allow-root plugin install woocommerce --activate --path="$WP_CORE_DIR"
 
   echo "Création de la suite de tests..."
-  wp --allow-root scaffold plugin-tests woocommerce-koban-sync --path="$WP_CORE_DIR"
+  mkdir -p /tmp/scaffold-tests
+  cd /tmp/scaffold-tests
 
-  # Remove test scaffolding files except the binary
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/tests
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.phpcs.xml.dist
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/phpunit.xml.dist
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/.circleci
+  wp --allow-root scaffold plugin-tests \
+      --path="$WP_CORE_DIR" \
+      --dir=/tmp/scaffold-tests
+
+  cp -r bin/install-wp-tests.sh "$PLUGIN_DIR"/bin/install-wp-tests.sh
+
+  cd ~
+  rm -rf /tmp/scaffold-tests
 
   echo "Installation de la suite de tests..."
   # Vider complètement le répertoire de tests pour repartir sur une base propre
   rm -rf "$WP_TESTS_DIR"
-  yes | $WP_CORE_DIR/wp-content/plugins/woocommerce-koban-sync/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
-  rm -rf "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync/bin/
+  yes | "$PLUGIN_DIR"/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
+  rm -rf "${PLUGIN_DIR:?}"/bin/
 
-  cd "$WP_CORE_DIR"/wp-content/plugins/woocommerce-koban-sync
+  cd "$PLUGIN_DIR"
   echo "Installation des dépendances..."
   composer install
 
