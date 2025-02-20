@@ -102,4 +102,6 @@ jobs:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           key: ${{ secrets.SFTP_KEY }}
-          script: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}
+          script: |
+            cd ${{ secrets.SFTP_REMOTE_PATH }} && composer install --no-dev --optimize-autoloader
+            chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}
