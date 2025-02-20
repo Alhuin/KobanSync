@@ -93,7 +93,7 @@ jobs:
           local_path: 'woocommerce-koban-sync/*'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
-          rSyncArgs: '--exclude=tests'
+          rSyncArgs: '--exclude=tests --exclude=vendor'
 
       - name: Setup permissions via SSH
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
