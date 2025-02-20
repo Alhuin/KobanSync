@@ -90,7 +90,7 @@ jobs:
           username: ${{ secrets.SFTP_USER }}
           server: ${{ secrets.SFTP_HOST }}
           ssh_private_key: ${{ secrets.SFTP_KEY }}
-          local_path: 'woocommerce-koban-sync/'
+          local_path: 'woocommerce-koban-sync/*'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
           rSyncArgs: '--exclude=tests'
