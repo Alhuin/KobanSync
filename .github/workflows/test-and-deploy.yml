@@ -2,7 +2,7 @@ name: CI & Deploy
 
 on:
   push:
-    branches: [ "main", "refacto-upload" ]
+    branches: [ "main", "refacto-autoload" ]
 
 jobs:
   test-and-deploy:
@@ -21,6 +21,7 @@ jobs:
               - 'docker/Dockerfile'
             deploy:
               - 'woocommerce-koban-sync/src/**'
+              - '.github/workflows/tests-and-deploy.yml'
 
       - name: Set up Docker Buildx
         if: steps.path_filter.outputs.docker == 'true'
