@@ -3,8 +3,8 @@
 DOCKER_DIR=docker
 PLUGIN_DIR=/var/www/html/wp-content/plugins/woocommerce-koban-sync
 TESTS_DIR=$(PLUGIN_DIR)/tests
-VENDOR=$(PLUGIN_DIR)/vendor
-CLEAN_DIRS=woocommerce-koban-sync/vendor woocommerce-koban-sync/.phpunit.result.cache woocommerce-koban-sync/tests/.phpunit.result.cache
+VENDOR=$(PLUGIN_DIR)/src/vendor
+CLEAN_DIRS=$(VENDOR) woocommerce-koban-sync/tests/.phpunit.result.cache
 
 help:
 	@echo "Available make targets:"

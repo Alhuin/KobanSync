@@ -19,19 +19,19 @@
   },
   "autoload": {
     "psr-4": {
-      "WCKoban\\": "src/includes",
-      "WCKoban\\Admin\\": "src/admin",
-      "WCKoban\\Hooks\\": "src/includes/hooks",
-      "WCKoban\\Serializers\\": "src/includes/serializers"
+      "WCKoban\\": "includes",
+      "WCKoban\\Admin\\": "admin",
+      "WCKoban\\Hooks\\": "includes/hooks",
+      "WCKoban\\Serializers\\": "includes/serializers"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "WCKoban\\Tests\\": "tests",
-      "WCKoban\\Tests\\Mocks\\": "tests/mocks"
+      "WCKoban\\Tests\\": "../tests",
+      "WCKoban\\Tests\\Mocks\\": "../tests/mocks"
     },
     "classmap": [
-      "tests/mocks/MockResponse.php"
+      "../tests/mocks/MockResponse.php"
     ]
   }
 }

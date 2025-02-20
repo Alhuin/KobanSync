@@ -44,7 +44,7 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   yes | "$PLUGIN_DIR"/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
   rm -rf "${PLUGIN_DIR:?}"/bin/
 
-  cd "$PLUGIN_DIR"
+  cd "$PLUGIN_DIR"/src
   echo "Installation des dépendances..."
   composer install
 
