@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin class for managing Koban Sync plugin settings and displaying logs.
  */
-class WCKoban_Admin {
+class Admin {
 
 	/**
 	 * Constructor that sets up the admin menu and registers settings.

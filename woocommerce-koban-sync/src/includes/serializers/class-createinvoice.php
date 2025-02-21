@@ -1,6 +1,6 @@
 <?php
 /**
- * WCKoban_CreateInvoice class file.
+ * CreateInvoice class file.
  *
  * Builds Koban payloads to create Invoices in Koban CRM.
  *
@@ -12,11 +12,11 @@ namespace WCKoban\Serializers;
 use WC_Order;
 
 /**
- * Class WCKoban_CreateInvoice
+ * Class CreateInvoice
  *
  * Handles serialization for Koban createInvoice payloads
  */
-class WCKoban_CreateInvoice {
+class CreateInvoice {
 	/**
 	 * Serializes a WooCommerce Order into a Koban createInvoice payload.
 	 *

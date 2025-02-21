@@ -7,7 +7,7 @@
  * @package WooCommerceKobanSync\Tests
  */
 
-namespace WCKoban\Tests\mocks;
+namespace WCKoban\Tests\Mocks;
 
 /**
  * Simple mock logger for tests, printing messages to stdout or handling them in any needed way.

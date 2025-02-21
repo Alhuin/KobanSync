@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.11.8
     container_name: wp_mysql
     environment:
       MYSQL_DATABASE: "wordpress_test"

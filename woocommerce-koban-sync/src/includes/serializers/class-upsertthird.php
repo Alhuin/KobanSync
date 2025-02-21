@@ -1,6 +1,6 @@
 <?php
 /**
- * WCKoban_UpsertProduct class file.
+ * UpsertProduct class file.
  *
  * Builds Koban payloads to create or update WooCommerce "Thirds" (accounts) in Koban CRM.
  *
@@ -14,11 +14,11 @@ use WP_User;
 use WCKoban\Logger;
 
 /**
- * Class WCKoban_UpsertThird
+ * Class UpsertThird
  *
  * Handles serialization for Koban upsertThird payloads
  */
-class WCKoban_UpsertThird {
+class UpsertThird {
 
 	/**
 	 *  WC_Order to Koban Third payload

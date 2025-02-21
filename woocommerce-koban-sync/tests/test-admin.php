@@ -1,6 +1,6 @@
 <?php
 /**
- * TODO: Test admin/WCKoban_Admin.php
+ * TODO: Test admin/class-admin.php
  *
  * @package WooCommerceKobanSync\Tests
  **/

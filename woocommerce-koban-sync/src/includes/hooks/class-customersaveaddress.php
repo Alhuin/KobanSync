@@ -1,6 +1,6 @@
 <?php
 /**
- * WCKoban_CustomerSaveAddress class file.
+ * CustomerSaveAddress class file.
  *
  * Handles synchronization of customer address changes to Koban CRM when a customer billing address is updated.
  *
@@ -11,14 +11,14 @@ namespace WCKoban\Hooks;
 
 use WCKoban\API;
 use WCKoban\Logger;
-use WCKoban\Serializers\WCKoban_UpsertThird;
+use WCKoban\Serializers\UpsertThird;
 
 /**
- * Class WCKoban_CustomerSaveAddress
+ * Class CustomerSaveAddress
  *
  * Registers a WooCommerce hook on customer save address and send Address data to Koban
  */
-class WCKoban_CustomerSaveAddress {
+class CustomerSaveAddress {
 
 	/**
 	 * Register the customer save address handler with WooCommerce.
@@ -37,7 +37,7 @@ class WCKoban_CustomerSaveAddress {
 		$koban_third_guid = get_user_meta( $customer_id, 'koban_guid', true );
 
 		if ( $koban_third_guid && 'billing' === $address_type ) {
-			$third_payload = ( new WCKoban_UpsertThird() )->user_to_koban_third( get_user_by( 'id', $customer_id ) );
+			$third_payload = ( new UpsertThird() )->user_to_koban_third( get_user_by( 'id', $customer_id ) );
 
 			Logger::info(
 				'Customer billing address updated, syncing to Koban',

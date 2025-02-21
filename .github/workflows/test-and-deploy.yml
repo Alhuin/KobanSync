@@ -93,7 +93,6 @@ jobs:
           local_path: 'woocommerce-koban-sync/src/*'
           remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
           sftpArgs: '-o ConnectTimeout=5'
-          rSyncArgs: '--exclude=vendor'
 
       - name: Setup permissions via SSH
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
@@ -102,6 +101,4 @@ jobs:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USER }}
           key: ${{ secrets.SFTP_KEY }}
-          script: |
-            cd ${{ secrets.SFTP_REMOTE_PATH }} && composer install --no-dev --optimize-autoloader
-            chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}
+          script: chown -R www-data:www-data ${{ secrets.SFTP_REMOTE_PATH }}

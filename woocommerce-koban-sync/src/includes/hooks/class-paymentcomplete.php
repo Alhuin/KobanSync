@@ -1,6 +1,6 @@
 <?php
 /**
- * WCKoban_PaymentComplete class file.
+ * PaymentComplete class file.
  *
  * Handles synchronization of customer data with Koban after a WooCommerce payment is completed.
  *
@@ -11,15 +11,15 @@ namespace WCKoban\Hooks;
 
 use WCKoban\API;
 use WCKoban\Logger;
-use WCKoban\Serializers\WCKoban_CreateInvoice;
-use WCKoban\Serializers\WCKoban_UpsertThird;
+use WCKoban\Serializers\CreateInvoice;
+use WCKoban\Serializers\UpsertThird;
 
 /**
- * Class WCKoban_PaymentComplete
+ * Class PaymentComplete
  *
  * Registers a WooCommerce hook on payment completion and send User & Order data to Koban
  */
-class WCKoban_PaymentComplete {
+class PaymentComplete {
 
 	/**
 	 * Register the payment complete handler with WooCommerce.
@@ -90,7 +90,7 @@ class WCKoban_PaymentComplete {
 
 		// If still no Koban record, create a new one.
 		if ( ! $koban_third_guid ) {
-			$third_payload    = ( new WCKoban_UpsertThird() )->order_to_koban_third( $order );
+			$third_payload    = ( new UpsertThird() )->order_to_koban_third( $order );
 			$koban_third_guid = ( new API() )->upsert_user( $third_payload );
 
 			if ( ! $koban_third_guid ) {
@@ -109,7 +109,7 @@ class WCKoban_PaymentComplete {
 
 		// Create the invoice in Koban.
 		if ( $koban_third_guid ) {
-			$invoice_payload    = ( new WCKoban_CreateInvoice() )->order_to_koban_invoice( $order, $koban_third_guid );
+			$invoice_payload    = ( new CreateInvoice() )->order_to_koban_invoice( $order, $koban_third_guid );
 			$koban_invoice_guid = ( new API() )->create_invoice( $invoice_payload );
 
 			if ( ! $koban_invoice_guid ) {

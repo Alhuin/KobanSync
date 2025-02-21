@@ -6,15 +6,21 @@
  * @package WooCommerceKobanSync\Tests
  */
 
+define( 'WCKOBAN_TESTING', true );
+
 if ( ! defined( 'WP_ADMIN' ) ) {
 	define( 'WP_ADMIN', true );
 }
 
+// Include WP Tests Lib.
 $_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
 require_once $_tests_dir . '/includes/functions.php';
 require_once $_tests_dir . '/includes/bootstrap.php';
 
+// Includes Mocks.
 require_once __DIR__ . '/mocks/mock-http.php';
+require_once __DIR__ . '/mocks/class-mocklogger.php';
+require_once __DIR__ . '/mocks/class-mockresponse.php';
 
 class_alias( 'WCKoban\\Tests\\Mocks\\MockLogger', 'WCKoban\\Logger' );
 

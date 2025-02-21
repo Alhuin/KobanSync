@@ -1,6 +1,6 @@
 <?php
 /**
- * WCKoban_UpsertProduct class file.
+ * UpsertProduct class file.
  *
  * Builds Koban payloads to create or update Products in Koban CRM.
  *
@@ -13,11 +13,11 @@ use WC_Product;
 use WCKoban\Logger;
 
 /**
- * Class WCKoban_UpsertProduct
+ * Class UpsertProduct
  *
  * Handles serialization for Koban upsertProduct payloads
  */
-class WCKoban_UpsertProduct {
+class UpsertProduct {
 
 	/**
 	 * Serializes a WooCommerce product into a Koban upsertProduct payload.

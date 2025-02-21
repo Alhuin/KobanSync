@@ -7,9 +7,9 @@
 
 namespace WCKoban\Tests;
 
-use WCKoban\Hooks\WCKoban_CustomerSaveAddress;
-use WCKoban\Hooks\WCKoban_PaymentComplete;
-use WCKoban\Hooks\WCKoban_ProductUpdate;
+use WCKoban\Hooks\CustomerSaveAddress;
+use WCKoban\Hooks\PaymentComplete;
+use WCKoban\Hooks\ProductUpdate;
 use WCKoban\Tests\Mocks\CreateInvoiceSuccess;
 use WCKoban\Tests\Mocks\CreateProductSuccess;
 use WCKoban\Tests\Mocks\CreateThirdSuccess;
@@ -135,7 +135,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
+		( new PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 3 );
 
@@ -196,7 +196,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
+		( new PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 4 );
 
@@ -249,7 +249,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
+		( new PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 2 );
 
@@ -293,7 +293,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
+		( new PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 3 );
 
@@ -333,7 +333,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_PaymentComplete() )->handle_payment_complete( $order_id );
+		( new PaymentComplete() )->handle_payment_complete( $order_id );
 
 		$this->assertRequestsCount( 4 );
 
@@ -360,7 +360,7 @@ class HooksTest extends \WP_UnitTestCase {
 		);
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
+		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -380,7 +380,7 @@ class HooksTest extends \WP_UnitTestCase {
 		update_user_meta( $user_id, 'koban_guid', 'testKobanGuid' );
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'shipping' );
+		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'shipping' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -406,7 +406,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
+		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );
@@ -424,7 +424,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_ProductUpdate() )->handle_product_update( $product_id );
+		( new ProductUpdate() )->handle_product_update( $product_id );
 
 		$this->assertRequestsCount( 1 );
 
@@ -449,7 +449,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new WCKoban_ProductUpdate() )->handle_product_update( $product_id );
+		( new ProductUpdate() )->handle_product_update( $product_id );
 
 		$this->assertRequestsCount( 1 );
 

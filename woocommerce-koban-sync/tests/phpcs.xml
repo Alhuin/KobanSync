@@ -1,13 +1,8 @@
 <ruleset>
     <file>/var/www/html/wp-content/plugins/woocommerce-koban-sync</file>
-    <exclude-pattern>/var/www/html/wp-content/plugins/woocommerce-koban-sync/src/vendor</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
 
     <rule ref="WordPress" />
-
-    <rule ref="WordPress.Files.FileName">
-        <!--  Incompatible with composer's autoloader -->
-        <exclude-pattern>*.php</exclude-pattern>
-    </rule>
 
     <rule ref="WordPress.Security.EscapeOutput">
         <!-- We don't care about this in the tests directory -->

@@ -41,10 +41,10 @@ if ! wp --allow-root core is-installed --path="$WP_CORE_DIR" >/dev/null 2>&1; th
   echo "Installation de la suite de tests..."
   # Vider complètement le répertoire de tests pour repartir sur une base propre
   rm -rf "$WP_TESTS_DIR"
-  yes | "$PLUGIN_DIR"/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.6
+  yes | "$PLUGIN_DIR"/bin/install-wp-tests.sh "$WORDPRESS_DB_NAME" "$WORDPRESS_DB_USER" "$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_HOST" 6.7
   rm -rf "${PLUGIN_DIR:?}"/bin/
 
-  cd "$PLUGIN_DIR"/src
+  cd "$PLUGIN_DIR"/tests
   echo "Installation des dépendances..."
   composer install
 

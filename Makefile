@@ -3,8 +3,8 @@
 DOCKER_DIR=docker
 PLUGIN_DIR=/var/www/html/wp-content/plugins/woocommerce-koban-sync
 TESTS_DIR=$(PLUGIN_DIR)/tests
-VENDOR=$(PLUGIN_DIR)/src/vendor
-CLEAN_DIRS=$(VENDOR) woocommerce-koban-sync/tests/.phpunit.result.cache
+VENDOR=$(TESTS_DIR)/vendor
+CLEAN_DIRS=$(VENDOR) $(TESTS_DIR)/.phpunit.result.cache
 
 help:
 	@echo "Available make targets:"
@@ -33,10 +33,10 @@ wp-down:
 
 tests:
 	@echo "Running tests $(test)"
-ifdef $(test)
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpunit --filter $(test)'
-else
+ifeq ($(test), )
 	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpunit'
+else
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpunit --filter $(test)'
 endif
 
 format:

@@ -13,27 +13,40 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-use WCKoban\Admin\WCKoban_Admin;
-use WCKoban\Hooks\WCKoban_CustomerSaveAddress;
-use WCKoban\Hooks\WCKoban_PaymentComplete;
-use WCKoban\Hooks\WCKoban_ProductUpdate;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	error_log( __DIR__ . '/vendor/autoload.php' );
-	require_once __DIR__ . '/vendor/autoload.php';
+// Include Admin, API and Logger classes.
+require_once __DIR__ . '/admin/class-admin.php';
+require_once __DIR__ . '/includes/class-api.php';
+
+if ( ! defined( 'WCKOBAN_TESTING' ) ) {
+	require_once __DIR__ . '/includes/class-logger.php';
 }
+
+// Include Hooks.
+require_once __DIR__ . '/includes/hooks/class-paymentcomplete.php';
+require_once __DIR__ . '/includes/hooks/class-customersaveaddress.php';
+require_once __DIR__ . '/includes/hooks/class-productupdate.php';
+
+// Include Serializers.
+require_once __DIR__ . '/includes/serializers/class-createinvoice.php';
+require_once __DIR__ . '/includes/serializers/class-upsertproduct.php';
+require_once __DIR__ . '/includes/serializers/class-upsertthird.php';
+
+use WCKoban\Admin\Admin;
+use WCKoban\Hooks\CustomerSaveAddress;
+use WCKoban\Hooks\PaymentComplete;
+use WCKoban\Hooks\ProductUpdate;
 
 if ( is_admin() ) {
-	new WCKoban_Admin();
+	new Admin();
 }
 
-( new WCKoban_CustomerSaveAddress() )->register();
-( new WCKoban_PaymentComplete() )->register();
-( new WCKoban_ProductUpdate() )->register();
+( new CustomerSaveAddress() )->register();
+( new PaymentComplete() )->register();
+( new ProductUpdate() )->register();
 
 /**
  * Checks if WooCommerce is active. If not, the plugin is deactivated.
