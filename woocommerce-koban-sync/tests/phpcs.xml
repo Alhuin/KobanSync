@@ -1,6 +1,6 @@
 <ruleset>
     <file>/var/www/html/wp-content/plugins/woocommerce-koban-sync</file>
-    <exclude-pattern>/var/www/html/wp-content/plugins/woocommerce-koban-sync/vendor</exclude-pattern>
+    <exclude-pattern>/var/www/html/wp-content/plugins/woocommerce-koban-sync/src/vendor</exclude-pattern>
 
     <rule ref="WordPress" />
 
