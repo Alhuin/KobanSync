@@ -101,7 +101,7 @@ class API {
 			return null;
 		}
 
-		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		$content_type  = wp_remote_retrieve_header( $response, 'content-type' );
 		$response_body = wp_remote_retrieve_body( $response );
 
 		if ( false !== strpos( $content_type, 'application/pdf' ) ) {
@@ -285,13 +285,13 @@ class API {
 		return true;
 	}
 
-	public function create_payment( array $payment_payload ): bool {
+	public function create_payment( array $payment_payload ): string {
 		$url           = $this->api_url . '/ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
 		$response_data = $this->make_request( $url, 'POST', $payment_payload );
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] && isset( $response_data['Result'][0] ) ) {
 			return false;
 		}
-		return true;
+		return $response_data['Result'][0];
 	}
 }
