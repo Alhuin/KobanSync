@@ -11,7 +11,7 @@ namespace WCKoban\Hooks;
 
 use WCKoban\API;
 use WCKoban\Logger;
-use WCKoban\Serializers\CreateInvoice;
+use WCKoban\Serializers\Order;
 use WCKoban\Serializers\UpsertThird;
 
 /**
@@ -109,12 +109,12 @@ class PaymentComplete {
 
 		// Create the invoice in Koban.
 		if ( $koban_third_guid ) {
-			$invoice_payload    = ( new CreateInvoice() )->order_to_koban_invoice( $order, $koban_third_guid );
+			$invoice_payload    = ( new Order() )->to_koban_invoice( $order, $koban_third_guid );
 			$koban_invoice_guid = ( new API() )->create_invoice( $invoice_payload );
 
 			if ( ! $koban_invoice_guid ) {
 				Logger::error(
-					'Could not create Koban Invoice, aborting PDF retrieval',
+					'Could not create Koban Invoice, aborting Payment and PDF creation',
 					array( 'order_id' => $order_id )
 				);
 
@@ -124,11 +124,15 @@ class PaymentComplete {
 			$order->update_meta_data( 'koban_invoice_guid', $koban_invoice_guid );
 			$order->save();
 
-			$pdf_url = ( new API() )->get_invoice_pdf( $koban_invoice_guid );
+			$payment_payload = ( new Order() )->to_koban_payment( $order, $koban_invoice_guid );
 
-			if ( $pdf_url ) {
-				$order->update_meta_data( 'koban_pdf_url', $pdf_url );
-				$order->save();
+			if ( ( new API() )->create_payment( $payment_payload ) ) {
+				$pdf_url = ( new API() )->get_invoice_pdf( $koban_invoice_guid );
+
+				if ( $pdf_url ) {
+					$order->update_meta_data( 'koban_invoice_pdf_path', $pdf_url );
+					$order->save();
+				}
 			}
 		}
 	}

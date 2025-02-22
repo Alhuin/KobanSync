@@ -10,13 +10,14 @@
 namespace WCKoban\Serializers;
 
 use WC_Order;
+use WCKoban\Logger;
 
 /**
- * Class CreateInvoice
+ * Class Order
  *
- * Handles serialization for Koban createInvoice payloads
+ * Handles serialization for Koban createInvoice and createPayment payloads
  */
-class CreateInvoice {
+class Order {
 	/**
 	 * Serializes a WooCommerce Order into a Koban createInvoice payload.
 	 *
@@ -26,7 +27,7 @@ class CreateInvoice {
 	 * @return array    The Koban createInvoice payload
 	 * TODO: Tax handling
 	 */
-	public function order_to_koban_invoice( WC_Order $order, ?string $koban_third_guid = '' ): array {
+	public function to_koban_invoice( WC_Order $order, string $koban_third_guid ): array {
 		$invoice_number = $order->get_order_number();
 		$invoice_date   = gmdate( 'Y-m-d\TH:i:s\Z' ); // or from $order->get_date_created().
 
@@ -49,6 +50,9 @@ class CreateInvoice {
 			$ttc = $ht * ( 1 + ( $vat_rate / 100 ) );
 
 			$lines[] = array(
+				'Product'   => array(
+					'Guid' => get_post_meta( $item->get_id(), 'koban_guid', true ),
+				),
 				'Label'     => $line_label,
 				'Quantity'  => $quantity,
 				'Ht'        => $ht,
@@ -58,19 +62,44 @@ class CreateInvoice {
 			);
 		}
 
-		$third = array();
-		if ( $koban_third_guid ) {
-			$third = array( 'Guid' => $koban_third_guid );
-		}
-
 		return array(
-			'Number'      => $invoice_number,
-			'InvoiceDate' => $invoice_date,
-			'DueDate'     => '',
-			'Status'      => 'SENT',
-			'Third'       => $third,
-			'Lines'       => $lines,
-			'PaymentMode' => 'CB',
+			array(
+				'Number'      => 'INV-' . $invoice_number,
+				'InvoiceDate' => $invoice_date,
+				'DueDate'     => '',
+				'Status'      => 'PENDING',
+				'Third'       => array(
+					'Guid' => $koban_third_guid,
+				),
+				'Lines'       => $lines,
+				'PaymentMode' => array(
+					'Code' => 'TPE',
+				),
+				'Extcode'     => null,
+				'OtherThird'  => null,
+				'Contact'     => null,
+				'Order'       => null,
+				'Header'      => null,
+				'AssignedTo'  => array(
+					'FullName' => 'Florian Piedimonte',
+				),
+			),
+		);
+	}
+
+	public function to_koban_payment( WC_Order $order, string $koban_invoice_guid ): array {
+		return array(
+			array(
+				'Extcode'     => 'PAY-' . $order->get_order_number(),
+				'Invoice'     => array(
+					'Guid' => $koban_invoice_guid,
+				),
+				'PaymentDate' => gmdate( 'Y-m-d\TH:i:s\Z' ),
+				'Ttc'         => $order->get_total(),
+				'ModeRglt'    => array(
+					'Code' => 'TPE',
+				),
+			),
 		);
 	}
 }

@@ -42,6 +42,7 @@ class API {
 	public function __construct() {
 		$options        = get_option( 'wckoban_sync_options' );
 		$this->api_url  = $options['koban_url'] ?? '';
+		$this->api_url  = $this->api_url . '/api/v1';
 		$this->api_key  = $options['koban_api_key'] ?? '';
 		$this->user_key = $options['koban_user_key'] ?? '';
 	}
@@ -85,14 +86,6 @@ class API {
 
 		$response = wp_remote_request( $url, $args );
 
-		Logger::info(
-			'Received response from Koban',
-			array(
-				'code' => $response['response']['code'],
-				'body' => json_decode( $response['body'], true ),
-			)
-		);
-
 		if ( is_wp_error( $response ) ) {
 			$error_message = $response->get_error_message();
 			Logger::error(
@@ -105,7 +98,29 @@ class API {
 				)
 			);
 
-			return false;
+			return null;
+		}
+
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		if ( false !== strpos( $content_type, 'application/pdf' ) ) {
+			return array(
+				'type' => 'pdf',
+				'data' => $response_body,
+			);
+		}
+
+		Logger::info(
+			'Received response from Koban',
+			array(
+				'code' => $response['response']['code'],
+				'body' => json_decode( $response_body, true ),
+			)
+		);
+
+		if ( 404 == $response['response']['code'] ) {
+			return null;
 		}
 
 		$response_body = wp_remote_retrieve_body( $response );
@@ -120,7 +135,7 @@ class API {
 				)
 			);
 
-			return false;
+			return null;
 		}
 
 		$response_data = json_decode( $response_body, true );
@@ -136,7 +151,7 @@ class API {
 				)
 			);
 
-			return false;
+			return null;
 		}
 
 		return $response_data;
@@ -185,7 +200,7 @@ class API {
 	 * @return string|false The newly created invoice GUID, or false on failure.
 	 */
 	public function create_invoice( array $invoice_payload ): ?string {
-		$url           = $this->api_url . '/ncInvoice';
+		$url           = $this->api_url . '/ncInvoice/PostMany?uniqueproperty=Number&orderuniqueproperty=Number&thirduniqueproperty=Guid';
 		$response_data = $this->make_request( $url, 'POST', $invoice_payload );
 
 		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
@@ -206,10 +221,34 @@ class API {
 		$url           = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
 		$response_data = $this->make_request( $url, 'GET' );
 
-		if ( ! $response_data || empty( $response_data['link'] ) ) {
+		if ( ! $response_data ) {
 			return false;
 		}
-		return $response_data['link'];
+
+		if ( isset( $response_data['type'] ) && 'pdf' === $response_data['type'] ) {
+			$pdf_binary = $response_data['data'];
+			$upload_dir = wp_upload_dir();
+
+			// Create a subfolder with .htaccess blocking direct access.
+			$protected_dir = trailingslashit( $upload_dir['basedir'] ) . 'protected-pdfs';
+			if ( ! file_exists( $protected_dir ) ) {
+				wp_mkdir_p( $protected_dir );
+
+				file_put_contents(
+					$protected_dir . '/.htaccess',
+					"Order allow,deny\nDeny from all\n"
+				);
+			}
+
+			// Save the file.
+			$filename = 'koban-invoice-' . $invoice_guid . '.pdf';
+			$filepath = trailingslashit( $protected_dir ) . $filename;
+			file_put_contents( $filepath, $pdf_binary );
+
+			return $filepath;
+		}
+
+		return null;
 	}
 
 	/**
@@ -220,7 +259,7 @@ class API {
 	 * @return string  The created Product GUID
 	 */
 	public function create_product( array $product_payload ): string {
-		$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
+		$url           = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
 		$response_data = $this->make_request( $url, 'POST', $product_payload );
 
 		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
@@ -237,8 +276,18 @@ class API {
 	 * @return bool  True on success, false on failure.
 	 */
 	public function update_product( array $product_payload ): bool {
-		$url           = $this->api_url . '/api/v1/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Reference';
+		$url           = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Reference';
 		$response_data = $this->make_request( $url, 'POST', $product_payload );
+
+		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
+			return false;
+		}
+		return true;
+	}
+
+	public function create_payment( array $payment_payload ): bool {
+		$url           = $this->api_url . '/ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
+		$response_data = $this->make_request( $url, 'POST', $payment_payload );
 
 		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
 			return false;

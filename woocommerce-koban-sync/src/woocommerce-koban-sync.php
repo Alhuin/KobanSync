@@ -31,7 +31,7 @@ require_once __DIR__ . '/includes/hooks/class-customersaveaddress.php';
 require_once __DIR__ . '/includes/hooks/class-productupdate.php';
 
 // Include Serializers.
-require_once __DIR__ . '/includes/serializers/class-createinvoice.php';
+require_once __DIR__ . '/includes/serializers/class-order.php';
 require_once __DIR__ . '/includes/serializers/class-upsertproduct.php';
 require_once __DIR__ . '/includes/serializers/class-upsertthird.php';
 

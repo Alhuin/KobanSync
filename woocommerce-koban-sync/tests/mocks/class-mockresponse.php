@@ -52,6 +52,13 @@ abstract class MockResponse {
 	public ?string $guid;
 
 	/**
+	 * The unencoded body.
+	 *
+	 * @var array|null
+	 */
+	public ?array $body;
+
+	/**
 	 * Constructor that automatically loads the JSON response from disk.
 	 */
 	public function __construct() {
@@ -78,13 +85,7 @@ abstract class MockResponse {
 			throw new \Exception( 'Erreur de décodage JSON : ' . json_last_error_msg() );
 		}
 
-		if ( isset( $data['body']['Guid'] ) ) {
-			$this->guid = $data['body']['Guid'];
-		} elseif ( isset( $data['body']['Result'] ) ) {
-			$this->guid = $data['body']['Result'];
-		} else {
-			$this->guid = null;
-		}
+		$this->body = $data['body'];
 
 		$this->response = array(
 			'response' => $data['response'],
@@ -102,6 +103,11 @@ class FindUserByEmailSuccess extends MockResponse {
 	public string $method    = 'GET';
 	public string $endpoint  = 'ncThird/GetOneByKey?uniqueproperty=Email&value=';
 	public string $json_path = 'find_user_by_email_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Guid'];
+	}
 }
 
 /**
@@ -122,6 +128,11 @@ class CreateInvoiceSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = '/ncInvoice';
 	public string $json_path = 'create_invoice_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
 }
 
 /**
@@ -142,6 +153,11 @@ class CreateThirdSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Extcode';
 	public string $json_path = 'create_third_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
 }
 
 /**
@@ -152,6 +168,11 @@ class UpdateThirdSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Extcode';
 	public string $json_path = 'update_third_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
 }
 
 /**
@@ -162,6 +183,11 @@ class CreateProductSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Reference';
 	public string $json_path = 'create_product_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
 }
 
 /**
@@ -172,4 +198,24 @@ class UpdateProductSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Guid';
 	public string $json_path = 'update_product_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
+ * Successful "createPayment" response from Koban.
+ */
+class CreatePaymentSuccess extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
+	public string $json_path = 'create_payment_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'][0];
+	}
 }
