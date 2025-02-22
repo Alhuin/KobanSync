@@ -285,11 +285,18 @@ class API {
 		return true;
 	}
 
+	/**
+	 * Creates a Payment in Koban For an Invoice identified by Guid.
+	 *
+	 * @param array $payment_payload The payment data to create.
+	 *
+	 * @return string|false  The Payment GUID on success, False on error.
+	 */
 	public function create_payment( array $payment_payload ): string {
 		$url           = $this->api_url . '/ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
 		$response_data = $this->make_request( $url, 'POST', $payment_payload );
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] && isset( $response_data['Result'][0] ) ) {
+		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] || ! isset( $response_data['Result'][0] ) ) {
 			return false;
 		}
 		return $response_data['Result'][0];

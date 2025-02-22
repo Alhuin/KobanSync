@@ -1,4 +1,11 @@
 <?php
+/**
+ * This file contains functions related to serving protected PDF invoices and adding invoice actions
+ * in the "My Orders" section of the WooCommerce account page. It handles access control, security checks,
+ * and URL generation for PDF invoices.
+ *
+ * @package WooCommerceKobanSync
+ */
 
 namespace WCKoban\Admin;
 
@@ -7,7 +14,6 @@ use WCKoban\Logger;
 add_action(
 	'init',
 	function () {
-		// Register a custom query variable
 		add_rewrite_tag( '%wckoban_invoice_pdf%', '([^&]+)' );
 	}
 );
@@ -18,50 +24,49 @@ add_action(
  */
 function wckoban_serve_protected_pdf() {
 	if ( ! isset( $_GET['wckoban_invoice_pdf'] ) ) {
-		return; // Not our query, do nothing
+		return;
 	}
 
-	// Typically you'll have an 'order_id' param, e.g. ...?wckoban_invoice_pdf=1&order_id=123
 	$order_id = isset( $_GET['order_id'] ) ? (int) $_GET['order_id'] : 0;
 	if ( ! $order_id ) {
 		wp_die( 'Invalid order_id.', 'Error', array( 'response' => 400 ) );
 	}
 
-	// Load the order
 	$order = wc_get_order( $order_id );
 	if ( ! $order ) {
 		wp_die( 'Order not found.', 'Error', array( 'response' => 404 ) );
 	}
 
-	// Check if user is admin or order owner
 	$current_user_id = get_current_user_id();
-	$order_user_id   = $order->get_user_id(); // 0 for guest
+	$order_user_id   = $order->get_user_id();
 
-	// If no user is logged in or doesn't match & not admin, block
-	if ( ! current_user_can( 'administrator' ) && ( $current_user_id !== (int) $order_user_id ) ) {
+	if ( ! current_user_can( 'manage_options' ) && ( $current_user_id !== $order_user_id ) ) {
 		wp_die( 'You are not allowed to view this file.', 'Forbidden', array( 'response' => 403 ) );
 	}
 
-	// Retrieve the local disk path from meta
 	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
 	if ( ! $pdf_path || ! file_exists( $pdf_path ) ) {
 		wp_die( 'File not found.', 'Error', array( 'response' => 404 ) );
 	}
 
-	// All good. Output it as PDF.
 	header( 'Content-Type: application/pdf' );
 	header( 'Content-Disposition: inline; filename="' . basename( $pdf_path ) . '"' );
 	header( 'Content-Length: ' . filesize( $pdf_path ) );
 	readfile( $pdf_path );
-	exit; // always exit after raw file output
+	exit;
 }
 add_action( 'template_redirect', __NAMESPACE__ . '\\wckoban_serve_protected_pdf' );
 
 /**
  * Add a "View Invoice" action button in the My Account -> My Orders list
  * if the order has a PDF invoice path.
+ *
+ * @param array    $actions    Array containing the WC actions.
+ * @param WC_Order $order   The WC_Order.
+ *
+ * @return array
  */
-function wckoban_add_invoice_action_to_my_orders( $actions, $order ) {
+function wckoban_add_invoice_action_to_my_orders( array $actions, WC_Order $order ): array {
 	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
 	Logger::info(
 		'pdf path',

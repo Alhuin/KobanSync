@@ -100,6 +100,14 @@ class Order {
 		);
 	}
 
+	/**
+	 * Serializes a WooCommerce Order into a Koban createPayment payload.
+	 *
+	 * @param WC_Order $order               The WooCommerce order.
+	 * @param string   $koban_invoice_guid  The Koban Invoice GUID.
+	 *
+	 * @return array    The Koban createPayment payload
+	 */
 	public function to_koban_payment( WC_Order $order, string $koban_invoice_guid ): array {
 		return array(
 			array(

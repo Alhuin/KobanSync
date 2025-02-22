@@ -1,8 +1,17 @@
 <?php
+/**
+ * This file contains functions to manage the meta boxes for Koban sync (product, order, and user information)
+ * within the WooCommerce admin interface. These meta boxes handle the Koban GUIDs, the payment, invoice, and
+ * user-specific information by displaying them on the product, category, order, and user profile pages.
+ *
+ * @package WooCommerceKobanSync
+ */
 
 namespace WCKoban\Admin;
 
-use WCKoban\Logger;
+use WP_Post;
+use WP_User;
+use WP_Term;
 
 /**
  * Add a meta box for the product's Koban GUID.
@@ -21,8 +30,10 @@ add_action( 'add_meta_boxes', __NAMESPACE__ . '\\wckoban_add_product_meta_box' )
 
 /**
  * Callback function to render the product meta box fields.
+ *
+ * @param WP_Post $post The WP_Post object.
  */
-function wckoban_product_meta_box_cb( $post ) {
+function wckoban_product_meta_box_cb( WP_Post $post ) {
 	wp_nonce_field( 'wckoban_save_product_meta', 'wckoban_product_meta_nonce' );
 	$koban_product_guid = get_post_meta( $post->ID, KOBAN_PRODUCT_GUID_META_KEY, true );
 	$koban_url          = get_option( 'wckoban_sync_options' )['koban_url'] ?? '';
@@ -36,19 +47,21 @@ function wckoban_product_meta_box_cb( $post ) {
 			</tr>
 			<tr>
 				<td>
-					<input type="text" name="<?php echo KOBAN_PRODUCT_GUID_META_KEY; ?>"
-							id="<?php echo KOBAN_PRODUCT_GUID_META_KEY; ?>"
+					<input
+							type="text"
+							name="<?php echo esc_attr( KOBAN_PRODUCT_GUID_META_KEY ); ?>"
+							id="<?php echo esc_attr( KOBAN_PRODUCT_GUID_META_KEY ); ?>"
 							value="<?php echo esc_attr( $koban_product_guid ); ?>" style="width: 100%;"
 						<?php echo empty( $koban_product_guid ) ? '' : 'disabled'; ?>
-							onclick="this.setAttribute('disabled', '');"
 					/>
 				</td>
 			</tr>
 			<tr style="text-align:center;">
 				<td>
 					<?php if ( ! empty( $koban_product_guid ) && ! empty( $koban_url ) ) : ?>
-						<a href="<?php echo esc_url( $koban_url . '/product/show/' . $koban_product_guid ); ?>"
-							class="button button-primary" target="_blank">
+						<a
+								href="<?php echo esc_url( $koban_url . '/product/show/' . $koban_product_guid ); ?>"
+								class="button button-primary" target="_blank">
 							<?php esc_html_e( 'See Product', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
@@ -61,18 +74,18 @@ function wckoban_product_meta_box_cb( $post ) {
 
 /**
  * Save the product meta data when the product is saved.
+ *
+ * @param int $post_id The WP_Post ID representing the WC_Product.
  */
-function wckoban_save_product_meta( $post_id ) {
-	// Check nonce & autosave
+function wckoban_save_product_meta( int $post_id ) {
 	if (
 		! isset( $_POST['wckoban_product_meta_nonce'] )
-		|| ! wp_verify_nonce( $_POST['wckoban_product_meta_nonce'], 'wckoban_save_product_meta' )
+		|| ! wp_verify_nonce( $_POST['wckoban_product_meta_nonce'], 'wckoban_save_product_meta' )   // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		|| ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 	) {
 		return;
 	}
 
-	// Only save if this is a 'product' post.
 	if ( 'product' !== get_post_type( $post_id ) ) {
 		return;
 	}
@@ -81,7 +94,7 @@ function wckoban_save_product_meta( $post_id ) {
 		update_post_meta(
 			$post_id,
 			KOBAN_PRODUCT_GUID_META_KEY,
-			sanitize_text_field( $_POST[ KOBAN_PRODUCT_GUID_META_KEY ] )
+			sanitize_text_field( wp_unslash( $_POST[ KOBAN_PRODUCT_GUID_META_KEY ] ) )
 		);
 	}
 }
@@ -91,13 +104,17 @@ add_action( 'save_post', __NAMESPACE__ . '\\wckoban_save_product_meta' );
  * Add Category Code field to the "Add New Product Category" screen.
  */
 function wckoban_product_cat_add_meta_field() {
+	wp_nonce_field( 'wckoban_save_category_meta', 'wckoban_category_meta_nonce' );
 	?>
 	<div class="form-field">
-		<label for="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>">
+		<label for="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>">
 			<?php esc_html_e( 'Koban GUID', 'woocommerce-koban-sync' ); ?>
 		</label>
-		<input type="text" name="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>"
-				id="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>" value=""
+		<input
+				type="text"
+				name="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>"
+				id="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>"
+				value=""
 		/>
 	</div>
 	<?php
@@ -106,20 +123,24 @@ add_action( 'product_cat_add_form_fields', __NAMESPACE__ . '\\wckoban_product_ca
 
 /**
  * Add field to the "Edit Product Category" screen.
+ *
+ * @param WP_Term $term The WP Category.
  */
-function wckoban_product_cat_edit_meta_field( $term ) {
+function wckoban_product_cat_edit_meta_field( WP_Term $term ) {
 	$koban_category_code = get_term_meta( $term->term_id, KOBAN_CATEGORY_CODE_META_KEY, true );
 	?>
 	<tr class="form-field">
 		<th scope="row" valign="top">
-			<label for="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>">
+			<label for="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>">
 				<?php esc_html_e( 'Koban Code', 'woocommerce-koban-sync' ); ?>
 			</label>
 		</th>
 		<td>
-			<input type="text" name="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>"
-					id="<?php echo KOBAN_CATEGORY_CODE_META_KEY; ?>"
+			<input
+					type="text" name="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>"
+					id="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>"
 					value="<?php echo esc_attr( $koban_category_code ); ?>"
+				<?php echo empty( $koban_category_code ) ? '' : 'disabled'; ?>
 			/>
 		</td>
 	</tr>
@@ -129,13 +150,22 @@ add_action( 'product_cat_edit_form_fields', __NAMESPACE__ . '\\wckoban_product_c
 
 /**
  * Save the custom field when creating or editing a product category.
+ *
+ * @param int $term_id The Category ID.
  */
-function wckoban_save_product_cat_meta( $term_id ) {
+function wckoban_save_product_cat_meta( int $term_id ) {
+	if (
+		! isset( $_POST['wckoban_category_meta_nonce'] )
+		|| ! wp_verify_nonce( $_POST['wckoban_category_meta_nonce'], 'wckoban_save_category_meta' ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	) {
+		return;
+	}
+
 	if ( isset( $_POST[ KOBAN_CATEGORY_CODE_META_KEY ] ) ) {
 		update_term_meta(
 			$term_id,
 			KOBAN_CATEGORY_CODE_META_KEY,
-			sanitize_text_field( $_POST[ KOBAN_CATEGORY_CODE_META_KEY ] )
+			sanitize_text_field( wp_unslash( $_POST[ KOBAN_CATEGORY_CODE_META_KEY ] ) )
 		);
 	}
 }
@@ -147,7 +177,6 @@ add_action( 'edited_product_cat', __NAMESPACE__ . '\\wckoban_save_product_cat_me
  * Register a “Koban Sync” meta box on the Order edit page.
  */
 function wckoban_add_order_meta_box() {
-	Logger::info( 'Bind' );
 	add_meta_box(
 		'wckoban_order_meta',
 		__( 'Koban Sync', 'woocommerce-koban-sync' ),
@@ -161,8 +190,10 @@ add_action( 'add_meta_boxes_woocommerce_page_wc-orders', __NAMESPACE__ . '\\wcko
 
 /**
  * Render fields in the Koban meta box for the order.
+ *
+ * @param WP_Post $post the WordPress Post object representing the WC_Order.
  */
-function wckoban_order_meta_box_cb( $post ) {
+function wckoban_order_meta_box_cb( WP_Post $post ) {
 	wp_nonce_field( 'wckoban_save_order_meta', 'wckoban_order_meta_nonce' );
 
 	$order                  = wc_get_order( $post->ID );
@@ -181,8 +212,9 @@ function wckoban_order_meta_box_cb( $post ) {
 			</tr>
 			<tr>
 				<td>
-					<input type="text" name="<?php echo KOBAN_INVOICE_GUID_META_KEY; ?>"
-							id="<?php echo KOBAN_INVOICE_GUID_META_KEY; ?>"
+					<input
+							type="text" name="<?php echo esc_attr( KOBAN_INVOICE_GUID_META_KEY ); ?>"
+							id="<?php echo esc_attr( KOBAN_INVOICE_GUID_META_KEY ); ?>"
 							value="<?php echo esc_attr( $koban_invoice_guid ); ?>" style="width: 100%;"
 						<?php echo empty( $koban_invoice_guid ) ? '' : 'disabled'; ?>
 					/>
@@ -191,9 +223,11 @@ function wckoban_order_meta_box_cb( $post ) {
 			<tr style="text-align:center;">
 				<td>
 					<?php if ( ! empty( $koban_invoice_guid ) && ! empty( $koban_url ) ) : ?>
-						<a href="<?php echo esc_url( $koban_url . '/invoice/show/' . $koban_invoice_guid ); ?>"
-							class="button button-primary" target="_blank">
-							<?php esc_html_e( 'See Invoice', 'woocommerce-koban-sync' ); ?></a>
+						<a
+								href="<?php echo esc_url( $koban_url . '/invoice/show/' . $koban_invoice_guid ); ?>"
+								class="button button-primary" target="_blank">
+							<?php esc_html_e( 'See Invoice', 'woocommerce-koban-sync' ); ?>
+						</a>
 					<?php endif; ?>
 				</td>
 			</tr>
@@ -206,8 +240,9 @@ function wckoban_order_meta_box_cb( $post ) {
 			</tr>
 			<tr>
 				<td>
-					<input type="text" name="<?php echo KOBAN_PAYMENT_GUID_META_KEY; ?>"
-							id="<?php echo KOBAN_PAYMENT_GUID_META_KEY; ?>"
+					<input
+							type="text" name="<?php echo esc_attr( KOBAN_PAYMENT_GUID_META_KEY ); ?>"
+							id="<?php echo esc_attr( KOBAN_PAYMENT_GUID_META_KEY ); ?>"
 							value="<?php echo esc_attr( $koban_payment_guid ); ?>" style="width: 100%;"
 						<?php echo empty( $koban_payment_guid ) ? '' : 'disabled'; ?>
 					/>
@@ -216,8 +251,9 @@ function wckoban_order_meta_box_cb( $post ) {
 			<tr style="text-align:center;">
 				<td>
 					<?php if ( ! empty( $koban_payment_guid ) && ! empty( $koban_url ) ) : ?>
-						<a href="<?php echo esc_url( $koban_url . '/payment/show/' . $koban_payment_guid ); ?>"
-							class="button button-primary" target="_blank">
+						<a
+								href="<?php echo esc_url( $koban_url . '/payment/show/' . $koban_payment_guid ); ?>"
+								class="button button-primary" target="_blank">
 							<?php esc_html_e( 'See Payment', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
@@ -233,8 +269,9 @@ function wckoban_order_meta_box_cb( $post ) {
 			</tr>
 			<tr>
 				<td>
-					<input type="text" name="<?php echo KOBAN_INVOICE_PDF_PATH_META_KEY; ?>"
-							id="<?php echo KOBAN_INVOICE_PDF_PATH_META_KEY; ?>"
+					<input
+							type="text" name="<?php echo esc_attr( KOBAN_INVOICE_PDF_PATH_META_KEY ); ?>"
+							id="<?php echo esc_attr( KOBAN_INVOICE_PDF_PATH_META_KEY ); ?>"
 							value="<?php echo esc_attr( $koban_invoice_pdf_path ); ?>" style="width: 100%;"
 						<?php echo empty( $koban_invoice_pdf_path ) ? '' : 'disabled'; ?>
 					/>
@@ -255,7 +292,8 @@ function wckoban_order_meta_box_cb( $post ) {
 							)
 						);
 						?>
-						" class="button button-primary" target="_blank">
+						"
+							class="button button-primary" target="_blank">
 							<?php esc_html_e( 'See Invoice PDF', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
@@ -269,11 +307,13 @@ function wckoban_order_meta_box_cb( $post ) {
 
 /**
  * Save our Koban fields when the order is updated.
+ *
+ * @param int $post_id The WP_Post ID representing the WC_Order.
  */
-function wckoban_save_order_meta( $post_id ) {
+function wckoban_save_order_meta( int $post_id ) {
 	if (
 		! isset( $_POST['wckoban_order_meta_nonce'] )
-		|| ! wp_verify_nonce( $_POST['wckoban_order_meta_nonce'], 'wckoban_save_order_meta' )
+		|| ! wp_verify_nonce( $_POST['wckoban_order_meta_nonce'], 'wckoban_save_order_meta' )   // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		|| ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 	) {
 		return;
@@ -284,13 +324,31 @@ function wckoban_save_order_meta( $post_id ) {
 	}
 
 	if ( isset( $_POST[ KOBAN_INVOICE_GUID_META_KEY ] ) ) {
-		update_post_meta( $post_id, KOBAN_INVOICE_GUID_META_KEY, sanitize_text_field( $_POST[ KOBAN_INVOICE_GUID_META_KEY ] ) );
+		update_post_meta(
+			$post_id,
+			KOBAN_INVOICE_GUID_META_KEY,
+			sanitize_text_field(
+				wp_unslash( $_POST[ KOBAN_INVOICE_GUID_META_KEY ] )
+			)
+		);
 	}
 	if ( isset( $_POST[ KOBAN_PAYMENT_GUID_META_KEY ] ) ) {
-		update_post_meta( $post_id, KOBAN_PAYMENT_GUID_META_KEY, sanitize_text_field( $_POST[ KOBAN_PAYMENT_GUID_META_KEY ] ) );
+		update_post_meta(
+			$post_id,
+			KOBAN_PAYMENT_GUID_META_KEY,
+			sanitize_text_field(
+				wp_unslash( $_POST[ KOBAN_PAYMENT_GUID_META_KEY ] )
+			)
+		);
 	}
 	if ( isset( $_POST[ KOBAN_INVOICE_PDF_PATH_META_KEY ] ) ) {
-		update_post_meta( $post_id, KOBAN_INVOICE_PDF_PATH_META_KEY, sanitize_text_field( $_POST[ KOBAN_INVOICE_PDF_PATH_META_KEY ] ) );
+		update_post_meta(
+			$post_id,
+			KOBAN_INVOICE_PDF_PATH_META_KEY,
+			sanitize_text_field(
+				wp_unslash( $_POST[ KOBAN_INVOICE_PDF_PATH_META_KEY ] )
+			)
+		);
 	}
 }
 add_action( 'save_post', __NAMESPACE__ . '\\wckoban_save_order_meta' );
@@ -298,8 +356,12 @@ add_action( 'save_post', __NAMESPACE__ . '\\wckoban_save_order_meta' );
 
 /**
  * Display Koban GUID in the user profile.
+ *
+ * @param WP_User $user The user.
  */
-function wckoban_show_user_fields( $user ) {
+function wckoban_show_user_fields( WP_User $user ) {
+	wp_nonce_field( 'wckoban_save_user_meta', 'wckoban_user_meta_nonce' );
+
 	if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 		return;
 	}
@@ -309,13 +371,14 @@ function wckoban_show_user_fields( $user ) {
 	<table class="form-table">
 		<tr>
 			<th>
-				<label for="<?php echo KOBAN_THIRD_GUID_META_KEY; ?>">
+				<label for="<?php echo esc_attr( KOBAN_THIRD_GUID_META_KEY ); ?>">
 					<?php esc_html_e( 'Koban Account GUID', 'woocommerce-koban-sync' ); ?>
 				</label>
 			</th>
 			<td>
-				<input type="text" name="<?php echo KOBAN_THIRD_GUID_META_KEY; ?>"
-						id="<?php echo KOBAN_THIRD_GUID_META_KEY; ?>"
+				<input
+						type="text" name="<?php echo esc_attr( KOBAN_THIRD_GUID_META_KEY ); ?>"
+						id="<?php echo esc_attr( KOBAN_THIRD_GUID_META_KEY ); ?>"
 						value="<?php echo esc_attr( $koban_third_guid ); ?>" class="regular-text"
 					<?php echo empty( $koban_third_guid ) ? '' : 'disabled'; ?>
 				/>
@@ -324,8 +387,9 @@ function wckoban_show_user_fields( $user ) {
 		<tr style="text-align:center;">
 			<td>
 				<?php if ( ! empty( $koban_third_guid ) && ! empty( $koban_url ) ) : ?>
-					<a href="<?php echo esc_url( $koban_url . '/third/show/' . $koban_third_guid ); ?>"
-						class="button button-primary" target="_blank">
+					<a
+							href="<?php echo esc_url( $koban_url . '/third/show/' . $koban_third_guid ); ?>"
+							class="button button-primary" target="_blank">
 						<?php esc_html_e( 'See Account', 'woocommerce-koban-sync' ); ?>
 					</a>
 				<?php endif; ?>
@@ -334,19 +398,34 @@ function wckoban_show_user_fields( $user ) {
 	</table>
 	<?php
 }
-add_action( 'show_user_profile', __NAMESPACE__ . '\\wckoban_show_user_fields' );  // For your own profile
-add_action( 'edit_user_profile', __NAMESPACE__ . '\\wckoban_show_user_fields' );   // For other users' profiles
+add_action( 'show_user_profile', __NAMESPACE__ . '\\wckoban_show_user_fields' );
+add_action( 'edit_user_profile', __NAMESPACE__ . '\\wckoban_show_user_fields' );
 
 /**
  * Save the Koban GUID when the user profile is updated.
+ *
+ * @param int $user_id  The user ID.
  */
-function wckoban_save_user_fields( $user_id ) {
+function wckoban_save_user_fields( int $user_id ) {
+	if (
+		! isset( $_POST['wckoban_user_meta_nonce'] )
+		|| ! wp_verify_nonce( $_POST['wckoban_user_meta_nonce'], 'wckoban_save_user_meta' ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	) {
+		return;
+	}
+
 	if ( ! current_user_can( 'edit_user', $user_id ) ) {
 		return;
 	}
 	if ( isset( $_POST[ KOBAN_THIRD_GUID_META_KEY ] ) ) {
-		update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, sanitize_text_field( $_POST[ KOBAN_THIRD_GUID_META_KEY ] ) );
+		update_user_meta(
+			$user_id,
+			KOBAN_THIRD_GUID_META_KEY,
+			sanitize_text_field(
+				wp_unslash( $_POST[ KOBAN_THIRD_GUID_META_KEY ] )
+			)
+		);
 	}
 }
-add_action( 'personal_options_update', __NAMESPACE__ . '\\wckoban_save_user_fields' ); // Self
-add_action( 'edit_user_profile_update', __NAMESPACE__ . '\\wckoban_save_user_fields' ); // Other
+add_action( 'personal_options_update', __NAMESPACE__ . '\\wckoban_save_user_fields' );
+add_action( 'edit_user_profile_update', __NAMESPACE__ . '\\wckoban_save_user_fields' );

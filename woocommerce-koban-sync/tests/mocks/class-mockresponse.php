@@ -96,6 +96,7 @@ abstract class MockResponse {
 
 // phpcs:disable Squiz.Commenting.VariableComment.Missing
 // phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 /**
  * Successful "find user by email" response from Koban.
  */
