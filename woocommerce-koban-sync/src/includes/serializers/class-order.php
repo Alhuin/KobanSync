@@ -34,6 +34,19 @@ class Order {
 		$payment_method = $order->get_payment_method();
 		$lines          = array();
 
+		$shipping = array();
+		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
+			// Get the data in an unprotected array.
+			$shipping[] = $item->get_data();
+		}
+		Logger::info(
+			'to_koban_invoice',
+			array(
+				'order'    => $order->get_data(),
+				'shipping' => $shipping,
+			)
+		);
+
 		foreach ( $order->get_items() as $item ) {
 			$product                = $item->get_product();
 			$quantity               = $item->get_quantity();
