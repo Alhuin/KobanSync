@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Include Admin, API and Logger classes.
 require_once __DIR__ . '/admin/class-admin.php';
+require_once __DIR__ . '/admin/protected-pdf.php';
 require_once __DIR__ . '/includes/class-api.php';
 
 if ( ! defined( 'WCKOBAN_TESTING' ) ) {
@@ -42,6 +43,7 @@ use WCKoban\Hooks\ProductUpdate;
 
 if ( is_admin() ) {
 	new Admin();
+	require_once __DIR__ . '/admin/meta-fields.php';
 }
 
 ( new CustomerSaveAddress() )->register();
