@@ -7,10 +7,8 @@
 
 namespace WCKoban\Tests;
 
-use WCKoban\Hooks\CustomerSaveAddress;
-use WCKoban\Hooks\PaymentComplete;
-use WCKoban\Hooks\ProductUpdate;
 use WCKoban\Tests\Mocks\CreateInvoiceSuccess;
+use WCKoban\Tests\Mocks\CreatePaymentSuccess;
 use WCKoban\Tests\Mocks\CreateProductSuccess;
 use WCKoban\Tests\Mocks\CreateThirdSuccess;
 use WCKoban\Tests\Mocks\FindUserByEmailNotFound;
@@ -108,6 +106,7 @@ class HooksTest extends \WP_UnitTestCase {
 		$expected_requests = array(
 			new FindUserByEmailSuccess(),
 			new CreateInvoiceSuccess(),
+			new CreatePaymentSuccess(),
 			new GetInvoicePdfSuccess(),
 		);
 
@@ -135,9 +134,9 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id );
+		do_action( 'woocommerce_payment_complete', $order_id );
 
-		$this->assertRequestsCount( 3 );
+		$this->assertRequestsCount( 4 );
 
 		$this->assertRequests( $expected_requests );
 
@@ -163,6 +162,7 @@ class HooksTest extends \WP_UnitTestCase {
 			new FindUserByEmailNotFound(),
 			new CreateThirdSuccess(),
 			new CreateInvoiceSuccess(),
+			new CreatePaymentSuccess(),
 			new GetInvoicePdfSuccess(),
 		);
 
@@ -196,9 +196,9 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id );
+		do_action( 'woocommerce_payment_complete', $order_id );
 
-		$this->assertRequestsCount( 4 );
+		$this->assertRequestsCount( 5 );
 
 		$this->assertRequests( $expected_requests );
 
@@ -221,6 +221,7 @@ class HooksTest extends \WP_UnitTestCase {
 	public function test_payment_complete_registered_user_with_meta_guid() {
 		$expected_requests = array(
 			new CreateInvoiceSuccess(),
+			new CreatePaymentSuccess(),
 			new GetInvoicePdfSuccess(),
 		);
 
@@ -249,9 +250,9 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id );
+		do_action( 'woocommerce_payment_complete', $order_id );
 
-		$this->assertRequestsCount( 2 );
+		$this->assertRequestsCount( 3 );
 
 		$this->assertRequests( $expected_requests );
 
@@ -274,6 +275,7 @@ class HooksTest extends \WP_UnitTestCase {
 		$expected_requests = array(
 			new FindUserByEmailSuccess(),
 			new CreateInvoiceSuccess(),
+			new CreatePaymentSuccess(),
 			new GetInvoicePdfSuccess(),
 		);
 
@@ -293,9 +295,9 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id );
+		do_action( 'woocommerce_payment_complete', $order_id );
 
-		$this->assertRequestsCount( 3 );
+		$this->assertRequestsCount( 4 );
 
 		$this->assertRequests( $expected_requests );
 
@@ -314,6 +316,7 @@ class HooksTest extends \WP_UnitTestCase {
 			new FindUserByEmailNotFound(),
 			new CreateThirdSuccess(),
 			new CreateInvoiceSuccess(),
+			new CreatePaymentSuccess(),
 			new GetInvoicePdfSuccess(),
 		);
 
@@ -333,9 +336,9 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id );
+		do_action( 'woocommerce_payment_complete', $order_id );
 
-		$this->assertRequestsCount( 4 );
+		$this->assertRequestsCount( 5 );
 
 		$this->assertRequests( $expected_requests );
 
@@ -360,7 +363,7 @@ class HooksTest extends \WP_UnitTestCase {
 		);
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
+		do_action( 'woocommerce_customer_save_address', $user_id, 'billing' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -380,7 +383,7 @@ class HooksTest extends \WP_UnitTestCase {
 		update_user_meta( $user_id, 'koban_guid', 'testKobanGuid' );
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'shipping' );
+		do_action( 'woocommerce_customer_save_address', $user_id, 'shipping' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -406,7 +409,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $user_id, 'billing' );
+		do_action( 'woocommerce_customer_save_address', $user_id, 'billing' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );
@@ -424,7 +427,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new ProductUpdate() )->handle_product_update( $product_id );
+		do_action( 'woocommerce_new_product', $product_id );
 
 		$this->assertRequestsCount( 1 );
 
@@ -449,7 +452,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		set_next_responses( $expected_requests );
 
-		( new ProductUpdate() )->handle_product_update( $product_id );
+		do_action( 'woocommerce_update_product', $product_id );
 
 		$this->assertRequestsCount( 1 );
 
