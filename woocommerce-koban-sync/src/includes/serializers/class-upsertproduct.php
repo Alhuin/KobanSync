@@ -39,12 +39,11 @@ class UpsertProduct {
 
 		if ( ! empty( $categories ) ) {
 			$category                 = array_pop( $categories );
-			$koban_category_reference = get_field( 'koban_category_reference', $category );
+			$koban_category_reference = get_term_meta( $category->term_id, 'koban_code', true );
 		}
 
 		$data = array(
 			'Label'          => $product->get_name(),
-			'Comments'       => $product->get_description(),
 			'Catproduct'     => array( 'Reference' => $koban_category_reference ),
 			'Ht'             => (float) $price_excl_tax,
 			'Vat'            => $vat_rate,
@@ -57,6 +56,7 @@ class UpsertProduct {
 			'DCreated'       => $product->get_date_created()->getTimestamp(),
 			'DUpdated'       => $product->get_date_modified()->getTimestamp(),
 			// --- Other Fields Available ----
+			// 'Comments'       => $product->get_description(),
 			// 'Model'          => 'Model',
 			// 'Brand'          => 'Brand',
 			// 'Packing'        => 'Pack',
