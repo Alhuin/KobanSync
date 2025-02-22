@@ -64,7 +64,7 @@ class Order {
 
 			$lines[] = array(
 				'Product'   => array(
-					'Guid' => get_post_meta( $item->get_id(), 'koban_guid', true ),
+					'Guid' => get_post_meta( $item->get_id(), KOBAN_THIRD_GUID_META_KEY, true ),
 				),
 				'Label'     => $line_label,
 				'Quantity'  => $quantity,

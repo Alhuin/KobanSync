@@ -27,7 +27,8 @@ class_alias( 'WCKoban\\Tests\\Mocks\\MockLogger', 'WCKoban\\Logger' );
 update_option(
 	'wckoban_sync_options',
 	array(
-		'koban_url'      => 'https://test.app-koban.com',
+		'koban_api_url'  => 'https://test.app-koban.com',
+		'koban_url'      => 'http://rct.itsonlyleads.com/v5#',
 		'koban_api_key'  => 'YpbWgwwZlvpnGtbNmb5lavFO',
 		'koban_user_key' => 'qATXjM4kYPTMRnFUWDAAGD18',
 	)

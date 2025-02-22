@@ -43,7 +43,7 @@ function wckoban_serve_protected_pdf() {
 	}
 
 	// Retrieve the local disk path from meta
-	$pdf_path = $order->get_meta( 'koban_invoice_pdf_path', true );
+	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
 	if ( ! $pdf_path || ! file_exists( $pdf_path ) ) {
 		wp_die( 'File not found.', 'Error', array( 'response' => 404 ) );
 	}
@@ -62,10 +62,7 @@ add_action( 'template_redirect', __NAMESPACE__ . '\\wckoban_serve_protected_pdf'
  * if the order has a PDF invoice path.
  */
 function wckoban_add_invoice_action_to_my_orders( $actions, $order ) {
-	Logger::info( 'INVOICE LINK' );
-	// Check if there's an invoice PDF path stored in post meta
-	// $pdf_path = get_post_meta( $order->get_id(), 'koban_invoice_pdf_path', true );
-	$pdf_path = $order->get_meta( 'koban_invoice_pdf_path', true );
+	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
 	Logger::info(
 		'pdf path',
 		array(
@@ -74,8 +71,6 @@ function wckoban_add_invoice_action_to_my_orders( $actions, $order ) {
 		)
 	);
 	if ( $pdf_path ) {
-		// Build the protected link
-		// e.g. https://mysite.com/my-account/orders/?wckoban_invoice_pdf=1&order_id=123
 		$protected_url = add_query_arg(
 			array(
 				'wckoban_invoice_pdf' => 1,
@@ -84,17 +79,9 @@ function wckoban_add_invoice_action_to_my_orders( $actions, $order ) {
 			wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) )
 		);
 
-		Logger::info(
-			'url',
-			array(
-				'url' => $protected_url,
-			)
-		);
-		// Add an action button
 		$actions['invoice_pdf'] = array(
 			'url'  => $protected_url,
 			'name' => __( 'View Invoice PDF', 'textdomain' ),
-			// You can also specify an icon if you like:
 			// 'icon' => 'some-css-class'
 		);
 	}

@@ -75,9 +75,17 @@ class Admin {
 		);
 
 		add_settings_field(
-			'koban_url',
+			'koban_api_url',
 			'Koban API URL',
 			array( $this, 'render_api_url_field' ),
+			'wckoban-sync-settings-page',
+			'wckoban_sync_section'
+		);
+
+		add_settings_field(
+			'koban_url',
+			'Koban URL',
+			array( $this, 'render_url_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
 		);
@@ -113,8 +121,18 @@ class Admin {
 	 */
 	public function render_api_url_field(): void {
 		$options = get_option( 'wckoban_sync_options' );
-		$api_url = isset( $options['koban_url'] ) ? $options['koban_url'] : '';
-		echo '<input type="url" name="wckoban_sync_options[koban_url]" value="' . esc_attr( $api_url ) . '" style="width:300px;" />';
+		$api_url = isset( $options['koban_api_url'] ) ? $options['koban_api_url'] : '';
+		echo '<input type="url" name="wckoban_sync_options[koban_api_url]" value="' . esc_attr( $api_url ) . '" style="width:300px;" />';
+	}
+
+
+	/**
+	 * Renders the Koban URL field for the settings form.
+	 */
+	public function render_url_field(): void {
+		$options = get_option( 'wckoban_sync_options' );
+		$url     = isset( $options['koban_url'] ) ? $options['koban_url'] : '';
+		echo '<input type="url" name="wckoban_sync_options[koban_url]" value="' . esc_attr( $url ) . '" style="width:300px;" />';
 	}
 
 	/**
@@ -133,6 +151,10 @@ class Admin {
 
 		$clean['koban_user_key'] = isset( $input['koban_user_key'] )
 		? sanitize_text_field( $input['koban_user_key'] )
+		: '';
+
+		$clean['koban_api_url'] = isset( $input['koban_api_url'] )
+		? esc_url_raw( $input['koban_api_url'] )
 		: '';
 
 		$clean['koban_url'] = isset( $input['koban_url'] )

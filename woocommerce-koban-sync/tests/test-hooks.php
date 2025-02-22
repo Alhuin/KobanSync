@@ -141,15 +141,15 @@ class HooksTest extends \WP_UnitTestCase {
 		$this->assertRequests( $expected_requests );
 
 		$this->assertSame(
-			get_user_meta( $user_id, 'koban_guid', true ),
+			get_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, true ),
 			( new FindUserByEmailSuccess() )->guid,
-			"Expected 'koban_guid' user_meta to match the GUID returned by Koban when searching by email."
+			'Expected KOBAN_THIRD_GUID_META_KEY in user_meta to match the GUID returned by Koban when searching by email.'
 		);
 
 		$this->assertSame(
-			get_post_meta( $order_id, 'koban_invoice_guid', true ),
+			get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ),
 			( new CreateInvoiceSuccess() )->guid,
-			"Expected 'koban_invoice_guid' in order_meta to match the GUID returned by Koban for the invoice."
+			'Expected KOBAN_INVOICE_GUID_META_KEY in order_meta to match the GUID returned by Koban for the invoice.'
 		);
 	}
 
@@ -203,15 +203,21 @@ class HooksTest extends \WP_UnitTestCase {
 		$this->assertRequests( $expected_requests );
 
 		$this->assertSame(
-			get_user_meta( $user_id, 'koban_guid', true ),
+			get_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, true ),
 			( new CreateThirdSuccess() )->guid,
-			"Expected 'koban_guid' user_meta to match the GUID for the newly created user in Koban."
+			'Expected KOBAN_THIRD_GUID_META_KEY in user_meta to match the GUID for the newly created user in Koban.'
 		);
 
 		$this->assertSame(
-			get_post_meta( $order_id, 'koban_invoice_guid', true ),
+			get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ),
 			( new CreateInvoiceSuccess() )->guid,
-			"Expected 'koban_invoice_guid' in order_meta to match the GUID returned by Koban for the invoice."
+			'Expected KOBAN_INVOICE_GUID_META_KEY in order_meta to match the GUID returned by Koban for the invoice.'
+		);
+
+		$this->assertSame(
+			get_post_meta( $order_id, KOBAN_PAYMENT_GUID_META_KEY, true ),
+			( new CreatePaymentSuccess() )->guid,
+			'Expected KOBAN_PAYMENT_GUID_META_KEY in order_meta to match the GUID returned by Koban for the payment.'
 		);
 	}
 
@@ -232,7 +238,7 @@ class HooksTest extends \WP_UnitTestCase {
 				'role'       => 'customer',
 			)
 		);
-		update_user_meta( $user_id, 'koban_guid', 'test_koban_guid' );
+		update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, 'test_koban_guid' );
 
 		$order    = wc_create_order(
 			array(
@@ -258,13 +264,20 @@ class HooksTest extends \WP_UnitTestCase {
 
 		$this->assertSame(
 			'test_koban_guid',
-			get_user_meta( $user_id, 'koban_guid', true ),
+			get_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, true ),
 			'Expected the existing Koban GUID to remain unchanged.'
 		);
+
 		$this->assertSame(
-			get_post_meta( $order_id, 'koban_invoice_guid', true ),
+			get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ),
 			( new CreateInvoiceSuccess() )->guid,
-			"Expected 'koban_invoice_guid' in order_meta to match the GUID returned by Koban for the invoice."
+			'Expected KOBAN_INVOICE_GUID_META_KEY in order_meta to match the GUID returned by Koban for the invoice.'
+		);
+
+		$this->assertSame(
+			get_post_meta( $order_id, KOBAN_PAYMENT_GUID_META_KEY, true ),
+			( new CreatePaymentSuccess() )->guid,
+			'Expected KOBAN_PAYMENT_GUID_META_KEY in order_meta to match the GUID returned by Koban for the payment.'
 		);
 	}
 
@@ -302,9 +315,15 @@ class HooksTest extends \WP_UnitTestCase {
 		$this->assertRequests( $expected_requests );
 
 		$this->assertSame(
-			get_post_meta( $order_id, 'koban_invoice_guid', true ),
+			get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ),
 			( new CreateInvoiceSuccess() )->guid,
-			"Expected 'koban_invoice_guid' in order_meta to match the GUID returned by Koban for the invoice."
+			'Expected KOBAN_INVOICE_GUID_META_KEY in order_meta to match the GUID returned by Koban for the invoice.'
+		);
+
+		$this->assertSame(
+			get_post_meta( $order_id, KOBAN_PAYMENT_GUID_META_KEY, true ),
+			( new CreatePaymentSuccess() )->guid,
+			'Expected KOBAN_PAYMENT_GUID_META_KEY in order_meta to match the GUID returned by Koban for the payment.'
 		);
 	}
 
@@ -343,9 +362,15 @@ class HooksTest extends \WP_UnitTestCase {
 		$this->assertRequests( $expected_requests );
 
 		$this->assertSame(
-			get_post_meta( $order_id, 'koban_invoice_guid', true ),
+			get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ),
 			( new CreateInvoiceSuccess() )->guid,
-			"Expected 'koban_invoice_guid' in order_meta to match the GUID returned by Koban for the invoice."
+			'Expected KOBAN_INVOICE_GUID_META_KEY in order_meta to match the GUID returned by Koban for the invoice.'
+		);
+
+		$this->assertSame(
+			get_post_meta( $order_id, KOBAN_PAYMENT_GUID_META_KEY, true ),
+			( new CreatePaymentSuccess() )->guid,
+			'Expected KOBAN_PAYMENT_GUID_META_KEY in order_meta to match the GUID returned by Koban for the payment.'
 		);
 	}
 
@@ -380,7 +405,7 @@ class HooksTest extends \WP_UnitTestCase {
 				'role'       => 'customer',
 			)
 		);
-		update_user_meta( $user_id, 'koban_guid', 'testKobanGuid' );
+		update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, 'testKobanGuid' );
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
 		do_action( 'woocommerce_customer_save_address', $user_id, 'shipping' );
@@ -404,7 +429,7 @@ class HooksTest extends \WP_UnitTestCase {
 				'role'       => 'customer',
 			)
 		);
-		update_user_meta( $user_id, 'koban_guid', 'testKobanGuid' );
+		update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, 'testKobanGuid' );
 		update_user_meta( $user_id, 'billing_first_name', 'Bobby' );
 
 		set_next_responses( $expected_requests );
@@ -435,7 +460,7 @@ class HooksTest extends \WP_UnitTestCase {
 
 		$this->assertSame(
 			( new CreateProductSuccess() )->guid,
-			get_post_meta( $product_id, 'koban_guid', true )
+			get_post_meta( $product_id, KOBAN_THIRD_GUID_META_KEY, true )
 		);
 	}
 
@@ -448,7 +473,7 @@ class HooksTest extends \WP_UnitTestCase {
 		);
 
 		$product_id = $this->create_product();
-		update_post_meta( $product_id, 'koban_guid', 'test_koban_guid' );
+		update_post_meta( $product_id, KOBAN_THIRD_GUID_META_KEY, 'test_koban_guid' );
 
 		set_next_responses( $expected_requests );
 

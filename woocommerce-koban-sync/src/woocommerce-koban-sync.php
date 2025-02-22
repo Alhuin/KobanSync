@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/config.php';
+
 // Include Admin, API and Logger classes.
 require_once __DIR__ . '/admin/class-admin.php';
 require_once __DIR__ . '/admin/protected-pdf.php';

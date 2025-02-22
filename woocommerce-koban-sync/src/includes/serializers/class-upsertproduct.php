@@ -29,7 +29,7 @@ class UpsertProduct {
 	 */
 	public function product_to_koban( WC_Product $product ): array {
 		$product_id               = $product->get_id();
-		$koban_product_guid       = get_post_meta( $product_id, 'koban_guid', true );
+		$koban_product_guid       = get_post_meta( $product_id, KOBAN_THIRD_GUID_META_KEY, true );
 		$categories               = get_the_terms( $product_id, 'product_cat' );
 		$koban_category_reference = null;
 		$price_excl_tax           = $product->get_price();
@@ -39,7 +39,7 @@ class UpsertProduct {
 
 		if ( ! empty( $categories ) ) {
 			$category                 = array_pop( $categories );
-			$koban_category_reference = get_term_meta( $category->term_id, 'koban_code', true );
+			$koban_category_reference = get_term_meta( $category->term_id, KOBAN_INVOICE_PDF_PATH_META_KEY, true );
 		}
 
 		$data = array(
@@ -76,7 +76,7 @@ class UpsertProduct {
 		if ( $koban_product_guid ) {  // Update.
 			$data['Guid'] = $koban_product_guid;
 		} else {    // Create.
-			$data['Reference'] = 'WKS-' . $product_id;
+			$data['Reference'] = 'PROD-' . $product_id;
 		}
 		return $data;
 	}

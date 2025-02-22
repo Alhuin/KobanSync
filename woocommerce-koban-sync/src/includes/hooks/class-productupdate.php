@@ -73,7 +73,7 @@ class ProductUpdate {
 			( new API() )->update_product( $product_paylaod );
 		} else {
 			$koban_product_guid = ( new API() )->create_product( $product_paylaod );
-			$product->update_meta_data( 'koban_guid', $koban_product_guid );
+			$product->update_meta_data( KOBAN_THIRD_GUID_META_KEY, $koban_product_guid );
 			$product->save();
 		}
 	}

@@ -51,7 +51,7 @@ class PaymentComplete {
 		}
 
 		// Avoid re-sending if we already have an invoice GUID.
-		if ( get_post_meta( $order_id, 'koban_invoice_guid', true ) ) {
+		if ( get_post_meta( $order_id, KOBAN_INVOICE_GUID_META_KEY, true ) ) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ class PaymentComplete {
 
 				return;
 			}
-			$koban_third_guid = get_user_meta( $user->ID, 'koban_guid', true );
+			$koban_third_guid = get_user_meta( $user->ID, KOBAN_THIRD_GUID_META_KEY, true );
 		} else {
 			Logger::info( 'User is a guest, proceeding without a WP user account' );
 		}
@@ -84,7 +84,7 @@ class PaymentComplete {
 			$koban_third_guid = ( new API() )->find_user_by_email( $order->get_billing_email() );
 
 			if ( $user_id && $koban_third_guid ) {
-				update_user_meta( $user_id, 'koban_guid', $koban_third_guid );
+				update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, $koban_third_guid );
 			}
 		}
 
@@ -103,7 +103,7 @@ class PaymentComplete {
 			}
 
 			if ( $user_id ) {
-				update_user_meta( $user_id, 'koban_guid', $koban_third_guid );
+				update_user_meta( $user_id, KOBAN_THIRD_GUID_META_KEY, $koban_third_guid );
 			}
 		}
 
@@ -121,16 +121,20 @@ class PaymentComplete {
 				return;
 			}
 
-			$order->update_meta_data( 'koban_invoice_guid', $koban_invoice_guid );
+			$order->update_meta_data( KOBAN_INVOICE_GUID_META_KEY, $koban_invoice_guid );
 			$order->save();
 
-			$payment_payload = ( new Order() )->to_koban_payment( $order, $koban_invoice_guid );
+			$payment_payload    = ( new Order() )->to_koban_payment( $order, $koban_invoice_guid );
+			$koban_payment_guid = ( new API() )->create_payment( $payment_payload );
 
-			if ( ( new API() )->create_payment( $payment_payload ) ) {
+			$order->update_meta_data( KOBAN_PAYMENT_GUID_META_KEY, $koban_payment_guid );
+			$order->save();
+
+			if ( $koban_payment_guid ) {
 				$pdf_url = ( new API() )->get_invoice_pdf( $koban_invoice_guid );
 
 				if ( $pdf_url ) {
-					$order->update_meta_data( 'koban_invoice_pdf_path', $pdf_url );
+					$order->update_meta_data( KOBAN_INVOICE_PDF_PATH_META_KEY, $pdf_url );
 					$order->save();
 				}
 			}
