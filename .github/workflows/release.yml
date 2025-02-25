@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-upload-release-asset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Build plugin zip
+        run: zip -r woocommerce-koban-sync.zip woocommerce-koban-sync/src
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./woocommerce-koban-sync.zip
+          asset_name: "woocommerce-koban-sync.zip"
+          asset_content_type: application/zip
