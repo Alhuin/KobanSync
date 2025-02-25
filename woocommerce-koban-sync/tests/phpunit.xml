@@ -9,7 +9,7 @@
 	>
 	<testsuites>
 		<testsuite name="testing">
-			<directory prefix="test-" suffix=".php">./</directory>
+			<directory suffix="test.php">./</directory>
 			<exclude>./test-sample.php</exclude>
 		</testsuite>
 	</testsuites>
