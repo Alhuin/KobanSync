@@ -18,19 +18,24 @@ require_once $_tests_dir . '/includes/functions.php';
 require_once $_tests_dir . '/includes/bootstrap.php';
 
 // Includes Mocks.
+require_once __DIR__ . '/class-wckoban-unittestcase.php';
 require_once __DIR__ . '/mocks/mock-http.php';
 require_once __DIR__ . '/mocks/class-mocklogger.php';
 require_once __DIR__ . '/mocks/class-mockresponse.php';
 
+use WCKoban\Logger;
+
 class_alias( 'WCKoban\\Tests\\Mocks\\MockLogger', 'WCKoban\\Logger' );
+
+Logger::set_debug_mode( (bool) getenv( 'WCKOBAN_DEBUG' ) );
 
 update_option(
 	'wckoban_sync_options',
 	array(
-		'koban_api_url'  => 'https://test.app-koban.com',
-		'koban_url'      => 'http://rct.itsonlyleads.com/v5#',
-		'koban_api_key'  => 'YpbWgwwZlvpnGtbNmb5lavFO',
-		'koban_user_key' => 'qATXjM4kYPTMRnFUWDAAGD18',
+		'koban_api_url'  => 'https://fake_koban_api.url/api/v1',
+		'koban_url'      => 'https://fake_koban.url',
+		'koban_api_key'  => 'fake_api_key',
+		'koban_user_key' => 'fake_user_key',
 	)
 );
 
