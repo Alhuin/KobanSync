@@ -16,9 +16,7 @@ jobs:
         run: zip -r woocommerce-koban-sync.zip woocommerce-koban-sync/src
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./woocommerce-koban-sync.zip
-          asset_name: "woocommerce-koban-sync.zip"
-          asset_content_type: application/zip
+          asset_path: woocommerce-koban-sync.zip
