@@ -1,9 +1,10 @@
 {
+  "headers": {
+    "content-type" : "application/pdf"
+  },
   "response": {
     "code": 200
   },
-  "body": {
-    "link": "https://example.com/invoice.pdf"
-  }
+  "body": "some_binary_pdf"
 }
 
