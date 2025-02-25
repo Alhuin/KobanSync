@@ -84,7 +84,7 @@ jobs:
           path: woocommerce-koban-sync
 
       - name: Deploy via SFTP
-        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' && secrets.SFTP_KEY != '' && secrets.SFTP_USER != '' && secrets.SFTP_HOST != '' && secrets.SFTP_REMOTE_PATH != '' }}
+        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.SFTP_USER }}
@@ -95,7 +95,7 @@ jobs:
           sftpArgs: '-o ConnectTimeout=5'
 
       - name: Setup permissions via SSH
-        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' && secrets.SFTP_KEY != '' && secrets.SFTP_USER != '' && secrets.SFTP_HOST != '' && secrets.SFTP_REMOTE_PATH != '' }}
+        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SFTP_HOST }}
