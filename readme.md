@@ -12,6 +12,7 @@ It listens for key WooCommerce events—orders, product updates, billing changes
 - **Creates Invoice Payments**: After the invoice creation, creates the relevant payment in Koban.
 - **Retrieves Invoice PDF Document**: After the payment creation, download the invoice PDF from Koban and store it securely.
 - **Product Upsert**: Syncs WooCommerce products (by SKU or product ID) with Koban.
+- **Koban Links**: Adds links to relevant objects in Koban on User, Order, Product and Category pages.
 - **Logging**: Captures activities in a custom database table for debugging and auditing.
 
 > When deployed, this plugin **won’t do anything** unless you configure the Koban credentials in **Koban Sync → Settings**.
