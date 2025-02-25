@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: woocommerce-koban-sync
-          path: woocommerce-koban-sync
+          path: woocommerce-koban-sync/src
 
       - name: Deploy via SFTP
         if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
