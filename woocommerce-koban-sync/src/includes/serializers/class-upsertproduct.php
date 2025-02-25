@@ -10,7 +10,7 @@
 namespace WCKoban\Serializers;
 
 use WC_Product;
-use WCKoban\Logger;
+use WCKoban\Utils\MetaUtils;
 
 /**
  * Class UpsertProduct
@@ -28,23 +28,23 @@ class UpsertProduct {
 	 * TODO: Tax and prices Handling
 	 */
 	public function product_to_koban( WC_Product $product ): array {
-		$product_id               = $product->get_id();
-		$koban_product_guid       = get_post_meta( $product_id, KOBAN_THIRD_GUID_META_KEY, true );
-		$categories               = get_the_terms( $product_id, 'product_cat' );
-		$koban_category_reference = null;
-		$price_excl_tax           = $product->get_price();
-		$vat_rate                 = 20; // or parse from product’s tax_class if you have more advanced logic.
-		$ttc                      = (float) $price_excl_tax * ( 1 + ( $vat_rate / 100 ) );
-		$image_id                 = $product->get_image_id();
+		$product_id          = $product->get_id();
+		$koban_product_guid  = MetaUtils::get_koban_product_guid( $product );
+		$categories          = get_the_terms( $product_id, 'product_cat' );
+		$koban_category_code = null;
+		$price_excl_tax      = $product->get_price();
+		$vat_rate            = 20; // or parse from product’s tax_class if you have more advanced logic.
+		$ttc                 = (float) $price_excl_tax * ( 1 + ( $vat_rate / 100 ) );
+		$image_id            = $product->get_image_id();
 
 		if ( ! empty( $categories ) ) {
-			$category                 = array_pop( $categories );
-			$koban_category_reference = get_term_meta( $category->term_id, KOBAN_INVOICE_PDF_PATH_META_KEY, true );
+			$category            = array_pop( $categories );
+			$koban_category_code = MetaUtils::get_koban_category_code( $category->term_id );
 		}
 
 		$data = array(
 			'Label'          => $product->get_name(),
-			'Catproduct'     => array( 'Reference' => $koban_category_reference ),
+			'Catproduct'     => array( 'Reference' => $koban_category_code ),
 			'Ht'             => (float) $price_excl_tax,
 			'Vat'            => $vat_rate,
 			'Ttc'            => round( $ttc, 2 ),
@@ -55,19 +55,6 @@ class UpsertProduct {
 			'Obsolete'       => false,
 			'DCreated'       => $product->get_date_created()->getTimestamp(),
 			'DUpdated'       => $product->get_date_modified()->getTimestamp(),
-			// --- Other Fields Available ----
-			// 'Comments'       => $product->get_description(),
-			// 'Model'          => 'Model',
-			// 'Brand'          => 'Brand',
-			// 'Packing'        => 'Pack',
-			// 'StockMin'       => 0,
-			// 'PCB'            => 10,
-			// 'Regroup'        => 'Regroupment Code',
-			// 'Classification' => 'Classification Code',
-			// 'Unit'           => 'Unit Code',
-			// 'Comments'       => '',
-			// 'Margin'         => 0,
-			// 'PrHt'           => 0,
 		);
 
 		if ( $image_id ) {
@@ -76,7 +63,7 @@ class UpsertProduct {
 		if ( $koban_product_guid ) {  // Update.
 			$data['Guid'] = $koban_product_guid;
 		} else {    // Create.
-			$data['Reference'] = 'PROD-' . $product_id;
+			$data['Reference'] = PRODUCT_PREFIX . $product_id;
 		}
 		return $data;
 	}

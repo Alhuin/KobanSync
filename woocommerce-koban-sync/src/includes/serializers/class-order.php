@@ -39,13 +39,6 @@ class Order {
 			// Get the data in an unprotected array.
 			$shipping[] = $item->get_data();
 		}
-		Logger::info(
-			'to_koban_invoice',
-			array(
-				'order'    => $order->get_data(),
-				'shipping' => $shipping,
-			)
-		);
 
 		foreach ( $order->get_items() as $item ) {
 			$product                = $item->get_product();
@@ -77,7 +70,7 @@ class Order {
 
 		return array(
 			array(
-				'Number'      => 'INV-' . $invoice_number,
+				'Number'      => INVOICE_PREFIX . $invoice_number,
 				'InvoiceDate' => $invoice_date,
 				'DueDate'     => '',
 				'Status'      => 'PENDING',
@@ -86,7 +79,7 @@ class Order {
 				),
 				'Lines'       => $lines,
 				'PaymentMode' => array(
-					'Code' => 'TPE',
+					'Code' => DEFAULT_PAYMENTMODE_CODE,
 				),
 				'Extcode'     => null,
 				'OtherThird'  => null,
@@ -94,7 +87,7 @@ class Order {
 				'Order'       => null,
 				'Header'      => null,
 				'AssignedTo'  => array(
-					'FullName' => 'Florian Piedimonte',
+					'FullName' => DEFAULT_ASSIGNEDTO_FULLNAME,
 				),
 			),
 		);
@@ -111,14 +104,14 @@ class Order {
 	public function to_koban_payment( WC_Order $order, string $koban_invoice_guid ): array {
 		return array(
 			array(
-				'Extcode'     => 'PAY-' . $order->get_order_number(),
+				'Extcode'     => PAYMENT_PREFIX . $order->get_order_number(),
 				'Invoice'     => array(
 					'Guid' => $koban_invoice_guid,
 				),
 				'PaymentDate' => gmdate( 'Y-m-d\TH:i:s\Z' ),
 				'Ttc'         => $order->get_total(),
 				'ModeRglt'    => array(
-					'Code' => 'TPE',
+					'Code' => DEFAULT_PAYMENTMODE_CODE,
 				),
 			),
 		);

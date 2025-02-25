@@ -69,30 +69,13 @@ class UpsertThird {
 
 		$billing = wp_parse_args( $billing_data, $defaults );
 
-		Logger::info( 'Preparing Third payload from billing', array( 'billing' => $billing ) );
-
 		$label = trim( $billing['first_name'] . ' ' . $billing['last_name'] );
 		if ( '' === $label ) {
-			$label = $billing['email'] ? $billing['email'] : 'Guest';
+			$label = $billing['email'] ?? 'Guest';
 		}
 
-		$status_code = 'PTC'; // code for "Particuliers".
-		switch ( $billing['country'] ) {
-			case 'FR':
-				$type_code = 'P';
-				break;
-			case 'BE':
-				$type_code = 'PB';
-				break;
-			case 'CH':
-				$type_code = 'PS';
-				break;
-			case 'LX':
-				$type_code = 'PLX';
-				break;
-			default:
-				$type_code = 'Particuliers (Autre)';
-		}
+		$status_code = CUSTOMER_THIRD_STATUS_CODE;
+		$type_code   = CUSTOMER_COUNTRY_THIRD_TYPE_CODE_MAPPER[ $billing['country'] ] ?? 'Particuliers (Autre)';
 
 		return array(
 			'Label'      => $label,
@@ -112,10 +95,9 @@ class UpsertThird {
 				'City'      => $billing['city'],
 				'Country'   => $billing['country'] ? mb_strtoupper( $billing['country'], 'utf-8' ) : 'FR',
 			),
-			'Cell'       => $billing['phone'],
 			'EMail'      => $billing['email'],
 			'AssignedTo' => array(
-				'FullName' => 'Florian Piedimonte',
+				'FullName' => DEFAULT_ASSIGNEDTO_FULLNAME,
 			),
 			'Optin'      => true,
 		);
