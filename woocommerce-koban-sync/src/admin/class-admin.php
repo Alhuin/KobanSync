@@ -280,7 +280,7 @@ class Admin {
 				word-wrap: break-word;
 			}
 
-			.context-conten pre {
+			.context-content pre {
 				white-space: pre-wrap;
 				word-wrap: break-word;
 				margin: 0;
