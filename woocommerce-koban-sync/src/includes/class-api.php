@@ -73,7 +73,7 @@ class API {
 		$args = array(
 			'method'    => $method,
 			'headers'   => $headers,
-			'timeout'   => 15,
+			'timeout'   => 30,
 			'sslverify' => true,
 		);
 
@@ -181,154 +181,163 @@ class API {
 		return $decoded;
 	}
 
-			return null;
-		}
-
-		return $response_data;
-	}
-
 	/**
-	 * Creates or updates a Third (user) record in Koban.
+	 * Wraps make_request() with retries and exponential backoff.
 	 *
-	 * @param array       $user_payload Data to upsert in Koban.
-	 * @param string|null $koban_guid   Optional existing GUID to update, or null to create a new record.
-	 *
-	 * @return string|false             Returns the Third GUID on success, false on failure.
+	 * @param string     $url      Endpoint URL.
+	 * @param string     $method   HTTP verb.
+	 * @param array|null $body     Request body.
+	 * @param int        $retries  Number of attempts.
+	 * @param int        $delay    Base delay for exponential backoff.
+	 * @return array|null          Response data or null after max attempts.
 	 */
-	public function upsert_user( array $user_payload, ?string $koban_guid = null ): ?string {
-		$url           = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
-		$response_data = $this->make_request( $url, 'POST', $user_payload );
+	private function make_request_with_retries( string $url, string $method = 'GET', ?array $body = null, int $retries = 3, int $delay = 2 ): ?array {
+		$attempts = 0;
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-			return false;
-		}
-		return $response_data['Result'];
-	}
+		while ( $attempts < $retries ) {
+			$response = $this->make_request( $url, $method, $body );
 
-	/**
-	 * Searches for a Third (user) in Koban by email address.
-	 *
-	 * @param string $email The email address to search.
-	 *
-	 * @return string|false The found Third GUID, or false if not found.
-	 */
-	public function find_user_by_email( string $email ): ?string {
-		$url           = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . rawurlencode( $email );
-		$response_data = $this->make_request( $url, 'GET' );
-
-		if ( ! $response_data || ! isset( $response_data['Guid'] ) ) {
-			return false;
-		}
-		return $response_data['Guid'];
-	}
-
-	/**
-	 * Creates a new invoice in Koban.
-	 *
-	 * @param array $invoice_payload Data describing the invoice.
-	 *
-	 * @return string|false The newly created invoice GUID, or false on failure.
-	 */
-	public function create_invoice( array $invoice_payload ): ?string {
-		$url           = $this->api_url . '/ncInvoice/PostMany?uniqueproperty=Number&orderuniqueproperty=Number&thirduniqueproperty=Guid';
-		$response_data = $this->make_request( $url, 'POST', $invoice_payload );
-
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-			return false;
-		}
-		return $response_data['Result'];
-	}
-
-
-	/**
-	 * Retrieves the PDF link for an existing invoice in Koban by GUID.
-	 *
-	 * @param string $invoice_guid The Koban invoice GUID.
-	 *
-	 * @return string|false Link to the invoice PDF, or false if unavailable.
-	 */
-	public function get_invoice_pdf( string $invoice_guid ): ?string {
-		$url           = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
-		$response_data = $this->make_request( $url, 'GET' );
-
-		if ( ! $response_data ) {
-			return false;
-		}
-
-		if ( isset( $response_data['type'] ) && 'pdf' === $response_data['type'] ) {
-			$pdf_binary = $response_data['data'];
-			$upload_dir = wp_upload_dir();
-
-			// Create a subfolder with .htaccess blocking direct access.
-			$protected_dir = trailingslashit( $upload_dir['basedir'] ) . 'protected-pdfs';
-			if ( ! file_exists( $protected_dir ) ) {
-				wp_mkdir_p( $protected_dir );
-
-				file_put_contents(
-					$protected_dir . '/.htaccess',
-					"Order allow,deny\nDeny from all\n"
-				);
+			// Return if successful or 404 is encountered.
+			if ( $response && ( ! isset( $response['error'] ) || 404 === $response['error'] ) ) {
+				return $response;
 			}
 
-			// Save the file.
-			$filename = 'koban-invoice-' . $invoice_guid . '.pdf';
-			$filepath = trailingslashit( $protected_dir ) . $filename;
-			file_put_contents( $filepath, $pdf_binary );
-
-			return $filepath;
+			++$attempts;
+			Logger::debug( $this->workflow_id, "Retrying request ($attempts/$retries)" );
+			sleep( pow( $delay, $attempts ) );
 		}
 
+		Logger::debug(
+			$this->workflow_id,
+			'Failed after retry attempts',
+			array(
+				'url'    => $url,
+				'method' => $method,
+				'body'   => $body,
+			)
+		);
 		return null;
 	}
 
 	/**
-	 * Creates a Product in Koban by reference.
+	 * Creates/updates a Koban "Third" record.
 	 *
-	 * @param array $product_payload The product data to upsert.
-	 *
-	 * @return string  The created Product GUID
+	 * @param array $user_payload Data for the Koban third.
+	 * @return string|null        The Third GUID or null on failure.
 	 */
-	public function create_product( array $product_payload ): string {
-		$url           = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
-		$response_data = $this->make_request( $url, 'POST', $product_payload );
+	public function upsert_user( array $user_payload ): ?string {
+		$url  = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
+		$data = $this->make_request_with_retries( $url, 'POST', $user_payload );
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-			return false;
+		if ( ! isset( $data['Success'] ) || ! $data['Success'] || ! isset( $data['Result'] ) ) {
+			return null;
 		}
-		return $response_data['Result'];
+		return $data['Result'];
 	}
 
 	/**
-	 * Updates a Product in Koban by Guid.
+	 * Retrieves a Third record by email.
 	 *
-	 * @param array $product_payload The product data to upsert.
+	 * @param string $email Email to match.
+	 * @return string|null  The Third GUID or null if not found.
+	 */
+	public function find_user_by_email( string $email ): ?string {
+		$url  = $this->api_url . '/ncThird/GetOneByKey?uniqueproperty=Email&value=' . rawurlencode( $email );
+		$data = $this->make_request_with_retries( $url, 'GET' );
+
+		if ( isset( $data['error'] ) || ! isset( $data['Guid'] ) ) {
+			return null;
+		}
+		return $data['Guid'];
+	}
+
+	/**
+	 * Creates a new invoice.
 	 *
-	 * @return bool  True on success, false on failure.
+	 * @param array $invoice_payload Invoice details for Koban.
+	 * @return string|null           Invoice GUID or null on failure.
+	 */
+	public function create_invoice( array $invoice_payload ): ?string {
+		$url  = $this->api_url . '/ncInvoice/PostMany?uniqueproperty=Number&orderuniqueproperty=Number&thirduniqueproperty=Guid';
+		$data = $this->make_request_with_retries( $url, 'POST', $invoice_payload );
+
+		if ( ! isset( $data['Success'] ) || ! $data['Success'] || ! isset( $data['Result'][0] ) ) {
+			return null;
+		}
+		return $data['Result'][0];
+	}
+
+	/**
+	 * Retrieves and saves a Koban invoice PDF locally.
+	 *
+	 * @param string $invoice_guid The invoice GUID.
+	 * @return string|null         Path to the saved PDF or null on failure.
+	 */
+	public function get_invoice_pdf( string $invoice_guid ): ?string {
+		$url  = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
+		$data = $this->make_request_with_retries( $url, 'GET' );
+
+		if ( ! $data || ! isset( $data['type'] ) || 'pdf' !== $data['type'] ) {
+			return null;
+		}
+		$pdf_binary    = $data['data'];
+		$upload_dir    = wp_upload_dir();
+		$protected_dir = trailingslashit( $upload_dir['basedir'] ) . 'protected-pdfs';
+
+		if ( ! file_exists( $protected_dir ) ) {
+			wp_mkdir_p( $protected_dir );
+			file_put_contents( $protected_dir . '/.htaccess', "Order allow,deny\nDeny from all\n" );
+		}
+
+		$filename = 'koban-invoice-' . $invoice_guid . '.pdf';
+		$filepath = trailingslashit( $protected_dir ) . $filename;
+		file_put_contents( $filepath, $pdf_binary );
+
+		return $filepath;
+	}
+
+	/**
+	 * Creates a Product record by reference.
+	 *
+	 * @param array $product_payload Product data for Koban.
+	 * @return string|null           The Product GUID or null on failure.
+	 */
+	public function create_product( array $product_payload ): ?string {
+		$url  = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Reference&catproductuniqueproperty=Reference';
+		$data = $this->make_request_with_retries( $url, 'POST', $product_payload );
+
+		if ( ! isset( $data['Success'] ) || ! $data['Success'] || ! isset( $data['Result'] ) ) {
+			return null;
+		}
+		return $data['Result'];
+	}
+
+	/**
+	 * Updates a Product record by GUID.
+	 *
+	 * @param array $product_payload Product data for Koban.
+	 * @return bool                  True on success, false otherwise.
 	 */
 	public function update_product( array $product_payload ): bool {
-		$url           = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Reference';
-		$response_data = $this->make_request( $url, 'POST', $product_payload );
+		$url  = $this->api_url . '/ncProduct/PostOne?uniqueproperty=Guid&catproductuniqueproperty=Reference';
+		$data = $this->make_request_with_retries( $url, 'POST', $product_payload );
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] ) {
-			return false;
-		}
-		return true;
+		return ( isset( $data['Success'] ) && $data['Success'] );
 	}
 
 	/**
-	 * Creates a Payment in Koban For an Invoice identified by Guid.
+	 * Creates a Payment for a given invoice in Koban.
 	 *
-	 * @param array $payment_payload The payment data to create.
-	 *
-	 * @return string|false  The Payment GUID on success, False on error.
+	 * @param array $payment_payload Payment details for Koban.
+	 * @return string|null           The Payment GUID or null on failure.
 	 */
-	public function create_payment( array $payment_payload ): string {
-		$url           = $this->api_url . '/ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
-		$response_data = $this->make_request( $url, 'POST', $payment_payload );
+	public function create_payment( array $payment_payload ): ?string {
+		$url  = $this->api_url . '/ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
+		$data = $this->make_request_with_retries( $url, 'POST', $payment_payload );
 
-		if ( ! $response_data || empty( $response_data['Success'] ) || true !== $response_data['Success'] || ! isset( $response_data['Result'][0] ) ) {
-			return false;
+		if ( ! isset( $data['Success'] ) || ! $data['Success'] || ! isset( $data['Result'][0] ) ) {
+			return null;
 		}
-		return $response_data['Result'][0];
+		return $data['Result'][0];
 	}
 }
