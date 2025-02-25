@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Koban Sync
  * Description: Integrates WooCommerce with Koban CRM for user, order, and product data synchronization.
- * Version: 1.0.0
+ * Version: 0.0.1
  * Author: Alhuin
  * Text Domain: woocommerce-koban-sync
  * Domain Path: /languages
