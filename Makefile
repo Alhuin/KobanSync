@@ -4,13 +4,15 @@ DOCKER_DIR=docker
 PLUGIN_DIR=/var/www/html/wp-content/plugins/woocommerce-koban-sync
 TESTS_DIR=$(PLUGIN_DIR)/tests
 VENDOR=$(TESTS_DIR)/vendor
-CLEAN_DIRS=$(VENDOR) $(TESTS_DIR)/.phpunit.result.cache
+CLEAN_DIRS=woocommerce-koban-sync/tests/vendor woocommerce-koban-sync/tests/.phpunit.result.cache
+debug ?= 0
 
 help:
 	@echo "Available make targets:"
 	@echo "  wp-up         Start the WordPress and DB containers"
 	@echo "  wp-up-ci      Start containers (CI mode)"
 	@echo "  wp-down       Stop the WordPress and DB containers"
+	@echo "  wp-exec       SSH into WordPress container"
 	@echo "  tests         Run the tests via Docker"
 	@echo "  format        Format code via phpcbf"
 	@echo "  lint          Run lint checks via phpcs"
@@ -31,12 +33,20 @@ wp-down:
 	@echo "Stopping the WordPress and DB containers..."
 	cd $(DOCKER_DIR) && docker compose down -v
 
+wp-exec:
+	@echo "SSH into wordpress Docker container..."
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash
+
 tests:
-	@echo "Running tests $(test)"
+	@echo "Running tests $(test) with debug=$(debug)"
 ifeq ($(test), )
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpunit'
+	@cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		cd $(TESTS_DIR) && env WCKOBAN_DEBUG=$(debug) $(VENDOR)/bin/phpunit \
+	'
 else
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpunit --filter $(test)'
+	@cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		cd $(TESTS_DIR) && env WCKOBAN_DEBUG=$(debug) $(VENDOR)/bin/phpunit --filter $(test)\
+	'
 endif
 
 format:
