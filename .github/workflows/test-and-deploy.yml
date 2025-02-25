@@ -2,7 +2,7 @@ name: CI & Deploy
 
 on:
   push:
-    branches: [ "main", "refacto-autoload" ]
+    branches: [ '*' ]
 
 jobs:
   test-and-deploy:
@@ -21,7 +21,7 @@ jobs:
               - 'docker/Dockerfile'
             deploy:
               - 'woocommerce-koban-sync/src/**'
-              - '.github/workflows/test-and-deploy.yml'
+              - '.github/workflows/tests-and-deploy.yml'
 
       - name: Set up Docker Buildx
         if: steps.path_filter.outputs.docker == 'true'
@@ -77,14 +77,14 @@ jobs:
         run: make wp-down
 
       - name: Upload artifact
-        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
+        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: woocommerce-koban-sync
-          path: woocommerce-koban-sync/src
+          path: woocommerce-koban-sync
 
       - name: Deploy via SFTP
-        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
+        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' && secrets.SFTP_KEY != '' && secrets.SFTP_USER != '' && secrets.SFTP_HOST != '' && secrets.SFTP_REMOTE_PATH != '' }}
         uses: wlixcc/SFTP-Deploy-Action@v1.2.5
         with:
           username: ${{ secrets.SFTP_USER }}
@@ -95,7 +95,7 @@ jobs:
           sftpArgs: '-o ConnectTimeout=5'
 
       - name: Setup permissions via SSH
-        if: ${{ success() && steps.path_filter.outputs.deploy == 'true' }}
+        if: ${{ github.ref == 'refs/heads/main' && success() && steps.path_filter.outputs.deploy == 'true' && secrets.SFTP_KEY != '' && secrets.SFTP_USER != '' && secrets.SFTP_HOST != '' && secrets.SFTP_REMOTE_PATH != '' }}
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SFTP_HOST }}
