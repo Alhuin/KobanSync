@@ -1,0 +1,10 @@
+{
+  "headers": {
+    "content-type" : "application/pdf"
+  },
+  "response": {
+    "code": 200
+  },
+  "body": "some_binary_pdf"
+}
+

@@ -1,13 +1,18 @@
 .PHONY: clean fclean tests wp-up wp-up-ci wp-down lint format lint-format test-all
 
 DOCKER_DIR=docker
-CLEAN_DIRS=tests/vendor tests/bin tests/.circleci tests/.phpunit.result.cache tests/.phpcs.xml.dist
+PLUGIN_DIR=/var/www/html/wp-content/plugins/woocommerce-koban-sync
+TESTS_DIR=$(PLUGIN_DIR)/tests
+VENDOR=$(TESTS_DIR)/vendor
+CLEAN_DIRS=woocommerce-koban-sync/tests/vendor woocommerce-koban-sync/tests/.phpunit.result.cache
+debug ?= 0
 
 help:
 	@echo "Available make targets:"
 	@echo "  wp-up         Start the WordPress and DB containers"
 	@echo "  wp-up-ci      Start containers (CI mode)"
 	@echo "  wp-down       Stop the WordPress and DB containers"
+	@echo "  wp-exec       SSH into WordPress container"
 	@echo "  tests         Run the tests via Docker"
 	@echo "  format        Format code via phpcbf"
 	@echo "  lint          Run lint checks via phpcs"
@@ -28,21 +33,30 @@ wp-down:
 	@echo "Stopping the WordPress and DB containers..."
 	cd $(DOCKER_DIR) && docker compose down -v
 
+wp-exec:
+	@echo "SSH into wordpress Docker container..."
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash
+
 tests:
-	@echo "Running tests $(test)"
-ifdef $(test)
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit --filter $(test)'
+	@echo "Running tests $(test) with debug=$(debug)"
+ifeq ($(test), )
+	@cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		cd $(TESTS_DIR) && env WCKOBAN_DEBUG=$(debug) $(VENDOR)/bin/phpunit \
+	'
 else
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpunit'
+	@cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		cd $(TESTS_DIR) && env WCKOBAN_DEBUG=$(debug) $(VENDOR)/bin/phpunit --filter $(test)\
+	'
 endif
 
 format:
 	@echo "Formatting code..."
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpcbf --standard=phpcs.xml'
+	echo $(TESTS_DIR)
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpcbf --standard=phpcs.xml'
 
 lint:
 	@echo "Running lint checks..."
-	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd /var/www/tests && vendor/bin/phpcs --warning-severity=0 --standard=phpcs.xml'
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c 'cd $(TESTS_DIR) && $(VENDOR)/bin/phpcs --warning-severity=0 --standard=phpcs.xml -s'
 
 lint-format: format lint
 	@echo "Done formatting and linting."

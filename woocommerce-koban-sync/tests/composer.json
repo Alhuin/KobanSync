@@ -1,0 +1,17 @@
+{
+  "config": {
+    "platform": {
+      "php": "7.4"
+    },
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "type": "wordpress-plugin",
+  "require": {
+    "squizlabs/php_codesniffer": "^3.7",
+    "wp-coding-standards/wpcs": "^3.1",
+    "phpunit/phpunit": "^9.5",
+    "yoast/phpunit-polyfills": "^1.0"
+  }
+}
