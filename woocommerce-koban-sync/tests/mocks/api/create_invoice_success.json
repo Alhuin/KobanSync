@@ -3,7 +3,9 @@
     "code": 201
   },
   "body": {
-    "Result": "67b209f3a05233639ee7af6n",
+    "Result": [
+      "67b209f3a05233639ee7af6n"
+    ],
     "Success": true,
     "Message": null,
     "Errors": []

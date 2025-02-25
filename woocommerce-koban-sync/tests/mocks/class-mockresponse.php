@@ -54,9 +54,9 @@ abstract class MockResponse {
 	/**
 	 * The unencoded body.
 	 *
-	 * @var array|null
+	 * @var array|string
 	 */
-	public ?array $body;
+	public $body;
 
 	/**
 	 * Constructor that automatically loads the JSON response from disk.
@@ -91,6 +91,10 @@ abstract class MockResponse {
 			'response' => $data['response'],
 			'body'     => wp_json_encode( $data['body'] ),
 		);
+
+		if ( isset( $data['headers'] ) ) {
+			$this->response['headers'] = $data['headers'];
+		}
 	}
 }
 
@@ -132,7 +136,7 @@ class CreateInvoiceSuccess extends MockResponse {
 
 	public function __construct() {
 		parent::__construct();
-		$this->guid = $this->body['Result'];
+		$this->guid = $this->body['Result'][0];
 	}
 }
 
