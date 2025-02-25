@@ -9,9 +9,12 @@
 
 namespace WCKoban\Admin;
 
+use WC_Order;
 use WP_Post;
 use WP_User;
 use WP_Term;
+use WC_Product;
+use WCKoban\Utils\MetaUtils;
 
 /**
  * Add a meta box for the product's Koban GUID.
@@ -35,7 +38,8 @@ add_action( 'add_meta_boxes', __NAMESPACE__ . '\\wckoban_add_product_meta_box' )
  */
 function wckoban_product_meta_box_cb( WP_Post $post ) {
 	wp_nonce_field( 'wckoban_save_product_meta', 'wckoban_product_meta_nonce' );
-	$koban_product_guid = get_post_meta( $post->ID, KOBAN_PRODUCT_GUID_META_KEY, true );
+	$product            = wc_get_product( $post->ID );
+	$koban_product_guid = MetaUtils::get_koban_product_guid( $product );
 	$koban_url          = get_option( 'wckoban_sync_options' )['koban_url'] ?? '';
 	?>
 	<table class="widefat wckoban_meta_box_data">
@@ -91,9 +95,8 @@ function wckoban_save_product_meta( int $post_id ) {
 	}
 
 	if ( isset( $_POST[ KOBAN_PRODUCT_GUID_META_KEY ] ) ) {
-		update_post_meta(
+		MetaUtils::set_koban_product_guid_for_product_id(
 			$post_id,
-			KOBAN_PRODUCT_GUID_META_KEY,
 			sanitize_text_field( wp_unslash( $_POST[ KOBAN_PRODUCT_GUID_META_KEY ] ) )
 		);
 	}
@@ -101,14 +104,14 @@ function wckoban_save_product_meta( int $post_id ) {
 add_action( 'save_post', __NAMESPACE__ . '\\wckoban_save_product_meta' );
 
 /**
- * Add Category Code field to the "Add New Product Category" screen.
+ * Add Category Guid field to the "Add New Product Category" screen.
  */
 function wckoban_product_cat_add_meta_field() {
 	wp_nonce_field( 'wckoban_save_category_meta', 'wckoban_category_meta_nonce' );
 	?>
 	<div class="form-field">
 		<label for="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>">
-			<?php esc_html_e( 'Koban GUID', 'woocommerce-koban-sync' ); ?>
+			<?php esc_html_e( 'Koban Code', 'woocommerce-koban-sync' ); ?>
 		</label>
 		<input
 				type="text"
@@ -127,7 +130,8 @@ add_action( 'product_cat_add_form_fields', __NAMESPACE__ . '\\wckoban_product_ca
  * @param WP_Term $term The WP Category.
  */
 function wckoban_product_cat_edit_meta_field( WP_Term $term ) {
-	$koban_category_code = get_term_meta( $term->term_id, KOBAN_CATEGORY_CODE_META_KEY, true );
+	wp_nonce_field( 'wckoban_save_category_meta', 'wckoban_category_meta_nonce' );
+	$koban_category_code = MetaUtils::get_koban_category_code( $term->term_id );
 	?>
 	<tr class="form-field">
 		<th scope="row" valign="top">
@@ -162,9 +166,8 @@ function wckoban_save_product_cat_meta( int $term_id ) {
 	}
 
 	if ( isset( $_POST[ KOBAN_CATEGORY_CODE_META_KEY ] ) ) {
-		update_term_meta(
+		MetaUtils::set_koban_category_code(
 			$term_id,
-			KOBAN_CATEGORY_CODE_META_KEY,
 			sanitize_text_field( wp_unslash( $_POST[ KOBAN_CATEGORY_CODE_META_KEY ] ) )
 		);
 	}
@@ -191,15 +194,15 @@ add_action( 'add_meta_boxes_woocommerce_page_wc-orders', __NAMESPACE__ . '\\wcko
 /**
  * Render fields in the Koban meta box for the order.
  *
- * @param WP_Post $post the WordPress Post object representing the WC_Order.
+ * @param WC_Order $post the WordPress Post object representing the WC_Order.
  */
-function wckoban_order_meta_box_cb( WP_Post $post ) {
+function wckoban_order_meta_box_cb( WC_Order $post ) {
 	wp_nonce_field( 'wckoban_save_order_meta', 'wckoban_order_meta_nonce' );
 
 	$order                  = wc_get_order( $post->ID );
-	$koban_invoice_guid     = $order->get_meta( KOBAN_INVOICE_GUID_META_KEY, true );
-	$koban_payment_guid     = $order->get_meta( KOBAN_PAYMENT_GUID_META_KEY, true );
-	$koban_invoice_pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
+	$koban_invoice_guid     = MetaUtils::get_koban_invoice_guid( $order );
+	$koban_payment_guid     = MetaUtils::get_koban_payment_guid( $order );
+	$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
 	$koban_url              = get_option( 'wckoban_sync_options' )['koban_url'] ?? '';
 
 	?>
@@ -246,17 +249,6 @@ function wckoban_order_meta_box_cb( WP_Post $post ) {
 							value="<?php echo esc_attr( $koban_payment_guid ); ?>" style="width: 100%;"
 						<?php echo empty( $koban_payment_guid ) ? '' : 'disabled'; ?>
 					/>
-				</td>
-			</tr>
-			<tr style="text-align:center;">
-				<td>
-					<?php if ( ! empty( $koban_payment_guid ) && ! empty( $koban_url ) ) : ?>
-						<a
-								href="<?php echo esc_url( $koban_url . '/payment/show/' . $koban_payment_guid ); ?>"
-								class="button button-primary" target="_blank">
-							<?php esc_html_e( 'See Payment', 'woocommerce-koban-sync' ); ?>
-						</a>
-					<?php endif; ?>
 				</td>
 			</tr>
 		</tbody>
@@ -324,27 +316,24 @@ function wckoban_save_order_meta( int $post_id ) {
 	}
 
 	if ( isset( $_POST[ KOBAN_INVOICE_GUID_META_KEY ] ) ) {
-		update_post_meta(
+		MetaUtils::set_koban_invoice_guid_for_order_id(
 			$post_id,
-			KOBAN_INVOICE_GUID_META_KEY,
 			sanitize_text_field(
 				wp_unslash( $_POST[ KOBAN_INVOICE_GUID_META_KEY ] )
 			)
 		);
 	}
 	if ( isset( $_POST[ KOBAN_PAYMENT_GUID_META_KEY ] ) ) {
-		update_post_meta(
+		MetaUtils::set_koban_payment_guid_for_order_id(
 			$post_id,
-			KOBAN_PAYMENT_GUID_META_KEY,
 			sanitize_text_field(
 				wp_unslash( $_POST[ KOBAN_PAYMENT_GUID_META_KEY ] )
 			)
 		);
 	}
 	if ( isset( $_POST[ KOBAN_INVOICE_PDF_PATH_META_KEY ] ) ) {
-		update_post_meta(
+		MetaUtils::set_koban_invoice_pdf_path_for_order_id(
 			$post_id,
-			KOBAN_INVOICE_PDF_PATH_META_KEY,
 			sanitize_text_field(
 				wp_unslash( $_POST[ KOBAN_INVOICE_PDF_PATH_META_KEY ] )
 			)
@@ -365,7 +354,8 @@ function wckoban_show_user_fields( WP_User $user ) {
 	if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 		return;
 	}
-	$koban_third_guid = get_user_meta( $user->ID, KOBAN_THIRD_GUID_META_KEY, true );
+	$koban_third_guid = MetaUtils::get_koban_third_guid( $user->ID );
+	$koban_url        = get_option( 'wckoban_sync_options' )['koban_url'] ?? '';
 	?>
 	<h2><?php esc_html_e( 'Koban Sync', 'woocommerce-koban-sync' ); ?></h2>
 	<table class="form-table">
@@ -418,9 +408,8 @@ function wckoban_save_user_fields( int $user_id ) {
 		return;
 	}
 	if ( isset( $_POST[ KOBAN_THIRD_GUID_META_KEY ] ) ) {
-		update_user_meta(
+		MetaUtils::set_koban_third_guid(
 			$user_id,
-			KOBAN_THIRD_GUID_META_KEY,
 			sanitize_text_field(
 				wp_unslash( $_POST[ KOBAN_THIRD_GUID_META_KEY ] )
 			)

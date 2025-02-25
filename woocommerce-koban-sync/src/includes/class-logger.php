@@ -62,4 +62,25 @@ class Logger {
 	public static function error( string $message, array $context = array() ): void {
 		self::log( 'error', $message, $context );
 	}
+
+	/**
+	 *
+	 * Write debug logs to a dedicated log file.
+	 *
+	 * @param string $workflow_id The Workflow identifier.
+	 * @param string $message       The message.
+	 * @param array  $context        Additional data.
+	 *
+	 * @return void
+	 */
+	public static function debug( string $workflow_id, string $message, array $context = array() ) {
+		$upload_dir = wp_upload_dir( null, false );
+		$log_file   = trailingslashit( $upload_dir['basedir'] ) . 'koban-debug.log';
+
+		$date_str     = gmdate( 'Y-m-d H:i:s' );
+		$context_json = wp_json_encode( $context );
+		$line         = sprintf( "[%s] %s: %s | context=%s\n", $date_str, $workflow_id, $message, $context_json );
+
+		file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX );
+	}
 }

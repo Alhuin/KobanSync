@@ -14,48 +14,54 @@ namespace WCKoban;
  */
 class API {
 
-
 	/**
-	 * The base URL for Koban API.
+	 * Base URL for Koban API.
 	 *
 	 * @var string
 	 */
-	private $api_url;
+	private string $api_url;
 
 	/**
-	 * The API key credential for Koban.
+	 * Koban API key.
 	 *
 	 * @var string
 	 */
-	private $api_key;
+	private string $api_key;
 
 	/**
-	 * The user key credential for Koban.
+	 * Koban user key.
 	 *
 	 * @var string
 	 */
-	private $user_key;
+	private string $user_key;
 
 	/**
-	 * Constructor. Loads Koban credentials from stored plugin options.
+	 * The Workflow_id.
+	 *
+	 * @var string
 	 */
-	public function __construct() {
-		$options        = get_option( 'wckoban_sync_options' );
-		$this->api_url  = $options['koban_url'] ?? '';
-		$this->api_url  = $this->api_url . '/api/v1';
-		$this->api_key  = $options['koban_api_key'] ?? '';
-		$this->user_key = $options['koban_user_key'] ?? '';
+	private string $workflow_id;
+
+	/**
+	 * Retrieves Koban credentials and builds the API base URL.
+	 *
+	 * @param string $workflow_id The Workflow_id.
+	 */
+	public function __construct( string $workflow_id ) {
+		$options           = get_option( 'wckoban_sync_options' );
+		$this->api_url     = rtrim( $options['koban_api_url'] ?? '', '/' );
+		$this->api_key     = $options['koban_api_key'] ?? '';
+		$this->user_key    = $options['koban_user_key'] ?? '';
+		$this->workflow_id = $workflow_id;
 	}
 
 	/**
-	 * Executes a generic API request (POST, GET, etc.) to Koban.
+	 * Sends an HTTP request to Koban, handling JSON/PDF responses.
 	 *
-	 * @param string     $url    The Koban API endpoint URL.
-	 * @param string     $method HTTP method (e.g. 'GET', 'POST').
-	 * @param array|null $body   Request body, which will be JSON-encoded if provided.
-	 *
-	 * @return array|false        The decoded JSON response or false on error.
-	 * TODO: Handle retries
+	 * @param string     $url    Endpoint URL.
+	 * @param string     $method HTTP verb.
+	 * @param array|null $body   Request body (JSON-encoded if present).
+	 * @return array|null        Decoded response data or error structure.
 	 */
 	private function make_request( string $url, string $method = 'GET', ?array $body = null ): ?array {
 		$headers = array(
@@ -71,7 +77,8 @@ class API {
 			'sslverify' => true,
 		);
 
-		Logger::info(
+		Logger::debug(
+			$this->workflow_id,
 			'Sending request to Koban',
 			array(
 				'url'    => $url,
@@ -87,61 +94,79 @@ class API {
 		$response = wp_remote_request( $url, $args );
 
 		if ( is_wp_error( $response ) ) {
-			$error_message = $response->get_error_message();
-			Logger::error(
+			Logger::debug(
+				$this->workflow_id,
 				'HTTP error while calling Koban API',
 				array(
 					'url'    => $url,
 					'method' => $method,
 					'body'   => $body,
-					'error'  => $error_message,
+					'error'  => $response->get_error_message(),
 				)
 			);
 
-			return null;
+			return array(
+				'error'   => $response->get_error_code(),
+				'message' => $response->get_error_message(),
+			);
 		}
 
+		$status_code   = $response['response']['code'];
 		$content_type  = wp_remote_retrieve_header( $response, 'content-type' );
 		$response_body = wp_remote_retrieve_body( $response );
 
 		if ( false !== strpos( $content_type, 'application/pdf' ) ) {
+			Logger::debug( $this->workflow_id, 'Received PDF from Koban', array( 'status_code' => $status_code ) );
 			return array(
 				'type' => 'pdf',
 				'data' => $response_body,
 			);
 		}
 
-		Logger::info(
+		Logger::debug(
+			$this->workflow_id,
 			'Received response from Koban',
 			array(
-				'code' => $response['response']['code'],
-				'body' => json_decode( $response_body, true ),
+				'status_code' => $status_code,
+				'body'        => json_decode( $response_body, true ),
 			)
 		);
 
-		if ( 404 == $response['response']['code'] ) {
-			return null;
+		if ( false !== strpos( $content_type, 'application/html' ) ) {
+			return array(
+				'error'   => 'received_html_response',
+				'message' => '',
+			);
 		}
 
-		$response_body = wp_remote_retrieve_body( $response );
+		if ( 404 === $status_code ) {
+			return array(
+				'error'   => 404,
+				'message' => 'NotFound',
+			);
+		}
 
-		if ( empty( $response_body ) ) {
-			Logger::error(
-				'Empty response from Koban API',
+		if ( $status_code < 200 || $status_code >= 300 ) {
+			Logger::debug(
+				$this->workflow_id,
+				'Unexpected HTTP response',
 				array(
 					'url'    => $url,
 					'method' => $method,
-					'body'   => $body,
+					'status' => $status_code,
+					'body'   => $response_body,
 				)
 			);
-
-			return null;
+			return array(
+				'error'   => $status_code,
+				'message' => $response_body,
+			);
 		}
 
-		$response_data = json_decode( $response_body, true );
-
+		$decoded = json_decode( $response_body, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			Logger::error(
+			Logger::debug(
+				$this->workflow_id,
 				'JSON decoding error from Koban API',
 				array(
 					'url'      => $url,
@@ -150,6 +175,11 @@ class API {
 					'response' => $response_body,
 				)
 			);
+			return null;
+		}
+
+		return $decoded;
+	}
 
 			return null;
 		}

@@ -15,6 +15,22 @@ namespace WCKoban\Tests\Mocks;
 class MockLogger {
 
 	/**
+	 * The debug flag.
+	 *
+	 * @var bool
+	 */
+	private static bool $debug_mode = false;
+
+	/**
+	 * Allows external code to enable/disable debug mode.
+	 *
+	 * @param bool $debug The debug flag.
+	 */
+	public static function set_debug_mode( bool $debug ): void {
+		self::$debug_mode = $debug;
+	}
+
+	/**
 	 * Generic logger function for mock purposes.
 	 *
 	 * @param string $level   The severity level (info, error, etc.).
@@ -22,9 +38,7 @@ class MockLogger {
 	 * @param array  $context Additional context data.
 	 */
 	public static function log( string $level, string $message, array $context = array() ): void {
-		global $debug;
-
-		if ( ! $debug ) {
+		if ( ! self::$debug_mode ) {
 			return;
 		}
 		$json_context = is_array( $context ) ? json_encode( $context ) : $context;
@@ -64,5 +78,27 @@ class MockLogger {
 	 */
 	public static function error( string $message, array $context = array() ): void {
 		self::log( 'error', $message, $context );
+	}
+
+	/**
+	 * Writes debug logs to a log file if debug mode is enabled.
+	 *
+	 * @param string $workflow_id The Workflow ID.
+	 * @param string $message The message.
+	 * @param array  $context Additional data.
+	 */
+	public static function debug( string $workflow_id, string $message, array $context = array() ) {
+		if ( ! self::$debug_mode ) {
+			return;
+		}
+
+		$upload_dir = wp_upload_dir( null, false );
+		$log_file   = trailingslashit( $upload_dir['basedir'] ) . 'koban-debug.log';
+
+		$date_str     = gmdate( 'Y-m-d H:i:s' );
+		$context_json = wp_json_encode( $context );
+		$line         = sprintf( "[%s] %s: %s | context=%s\n", $date_str, $workflow_id, $message, $context_json );
+
+		file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX );
 	}
 }

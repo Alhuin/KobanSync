@@ -31,7 +31,8 @@ if ( ! defined( 'WCKOBAN_TESTING' ) ) {
 	require_once __DIR__ . '/includes/class-logger.php';
 }
 
-// Include Hooks.
+// Include the hooks and serializers.
+require_once __DIR__ . '/includes/hooks/class-statemachine.php';
 require_once __DIR__ . '/includes/hooks/class-paymentcomplete.php';
 require_once __DIR__ . '/includes/hooks/class-customersaveaddress.php';
 require_once __DIR__ . '/includes/hooks/class-productupdate.php';

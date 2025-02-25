@@ -9,7 +9,8 @@
 
 namespace WCKoban\Admin;
 
-use WCKoban\Logger;
+use WC_Order;
+use WCKoban\Utils\MetaUtils;
 
 add_action(
 	'init',
@@ -44,7 +45,7 @@ function wckoban_serve_protected_pdf() {
 		wp_die( 'You are not allowed to view this file.', 'Forbidden', array( 'response' => 403 ) );
 	}
 
-	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
+	$pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
 	if ( ! $pdf_path || ! file_exists( $pdf_path ) ) {
 		wp_die( 'File not found.', 'Error', array( 'response' => 404 ) );
 	}
@@ -67,14 +68,8 @@ add_action( 'template_redirect', __NAMESPACE__ . '\\wckoban_serve_protected_pdf'
  * @return array
  */
 function wckoban_add_invoice_action_to_my_orders( array $actions, WC_Order $order ): array {
-	$pdf_path = $order->get_meta( KOBAN_INVOICE_PDF_PATH_META_KEY, true );
-	Logger::info(
-		'pdf path',
-		array(
-			'id'   => $order->get_id(),
-			'path' => $pdf_path,
-		)
-	);
+	$pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
 	if ( $pdf_path ) {
 		$protected_url = add_query_arg(
 			array(
