@@ -32,8 +32,8 @@ class CustomerSaveAddress {
 	 * Adds a WooCommerce hook to detect when a user saves their address.
 	 */
 	public function register(): void {
-		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ) );
 		add_action( 'woocommerce_customer_save_address', array( $this, 'schedule_customer_save_address' ), 20, 2 );
+		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ), 10, 3 );
 	}
 
 	/**
