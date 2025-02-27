@@ -26,20 +26,39 @@ class WC_Email_Logistics extends WC_Email {
 	 */
 	public function __construct() {
 		$this->id             = 'wc_email_logistics';
-		$this->title          = 'Logistics Email';
 		$this->description    = 'Sends invoice PDF + shipping label to logistics.';
 		$this->template_html  = 'logistics-email.php';
 		$this->template_plain = 'logistics-email-plain.php';
 		$this->email_type     = 'html';
-		$this->recipient      = $this->get_option( 'recipient', 'logistics@example.com' );
 
-		$this->template_base = untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/';
+		$this->init_form_fields();
+		$this->init_settings();
+
+		$this->recipient = $this->get_option( 'recipient', 'logistics@example.com' );
+		$this->recipient = $this->get_option( 'title', 'Logistics Email' );
+
+		// If the user toggled “Enable/Disable” from the admin
+		$this->enabled = 'yes' === $this->get_option( 'enabled', 'yes' );
 
 		parent::__construct();
+	}
 
-		if ( 'yes' === $this->get_option( 'enabled', 'yes' ) ) {
-			$this->enabled = 'yes';
-		}
+	public function init_form_fields() {
+		// parent::init_form_fields() may define default ‘enabled’, ‘subject’, etc.
+		parent::init_form_fields();
+
+		$this->form_fields = array_merge(
+			$this->form_fields,
+			array(
+				'recipient' => array(
+					'title'       => __( 'Recipient(s)', 'woocommerce' ),
+					'type'        => 'text',
+					'description' => __( 'Enter an email address or multiple addresses (comma separated).', 'woocommerce' ),
+					'default'     => 'logistics@example.com',
+					'desc_tip'    => true,
+				),
+			)
+		);
 	}
 
 	/**
