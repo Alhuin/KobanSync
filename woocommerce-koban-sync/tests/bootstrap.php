@@ -20,6 +20,7 @@ require_once $_tests_dir . '/includes/bootstrap.php';
 // Includes Mocks.
 require_once __DIR__ . '/class-wckoban-unittestcase.php';
 require_once __DIR__ . '/mocks/mock-http.php';
+require_once __DIR__ . '/mocks/mock-smtp.php';
 require_once __DIR__ . '/mocks/class-mocklogger.php';
 require_once __DIR__ . '/mocks/class-mockresponse.php';
 
