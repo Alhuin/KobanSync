@@ -10,6 +10,8 @@
 
 namespace WCKoban\Tests;
 
+use WCKoban\Utils\MetaUtils;
+use WC_Order;
 use WP_UnitTestCase;
 use WC_Customer;
 use WC_Product;
@@ -23,16 +25,24 @@ use WC_Product;
 class WCKoban_UnitTestCase extends WP_UnitTestCase {
 
 	/**
+	 * The protected_pdfs path
+	 *
+	 * @var string
+	 */
+	private string $protected_pdf_dir = WP_CONTENT_DIR . '/uploads/protected-pdfs';
+
+	/**
 	 * Reset global mock response and request tracking.
 	 *
 	 * Clears the mock response queue and tracked requests before each test run.
 	 */
 	public function reset_mocks(): void {
-		global $wp_remote_requests, $mock_response_queue, $request_index;
+		global $wp_remote_requests, $mock_response_queue, $request_index, $sent_emails;
 
 		$request_index       = 0;
 		$mock_response_queue = array();
 		$wp_remote_requests  = array();
+		$sent_emails         = array();
 	}
 
 	/**
@@ -69,6 +79,70 @@ class WCKoban_UnitTestCase extends WP_UnitTestCase {
 		global $wp_remote_requests;
 
 		$this->assertCount( $expected, $wp_remote_requests, "Expected {$expected} HTTP requests in total." );
+	}
+
+	/**
+	 * Creates a dummy Chronopost label file and updates the specified order
+	 * with mock shipping data in the protected PDFs directory.
+	 *
+	 * @param int $order_id WC_Order ID.
+	 *
+	 * @return void
+	 */
+	public function setup_shipping_label( int $order_id ): void {
+		$order = wc_get_order( $order_id );
+		if ( ! file_exists( $this->protected_pdf_dir ) ) {
+			wp_mkdir_p( $this->protected_pdf_dir );
+		}
+
+		$label_path = $this->protected_pdf_dir . '/chronopost-label-MOCK123.pdf';
+		file_put_contents( $label_path, 'Fake PDF Data' );
+
+		$order->update_meta_data(
+			'_wms_chronopost_shipment_data',
+			array(
+				'_wms_outward_parcels' => array(
+					'_wms_parcels' => array(
+						array( '_wms_parcel_skybill_number' => 'MOCK123' ),
+					),
+				),
+			)
+		);
+		$order->save();
+	}
+
+	/**
+	 * Verifies that a logistics email was sent with the correct attachments:
+	 * the Koban invoice PDF and the Chronopost label PDF.
+	 *
+	 * @param WC_Order $order The WC_Order.
+	 *
+	 * @return void
+	 */
+	public function assertLogisticsEmailSentWithAttachments( WC_Order $order ): void {
+		global $sent_emails;
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+		$chronopost_label_path  = $this->protected_pdf_dir . '/chronopost-label-MOCK123.pdf';
+
+		$logistics_mail = null;
+		foreach ( $sent_emails as $sent ) {
+			if ( isset( $sent['to'] ) && 'logistics@example.com' === $sent['to'] ) {
+				$logistics_mail = $sent;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $logistics_mail, 'Expected the logistics email but did not find it.' );
+		$this->assertStringContainsString( 'Invoice & Shipping label for order', $logistics_mail['subject'] );
+		$this->assertStringContainsString( 'A new order has just completed payment', $logistics_mail['message'] );
+
+		$this->assertCount( 2, $logistics_mail['attachments'] );
+		$this->assertContains( $koban_invoice_pdf_path, $logistics_mail['attachments'] );
+		$this->assertContains( $chronopost_label_path, $logistics_mail['attachments'] );
+
+		unlink( $koban_invoice_pdf_path );
+		unlink( $chronopost_label_path );
 	}
 
 	/**

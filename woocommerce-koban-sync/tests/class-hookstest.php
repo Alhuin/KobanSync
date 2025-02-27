@@ -66,6 +66,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 
 		$customer_id = $this->create_wc_customer();
 		$order_id    = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
+		$this->setup_shipping_label( $order_id );
 
 		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
 
@@ -84,6 +85,12 @@ class HooksTest extends WCKoban_UnitTestCase {
 			( new CreateInvoiceSuccess() )->guid,
 			'Expected order_meta to match the newly created Koban invoice GUID.'
 		);
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
+		$this->assertNotEmpty( $koban_invoice_pdf_path );
+		$this->assertFileExists( $koban_invoice_pdf_path );
+		$this->assertLogisticsEmailSentWithAttachments( $order );
 	}
 
 	/**
@@ -101,6 +108,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 
 		$customer_id = $this->create_wc_customer();
 		$order_id    = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
+		$this->setup_shipping_label( $order_id );
 
 		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
 
@@ -124,7 +132,12 @@ class HooksTest extends WCKoban_UnitTestCase {
 			( new CreatePaymentSuccess() )->guid,
 			'Expected order_meta to store the new Koban payment GUID.'
 		);
-	}
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
+		$this->assertNotEmpty( $koban_invoice_pdf_path );
+		$this->assertFileExists( $koban_invoice_pdf_path );
+		$this->assertLogisticsEmailSentWithAttachments( $order ); }
 
 	/**
 	 * Payment complete: Registered user with existing Koban GUID, no Third creation/update needed.
@@ -140,6 +153,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$customer_id = $this->create_wc_customer();
 		MetaUtils::set_koban_third_guid( $customer_id, 'test_koban_guid' );
 		$order_id = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
+		$this->setup_shipping_label( $order_id );
 
 		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
 
@@ -163,7 +177,12 @@ class HooksTest extends WCKoban_UnitTestCase {
 			( new CreatePaymentSuccess() )->guid,
 			'Order payment GUID should match newly created Koban payment.'
 		);
-	}
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
+		$this->assertNotEmpty( $koban_invoice_pdf_path );
+		$this->assertFileExists( $koban_invoice_pdf_path );
+		$this->assertLogisticsEmailSentWithAttachments( $order ); }
 
 	/**
 	 * Payment complete: Guest user, email found in Koban.
@@ -178,6 +197,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		set_next_responses( $expected_requests );
 
 		$order_id = $this->create_wc_order();
+		$this->setup_shipping_label( $order_id );
 
 		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
 
@@ -196,7 +216,12 @@ class HooksTest extends WCKoban_UnitTestCase {
 			( new CreatePaymentSuccess() )->guid,
 			'Order payment GUID should match newly created Koban payment.'
 		);
-	}
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
+		$this->assertNotEmpty( $koban_invoice_pdf_path );
+		$this->assertFileExists( $koban_invoice_pdf_path );
+		$this->assertLogisticsEmailSentWithAttachments( $order ); }
 
 	/**
 	 * Payment complete: Guest user, email not found in Koban.
@@ -212,6 +237,8 @@ class HooksTest extends WCKoban_UnitTestCase {
 		set_next_responses( $expected_requests );
 
 		$order_id = $this->create_wc_order();
+		$this->setup_shipping_label( $order_id );
+
 		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 5 );
@@ -229,6 +256,12 @@ class HooksTest extends WCKoban_UnitTestCase {
 			MetaUtils::get_koban_payment_guid( $order ),
 			'Payment GUID in order_meta should match newly created Koban payment.'
 		);
+
+		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
+
+		$this->assertNotEmpty( $koban_invoice_pdf_path );
+		$this->assertFileExists( $koban_invoice_pdf_path );
+		$this->assertLogisticsEmailSentWithAttachments( $order );
 	}
 
 	/**

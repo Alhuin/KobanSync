@@ -42,6 +42,7 @@ require_once __DIR__ . '/includes/serializers/class-upsertproduct.php';
 require_once __DIR__ . '/includes/serializers/class-upsertthird.php';
 
 use WCKoban\Admin\Admin;
+use WCKoban\Emails\WC_Email_Logistics;
 use WCKoban\Hooks\CustomerSaveAddress;
 use WCKoban\Hooks\PaymentComplete;
 use WCKoban\Hooks\ProductUpdate;
@@ -92,9 +93,20 @@ if ( wckoban_sync_has_valid_config() ) {
 		require_once __DIR__ . '/admin/meta-fields.php';
 	}
 
+	// Hooks.
 	( new CustomerSaveAddress() )->register();
 	( new PaymentComplete() )->register();
 	( new ProductUpdate() )->register();
+
+	// Email Templates.
+	add_filter(
+		'woocommerce_email_classes',
+		function ( $emails ) {
+			require_once __DIR__ . '/includes/emails/class-wc-email-logistics.php';
+			$emails['wc_email_logistics'] = new WC_Email_Logistics();
+			return $emails;
+		}
+	);
 
 } else {
 	add_action(
