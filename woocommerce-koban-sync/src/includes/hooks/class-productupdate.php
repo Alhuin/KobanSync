@@ -35,9 +35,9 @@ class ProductUpdate {
 	 * Adds a WooCommerce hook to detect when a product is created or updated.
 	 */
 	public function register(): void {
-		add_action( 'wckoban_handle_product_update', array( $this, 'handle_product_update' ) );
 		add_action( 'woocommerce_new_product', array( $this, 'schedule_product_update' ) );
 		add_action( 'woocommerce_update_product', array( $this, 'schedule_product_update' ) );
+		add_action( 'wckoban_handle_product_update', array( $this, 'handle_product_update' ), 10, 2 );
 	}
 
 	/**

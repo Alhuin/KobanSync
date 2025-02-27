@@ -37,7 +37,7 @@ class PaymentComplete {
 	public function register(): void {
 		// Execute flow in the background with WooCommerce ActionScheduler.
 		add_action( 'woocommerce_payment_complete', array( $this, 'schedule_payment_complete' ) );
-		add_action( 'wckoban_handle_payment_complete', array( $this, 'handle_payment_complete' ) );
+		add_action( 'wckoban_handle_payment_complete', array( $this, 'handle_payment_complete' ), 10, 2 );
 	}
 
 	/**
