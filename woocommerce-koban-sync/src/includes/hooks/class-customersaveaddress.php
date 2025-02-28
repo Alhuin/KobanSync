@@ -103,7 +103,8 @@ class CustomerSaveAddress {
 		$customer_id = $state->get_data( 'customer_id' );
 
 		if ( ! get_user_by( 'id', $customer_id ) ) {
-			return $state->stop( "Invalid customer ID `$customer_id`" );
+			/* translators: %s: the WooCommerce Customer ID */
+			return $state->stop( sprintf( __( 'Invalid customer ID: %s', 'woocommerce-koban-sync' ), $customer_id ) );
 		}
 		return $state->success();
 	}
@@ -124,12 +125,14 @@ class CustomerSaveAddress {
 			$third_payload = ( new UpsertThird() )->user_to_koban_third( get_user_by( 'id', $customer_id ) );
 
 			if ( $this->api->upsert_user( $third_payload, $koban_third_guid ) ) {
-				return $state->success( 'Updated Koban Third with new billing details.' );
+				return $state->success( __( 'Updated Koban Third with new billing details.', 'woocommerce-koban-sync' ) );
 			}
-			return $state->failed( 'Could not Update Koban Third.' );
+			return $state->failed( __( 'Could not update Koban Third.', 'woocommerce-koban-sync' ) );
 		}
 
 		// No update is needed if there's no Koban GUID or it's not a billing address.
-		return $state->success( 'Update not necessary, user either not synced yet or address was not billing.' );
+		return $state->success(
+			__( 'Update not necessary, user either not synced yet or address was not billing.', 'woocommerce-koban-sync' )
+		);
 	}
 }

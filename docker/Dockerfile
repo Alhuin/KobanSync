@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     subversion \
     libzip-dev \
     rsync \
-    curl
+    curl \
+    gettext
 
 RUN echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/memory-limit.ini
 

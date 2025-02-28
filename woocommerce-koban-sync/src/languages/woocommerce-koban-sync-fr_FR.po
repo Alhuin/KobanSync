@@ -1,0 +1,358 @@
+# Copyright (C) 2025 Alhuin
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Koban Sync 0.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/src\n"
+"POT-Creation-Date: 2025-02-28T12:10:06+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Alhuin <alhuin.git@proton.me>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: woocommerce-koban-sync\n"
+
+#. Plugin Name of the plugin
+#: woocommerce-koban-sync.php
+msgid "WooCommerce Koban Sync"
+msgstr "WooCommerce Koban Sync"
+
+#. Description of the plugin
+#: woocommerce-koban-sync.php
+msgid ""
+"Integrates WooCommerce with Koban CRM for user, order, and product data "
+"synchronization."
+msgstr ""
+"Synchronise les utilisateurs, les commandes et les produits WooCommerce avec "
+"le CRM Koban."
+
+#. Author of the plugin
+#: woocommerce-koban-sync.php
+msgid "Alhuin"
+msgstr "Alhuin"
+
+#: admin/class-admin.php:35
+msgid "Koban Sync Settings"
+msgstr "Paramètres Koban Sync"
+
+#: admin/class-admin.php:36 admin/meta-fields.php:25 admin/meta-fields.php:185
+#: admin/meta-fields.php:360
+msgid "Koban Sync"
+msgstr "Koban Sync"
+
+#: admin/class-admin.php:56
+msgid "Koban Settings"
+msgstr "Paramètres Koban"
+
+#: admin/class-admin.php:63
+msgid "API Key"
+msgstr "Clé API"
+
+#: admin/class-admin.php:71
+msgid "User Key"
+msgstr "Clé Utilisateur"
+
+#: admin/class-admin.php:79
+msgid "Koban API URL"
+msgstr "URL de l'API Koban"
+
+#: admin/class-admin.php:87
+msgid "Koban URL"
+msgstr "URL Koban"
+
+#: admin/class-admin.php:98
+msgid "Enter your Koban settings below."
+msgstr "Renseignez les paramètres Koban ci-dessous."
+
+#: admin/class-admin.php:180 woocommerce-koban-sync.php:206
+msgid "Settings"
+msgstr "Paramètres"
+
+#: admin/class-admin.php:184
+msgid "Logs"
+msgstr "Journaux"
+
+#: admin/class-admin.php:194
+msgid "Save Changes"
+msgstr "Enregistrer les changements"
+
+#: admin/class-admin.php:219
+msgid "Synchronization Logs"
+msgstr "Journaux de synchronisation"
+
+#: admin/class-admin.php:239 admin/class-admin.php:260
+msgid "View Context"
+msgstr "Afficher le contexte"
+
+#: admin/class-admin.php:246
+msgid "No logs available."
+msgstr "Aucune entrée disponible."
+
+#: admin/class-admin.php:261
+msgid "Hide Context"
+msgstr "Masquer le contexte"
+
+#: admin/meta-fields.php:49
+msgid "Koban Product GUID"
+msgstr "GUID du Produit Koban"
+
+#: admin/meta-fields.php:69
+msgid "View Product"
+msgstr "Afficher le Produit"
+
+#: admin/meta-fields.php:114 admin/meta-fields.php:139
+msgid "Koban Code"
+msgstr "Code Koban"
+
+#: admin/meta-fields.php:213
+msgid "Koban Invoice GUID"
+msgstr "GUID de la Facture Koban"
+
+#: admin/meta-fields.php:232
+msgid "View Invoice"
+msgstr "Afficher la Facture"
+
+#: admin/meta-fields.php:241
+msgid "Koban Payment GUID"
+msgstr "GUID du Paiement Koban"
+
+#: admin/meta-fields.php:259
+msgid "Koban Invoice PDF Path"
+msgstr "Chemin du PDF de la Facture Koban"
+
+#: admin/meta-fields.php:289 admin/protected-pdf.php:100
+msgid "View Invoice PDF"
+msgstr "Afficher le PDF de la Facture"
+
+#: admin/meta-fields.php:365
+msgid "Koban Account GUID"
+msgstr "GUID du Compte Koban"
+
+#: admin/meta-fields.php:383
+msgid "View Account"
+msgstr "Afficher le Compte"
+
+#: admin/protected-pdf.php:34
+msgid "Invalid Order ID."
+msgstr "Order ID non valide."
+
+#: admin/protected-pdf.php:35 admin/protected-pdf.php:44
+#: admin/protected-pdf.php:64
+msgid "Error"
+msgstr "Erreur"
+
+#: admin/protected-pdf.php:43
+msgid "Order not found."
+msgstr "Commande introuvable."
+
+#: admin/protected-pdf.php:54
+msgid "You are not allowed to view this file."
+msgstr "Vous n'êtes pas autorisé à voir ce fichier."
+
+#: admin/protected-pdf.php:55
+msgid "Forbidden"
+msgstr "Interdit"
+
+#: admin/protected-pdf.php:63
+msgid "File not found."
+msgstr "Fichier introuvable."
+
+#: includes/emails/class-wc-email-logistics.php:29
+msgid "Sends invoice PDF + shipping label to logistics."
+msgstr ""
+"Envoie le PDF de la facture et l'étiquette de livraison au service "
+"logistique."
+
+#: includes/emails/class-wc-email-logistics.php:38
+msgid "Logistics Email"
+msgstr "Email au service logistique"
+
+#. translators: %s: the WooCommerce order number
+#: includes/emails/class-wc-email-logistics.php:84
+msgid "Invoice & Shipping label for order #%s"
+msgstr "Facture et étiquette de livraison pour la commande n°%s"
+
+#: includes/emails/logistics-email.php:15
+msgid "Hello Logistics Team,"
+msgstr "Bonjour l'équipe logistique,"
+
+#: includes/emails/logistics-email.php:18
+msgid ""
+"A new order has just completed payment. The following documents are attached:"
+msgstr "Une nouvelle commande a été validée. Ci-joint :"
+
+#: includes/emails/logistics-email.php:21
+msgid "The invoice PDF"
+msgstr "Le PDF de la facture"
+
+#: includes/emails/logistics-email.php:22
+msgid "The Chronopost shipping label"
+msgstr "L'étiquette de livraison Chronopost"
+
+#: includes/emails/logistics-email.php:26
+msgid "Order ID:"
+msgstr "ID de la commande :"
+
+#: includes/emails/logistics-email.php:29
+msgid "Customer:"
+msgstr "Client :"
+
+#. translators: %s: the WooCommerce Customer ID
+#: includes/hooks/class-customersaveaddress.php:107
+msgid "Invalid customer ID: %s"
+msgstr "Customer ID non valide : %s."
+
+#: includes/hooks/class-customersaveaddress.php:128
+msgid "Updated Koban Third with new billing details."
+msgstr ""
+"Le Compte Koban a été mis à jour avec les nouvelles informations de "
+"facturation."
+
+#: includes/hooks/class-customersaveaddress.php:130
+msgid "Could not update Koban Third."
+msgstr "Impossible de mettre à jour le Compte Koban."
+
+#: includes/hooks/class-customersaveaddress.php:135
+msgid ""
+"Update not necessary, user either not synced yet or address was not billing."
+msgstr ""
+"Mise à jour inutile : l'utilisateur n'est pas encore synchronisé ou il ne "
+"s'agit pas d'une adresse de facturation."
+
+#: includes/hooks/class-paymentcomplete.php:115
+msgid "Invalid order."
+msgstr "Commande non valide."
+
+#: includes/hooks/class-paymentcomplete.php:121
+msgid "Order already processed."
+msgstr "La commande a déjà été synchronisée."
+
+#: includes/hooks/class-paymentcomplete.php:127
+#, fuzzy
+msgid "Invalid User ID."
+msgstr "Order ID non valide."
+
+#: includes/hooks/class-paymentcomplete.php:147
+msgid "Found Koban GUID in user metadata."
+msgstr "Un GUID Koban a été trouvé dans les métadonnées de l'utilisateur."
+
+#: includes/hooks/class-paymentcomplete.php:160
+msgid "Found Koban Third with matching email."
+msgstr "Compte Koban correspondant à cet email trouvé."
+
+#: includes/hooks/class-paymentcomplete.php:172
+msgid "Created Koban Third."
+msgstr "Le Compte Koban a été créé."
+
+#: includes/hooks/class-paymentcomplete.php:177
+msgid "Could not create Koban Third."
+msgstr "Impossible de créer le Compte Koban."
+
+#: includes/hooks/class-paymentcomplete.php:211
+msgid "Created Koban Invoice."
+msgstr "La Facture Koban a été créée."
+
+#: includes/hooks/class-paymentcomplete.php:215
+msgid "Could not create Koban Invoice."
+msgstr "Impossible de créer la Facture Koban."
+
+#: includes/hooks/class-paymentcomplete.php:234
+msgid "Created Koban Payment."
+msgstr "Le Paiement Koban a été créé."
+
+#: includes/hooks/class-paymentcomplete.php:236
+msgid "Could not create Koban Payment."
+msgstr "Impossible de créer le Paiement Koban."
+
+#: includes/hooks/class-paymentcomplete.php:253
+msgid "Retrieved Koban Invoice PDF."
+msgstr "Le PDF de la Facture Koban a été récupéré."
+
+#: includes/hooks/class-paymentcomplete.php:255
+msgid "Could not retrieve Koban Invoice PDF."
+msgstr "Impossible de récupérer le PDF de la Facture Koban."
+
+#: includes/hooks/class-paymentcomplete.php:269
+msgid "Koban invoice PDF not found."
+msgstr "Le PDF de la Facture Koban est introuvable."
+
+#: includes/hooks/class-paymentcomplete.php:274
+msgid "No shipping data found for this order."
+msgstr "Aucune donnée d'expédition trouvée pour cette commande."
+
+#: includes/hooks/class-paymentcomplete.php:279
+msgid "No tracking number found in shipping data."
+msgstr "Aucun numéro de suivi trouvé dans les données d'expédition."
+
+#: includes/hooks/class-paymentcomplete.php:285
+msgid "Chronopost label PDF not found."
+msgstr "Étiquette de livraison Chronopost introuvable."
+
+#: includes/hooks/class-paymentcomplete.php:293
+msgid "Email sent to logistics."
+msgstr "L'email a été envoyé au service logistique."
+
+#: includes/hooks/class-paymentcomplete.php:295
+msgid "Could not send email to logistics."
+msgstr "Impossible d'envoyer l'email au service logistique."
+
+#: includes/hooks/class-paymentcomplete.php:298
+msgid "wc_email_logistics not found in mailer."
+msgstr "Template d'email introuvable dans la configuration WooCommerce."
+
+#. translators: %s: the WooCommerce Product ID
+#: includes/hooks/class-productupdate.php:113
+msgid "Invalid Product ID: %s."
+msgstr "Product ID non valide : %s."
+
+#: includes/hooks/class-productupdate.php:131
+msgid "Updated Koban Product."
+msgstr "Le Produit Koban a été mis à jour."
+
+#: includes/hooks/class-productupdate.php:133
+msgid "Could not update Koban Product."
+msgstr "Impossible de mettre à jour le Produit Koban."
+
+#: includes/hooks/class-productupdate.php:139
+msgid "Created Koban Product."
+msgstr "Le Produit Koban a été créé."
+
+#: includes/hooks/class-productupdate.php:141
+msgid "Could not create Koban Product."
+msgstr "Impossible de créer le Produit Koban."
+
+#: includes/hooks/class-statemachine.php:88
+msgid "Stop"
+msgstr "Arrêt"
+
+#: includes/hooks/class-statemachine.php:89
+msgid "Failed"
+msgstr "Échec"
+
+#: includes/hooks/class-statemachine.php:90
+msgid "Processing"
+msgstr "En cours"
+
+#: includes/hooks/class-statemachine.php:91
+msgid "Success"
+msgstr "Succès"
+
+#: includes/hooks/class-statemachine.php:226
+msgid "Workflow execution finished."
+msgstr "Synchronisation terminée."
+
+#: woocommerce-koban-sync.php:64
+msgid "WooCommerce Koban Sync requires WooCommerce to be installed and active."
+msgstr ""
+"WooCommerce Koban Sync nécessite que WooCommerce soit installé et activé."
+
+#: woocommerce-koban-sync.php:118
+msgid ""
+"WooCommerce Koban Sync is inactive because Koban credentials are missing. "
+"Please visit Koban Sync → Settings."
+msgstr ""
+"WooCommerce Koban Sync restera inactif tant que les paramètres Koban ne "
+"seront pas renseignés. Rendez-vous dans Koban Sync → Paramètres."

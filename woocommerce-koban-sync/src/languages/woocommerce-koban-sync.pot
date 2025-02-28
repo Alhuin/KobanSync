@@ -1,0 +1,346 @@
+# Copyright (C) 2025 Alhuin
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Koban Sync 0.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/src\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-02-28T12:10:06+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: woocommerce-koban-sync\n"
+
+#. Plugin Name of the plugin
+#: woocommerce-koban-sync.php
+msgid "WooCommerce Koban Sync"
+msgstr ""
+
+#. Description of the plugin
+#: woocommerce-koban-sync.php
+msgid "Integrates WooCommerce with Koban CRM for user, order, and product data synchronization."
+msgstr ""
+
+#. Author of the plugin
+#: woocommerce-koban-sync.php
+msgid "Alhuin"
+msgstr ""
+
+#: admin/class-admin.php:35
+msgid "Koban Sync Settings"
+msgstr ""
+
+#: admin/class-admin.php:36
+#: admin/meta-fields.php:25
+#: admin/meta-fields.php:185
+#: admin/meta-fields.php:360
+msgid "Koban Sync"
+msgstr ""
+
+#: admin/class-admin.php:56
+msgid "Koban Settings"
+msgstr ""
+
+#: admin/class-admin.php:63
+msgid "API Key"
+msgstr ""
+
+#: admin/class-admin.php:71
+msgid "User Key"
+msgstr ""
+
+#: admin/class-admin.php:79
+msgid "Koban API URL"
+msgstr ""
+
+#: admin/class-admin.php:87
+msgid "Koban URL"
+msgstr ""
+
+#: admin/class-admin.php:98
+msgid "Enter your Koban settings below."
+msgstr ""
+
+#: admin/class-admin.php:180
+#: woocommerce-koban-sync.php:206
+msgid "Settings"
+msgstr ""
+
+#: admin/class-admin.php:184
+msgid "Logs"
+msgstr ""
+
+#: admin/class-admin.php:194
+msgid "Save Changes"
+msgstr ""
+
+#: admin/class-admin.php:219
+msgid "Synchronization Logs"
+msgstr ""
+
+#: admin/class-admin.php:239
+#: admin/class-admin.php:260
+msgid "View Context"
+msgstr ""
+
+#: admin/class-admin.php:246
+msgid "No logs available."
+msgstr ""
+
+#: admin/class-admin.php:261
+msgid "Hide Context"
+msgstr ""
+
+#: admin/meta-fields.php:49
+msgid "Koban Product GUID"
+msgstr ""
+
+#: admin/meta-fields.php:69
+msgid "View Product"
+msgstr ""
+
+#: admin/meta-fields.php:114
+#: admin/meta-fields.php:139
+msgid "Koban Code"
+msgstr ""
+
+#: admin/meta-fields.php:213
+msgid "Koban Invoice GUID"
+msgstr ""
+
+#: admin/meta-fields.php:232
+msgid "View Invoice"
+msgstr ""
+
+#: admin/meta-fields.php:241
+msgid "Koban Payment GUID"
+msgstr ""
+
+#: admin/meta-fields.php:259
+msgid "Koban Invoice PDF Path"
+msgstr ""
+
+#: admin/meta-fields.php:289
+#: admin/protected-pdf.php:100
+msgid "View Invoice PDF"
+msgstr ""
+
+#: admin/meta-fields.php:365
+msgid "Koban Account GUID"
+msgstr ""
+
+#: admin/meta-fields.php:383
+msgid "View Account"
+msgstr ""
+
+#: admin/protected-pdf.php:34
+msgid "Invalid Order ID."
+msgstr ""
+
+#: admin/protected-pdf.php:35
+#: admin/protected-pdf.php:44
+#: admin/protected-pdf.php:64
+msgid "Error"
+msgstr ""
+
+#: admin/protected-pdf.php:43
+msgid "Order not found."
+msgstr ""
+
+#: admin/protected-pdf.php:54
+msgid "You are not allowed to view this file."
+msgstr ""
+
+#: admin/protected-pdf.php:55
+msgid "Forbidden"
+msgstr ""
+
+#: admin/protected-pdf.php:63
+msgid "File not found."
+msgstr ""
+
+#: includes/emails/class-wc-email-logistics.php:29
+msgid "Sends invoice PDF + shipping label to logistics."
+msgstr ""
+
+#: includes/emails/class-wc-email-logistics.php:38
+msgid "Logistics Email"
+msgstr ""
+
+#. translators: %s: the WooCommerce order number
+#: includes/emails/class-wc-email-logistics.php:84
+msgid "Invoice & Shipping label for order #%s"
+msgstr ""
+
+#: includes/emails/logistics-email.php:15
+msgid "Hello Logistics Team,"
+msgstr ""
+
+#: includes/emails/logistics-email.php:18
+msgid "A new order has just completed payment. The following documents are attached:"
+msgstr ""
+
+#: includes/emails/logistics-email.php:21
+msgid "The invoice PDF"
+msgstr ""
+
+#: includes/emails/logistics-email.php:22
+msgid "The Chronopost shipping label"
+msgstr ""
+
+#: includes/emails/logistics-email.php:26
+msgid "Order ID:"
+msgstr ""
+
+#: includes/emails/logistics-email.php:29
+msgid "Customer:"
+msgstr ""
+
+#. translators: %s: the WooCommerce Customer ID
+#: includes/hooks/class-customersaveaddress.php:107
+msgid "Invalid customer ID: %s"
+msgstr ""
+
+#: includes/hooks/class-customersaveaddress.php:128
+msgid "Updated Koban Third with new billing details."
+msgstr ""
+
+#: includes/hooks/class-customersaveaddress.php:130
+msgid "Could not update Koban Third."
+msgstr ""
+
+#: includes/hooks/class-customersaveaddress.php:135
+msgid "Update not necessary, user either not synced yet or address was not billing."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:115
+msgid "Invalid order."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:121
+msgid "Order already processed."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:127
+msgid "Invalid User ID."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:147
+msgid "Found Koban GUID in user metadata."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:160
+msgid "Found Koban Third with matching email."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:172
+msgid "Created Koban Third."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:177
+msgid "Could not create Koban Third."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:211
+msgid "Created Koban Invoice."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:215
+msgid "Could not create Koban Invoice."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:234
+msgid "Created Koban Payment."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:236
+msgid "Could not create Koban Payment."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:253
+msgid "Retrieved Koban Invoice PDF."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:255
+msgid "Could not retrieve Koban Invoice PDF."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:269
+msgid "Koban invoice PDF not found."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:274
+msgid "No shipping data found for this order."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:279
+msgid "No tracking number found in shipping data."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:285
+msgid "Chronopost label PDF not found."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:293
+msgid "Email sent to logistics."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:295
+msgid "Could not send email to logistics."
+msgstr ""
+
+#: includes/hooks/class-paymentcomplete.php:298
+msgid "wc_email_logistics not found in mailer."
+msgstr ""
+
+#. translators: %s: the WooCommerce Product ID
+#: includes/hooks/class-productupdate.php:113
+msgid "Invalid Product ID: %s."
+msgstr ""
+
+#: includes/hooks/class-productupdate.php:131
+msgid "Updated Koban Product."
+msgstr ""
+
+#: includes/hooks/class-productupdate.php:133
+msgid "Could not update Koban Product."
+msgstr ""
+
+#: includes/hooks/class-productupdate.php:139
+msgid "Created Koban Product."
+msgstr ""
+
+#: includes/hooks/class-productupdate.php:141
+msgid "Could not create Koban Product."
+msgstr ""
+
+#: includes/hooks/class-statemachine.php:88
+msgid "Stop"
+msgstr ""
+
+#: includes/hooks/class-statemachine.php:89
+msgid "Failed"
+msgstr ""
+
+#: includes/hooks/class-statemachine.php:90
+msgid "Processing"
+msgstr ""
+
+#: includes/hooks/class-statemachine.php:91
+msgid "Success"
+msgstr ""
+
+#: includes/hooks/class-statemachine.php:226
+msgid "Workflow execution finished."
+msgstr ""
+
+#: woocommerce-koban-sync.php:64
+msgid "WooCommerce Koban Sync requires WooCommerce to be installed and active."
+msgstr ""
+
+#: woocommerce-koban-sync.php:118
+msgid "WooCommerce Koban Sync is inactive because Koban credentials are missing. Please visit Koban Sync → Settings."
+msgstr ""

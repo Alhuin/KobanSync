@@ -46,7 +46,7 @@ function wckoban_product_meta_box_cb( WP_Post $post ) {
 		<tbody id="wckoban-product-meta">
 			<tr>
 				<td>
-					<strong><?php esc_html_e( 'Koban Product GUID', 'woocommerce-koban-sync' ); ?></strong>
+					<strong><?php echo esc_html__( 'Koban Product GUID', 'woocommerce-koban-sync' ); ?></strong>
 				</td>
 			</tr>
 			<tr>
@@ -66,7 +66,7 @@ function wckoban_product_meta_box_cb( WP_Post $post ) {
 						<a
 								href="<?php echo esc_url( $koban_url . '/product/show/' . $koban_product_guid ); ?>"
 								class="button button-primary" target="_blank">
-							<?php esc_html_e( 'See Product', 'woocommerce-koban-sync' ); ?>
+							<?php echo esc_html__( 'View Product', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
 				</td>
@@ -111,7 +111,7 @@ function wckoban_product_cat_add_meta_field() {
 	?>
 	<div class="form-field">
 		<label for="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>">
-			<?php esc_html_e( 'Koban Code', 'woocommerce-koban-sync' ); ?>
+			<?php echo esc_html__( 'Koban Code', 'woocommerce-koban-sync' ); ?>
 		</label>
 		<input
 				type="text"
@@ -136,7 +136,7 @@ function wckoban_product_cat_edit_meta_field( WP_Term $term ) {
 	<tr class="form-field">
 		<th scope="row" valign="top">
 			<label for="<?php echo esc_attr( KOBAN_CATEGORY_CODE_META_KEY ); ?>">
-				<?php esc_html_e( 'Koban Code', 'woocommerce-koban-sync' ); ?>
+				<?php echo esc_html__( 'Koban Code', 'woocommerce-koban-sync' ); ?>
 			</label>
 		</th>
 		<td>
@@ -210,7 +210,7 @@ function wckoban_order_meta_box_cb( WC_Order $post ) {
 		<tbody id="wckoban-invoice-meta">
 			<tr>
 				<td>
-					<strong><?php esc_html_e( 'Koban Invoice GUID', 'woocommerce-koban-sync' ); ?></strong>
+					<strong><?php echo esc_html__( 'Koban Invoice GUID', 'woocommerce-koban-sync' ); ?></strong>
 				</td>
 			</tr>
 			<tr>
@@ -229,7 +229,7 @@ function wckoban_order_meta_box_cb( WC_Order $post ) {
 						<a
 								href="<?php echo esc_url( $koban_url . '/invoice/show/' . $koban_invoice_guid ); ?>"
 								class="button button-primary" target="_blank">
-							<?php esc_html_e( 'See Invoice', 'woocommerce-koban-sync' ); ?>
+							<?php echo esc_html__( 'View Invoice', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
 				</td>
@@ -238,7 +238,7 @@ function wckoban_order_meta_box_cb( WC_Order $post ) {
 		<tbody id="wckoban-payment-meta">
 			<tr>
 				<td>
-					<strong><?php esc_html_e( 'Koban Payment GUID', 'woocommerce-koban-sync' ); ?></strong>
+					<strong><?php echo esc_html__( 'Koban Payment GUID', 'woocommerce-koban-sync' ); ?></strong>
 				</td>
 			</tr>
 			<tr>
@@ -256,7 +256,7 @@ function wckoban_order_meta_box_cb( WC_Order $post ) {
 		<tbody id="wckoban-invoice-pdf-meta">
 			<tr>
 				<td>
-					<strong><?php esc_html_e( 'Koban Invoice PDF Path', 'woocommerce-koban-sync' ); ?></strong>
+					<strong><?php echo esc_html__( 'Koban Invoice PDF Path', 'woocommerce-koban-sync' ); ?></strong>
 				</td>
 			</tr>
 			<tr>
@@ -286,7 +286,7 @@ function wckoban_order_meta_box_cb( WC_Order $post ) {
 						?>
 						"
 							class="button button-primary" target="_blank">
-							<?php esc_html_e( 'See Invoice PDF', 'woocommerce-koban-sync' ); ?>
+							<?php echo esc_html__( 'View Invoice PDF', 'woocommerce-koban-sync' ); ?>
 						</a>
 					<?php endif; ?>
 				</td>
@@ -357,12 +357,12 @@ function wckoban_show_user_fields( WP_User $user ) {
 	$koban_third_guid = MetaUtils::get_koban_third_guid( $user->ID );
 	$koban_url        = get_option( 'wckoban_sync_options' )['koban_url'] ?? '';
 	?>
-	<h2><?php esc_html_e( 'Koban Sync', 'woocommerce-koban-sync' ); ?></h2>
+	<h2><?php echo esc_html__( 'Koban Sync', 'woocommerce-koban-sync' ); ?></h2>
 	<table class="form-table">
 		<tr>
 			<th>
 				<label for="<?php echo esc_attr( KOBAN_THIRD_GUID_META_KEY ); ?>">
-					<?php esc_html_e( 'Koban Account GUID', 'woocommerce-koban-sync' ); ?>
+					<?php echo esc_html__( 'Koban Account GUID', 'woocommerce-koban-sync' ); ?>
 				</label>
 			</th>
 			<td>
@@ -380,7 +380,7 @@ function wckoban_show_user_fields( WP_User $user ) {
 					<a
 							href="<?php echo esc_url( $koban_url . '/third/show/' . $koban_third_guid ); ?>"
 							class="button button-primary" target="_blank">
-						<?php esc_html_e( 'See Account', 'woocommerce-koban-sync' ); ?>
+						<?php echo esc_html__( 'View Account', 'woocommerce-koban-sync' ); ?>
 					</a>
 				<?php endif; ?>
 			</td>

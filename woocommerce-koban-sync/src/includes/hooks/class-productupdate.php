@@ -109,7 +109,8 @@ class ProductUpdate {
 		$product_id = $state->get_data( 'product_id' );
 
 		if ( ! wc_get_product( $product_id ) instanceof WC_Product ) {
-			return $state->failed( "Invalid Product ID: `$product_id`." );
+			/* translators: %s: the WooCommerce Product ID */
+			return $state->failed( sprintf( __( 'Invalid Product ID: %s.', 'woocommerce-koban-sync' ), $product_id ) );
 		}
 
 		return $state->success();
@@ -127,16 +128,16 @@ class ProductUpdate {
 
 		if ( isset( $product_payload['Guid'] ) ) {
 			if ( $this->api->update_product( $product_payload ) ) {
-				return $state->success( 'Updated Koban Product ' . $product_payload['Guid'] . '.' );
+				return $state->success( __( 'Updated Koban Product.', 'woocommerce-koban-sync' ) );
 			}
-			return $state->failed( 'Could not Update Koban Product.' );
+			return $state->failed( __( 'Could not update Koban Product.', 'woocommerce-koban-sync' ) );
 		}
 
 		$koban_product_guid = $this->api->create_product( $product_payload );
 		if ( $koban_product_guid ) {
 			MetaUtils::set_koban_product_guid_for_product( $product, $koban_product_guid );
-			return $state->success( "Created Koban Product $koban_product_guid" );
+			return $state->success( __( 'Created Koban Product.', 'woocommerce-koban-sync' ) );
 		}
-		return $state->failed( 'Could not Create Koban Product.' );
+		return $state->failed( __( 'Could not create Koban Product.', 'woocommerce-koban-sync' ) );
 	}
 }
