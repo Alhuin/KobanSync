@@ -31,7 +31,7 @@ if ( ! defined( 'WCKOBAN_TESTING' ) ) {
 	require_once __DIR__ . '/includes/class-logger.php';
 }
 
-// Include the hooks and serializers.
+// Include hooks and serializers.
 require_once __DIR__ . '/includes/hooks/class-statemachine.php';
 require_once __DIR__ . '/includes/hooks/class-paymentcomplete.php';
 require_once __DIR__ . '/includes/hooks/class-customersaveaddress.php';
@@ -48,7 +48,7 @@ use WCKoban\Hooks\PaymentComplete;
 use WCKoban\Hooks\ProductUpdate;
 
 /**
- * Checks if WooCommerce is active. If not, the plugin is deactivated immediately.
+ * Check if WooCommerce is active. If not, deactivate.
  */
 function wckoban_sync_check_woocommerce(): void {
 	if ( ! class_exists( 'WooCommerce' ) ) {
@@ -61,7 +61,7 @@ function wckoban_sync_check_woocommerce(): void {
 			'admin_notices',
 			function () {
 				echo '<div class="error"><p>';
-				echo 'WooCommerce Koban Sync requires WooCommerce to be installed and active.';
+				echo esc_html__( 'WooCommerce Koban Sync requires WooCommerce to be installed and active.', 'woocommerce-koban-sync' );
 				echo '</p></div>';
 			}
 		);
@@ -70,7 +70,7 @@ function wckoban_sync_check_woocommerce(): void {
 add_action( 'plugins_loaded', 'wckoban_sync_check_woocommerce' );
 
 /**
- * Check if the plugin’s Koban settings are complete (non-empty).
+ * Check if the plugin’s Koban settings are not empty.
  *
  * @return bool True if the user has configured all required Koban fields
  */
@@ -87,7 +87,6 @@ function wckoban_sync_has_valid_config(): bool {
  * If Koban config is valid, load everything; otherwise, show an admin notice.
  */
 if ( wckoban_sync_has_valid_config() ) {
-	// Only load meta-fields if we’re in the admin, to avoid overhead on the frontend.
 	if ( is_admin() ) {
 		new Admin();
 		require_once __DIR__ . '/admin/meta-fields.php';
@@ -116,7 +115,7 @@ if ( wckoban_sync_has_valid_config() ) {
 		<div class="notice notice-warning">
 			<p>
 			<?php
-			esc_html_e(
+			echo esc_html__(
 				'WooCommerce Koban Sync is inactive because Koban credentials are missing. Please visit Koban Sync → Settings.',
 				'woocommerce-koban-sync'
 			);
@@ -127,14 +126,14 @@ if ( wckoban_sync_has_valid_config() ) {
 		}
 	);
 
-	// Still load Admin to show the Settings page, so the user can fix their credentials.
+	// Still load Admin to show the Settings page.
 	if ( is_admin() ) {
 		new Admin();
 	}
 }
 
 /**
- * Creates the Koban sync logs table on plugin activation, if it doesn't already exist.
+ * Create the Koban sync logs table on plugin activation.
  */
 function wckoban_sync_create_logs_table(): void {
 	global $wpdb;
@@ -158,7 +157,7 @@ function wckoban_sync_create_logs_table(): void {
 register_activation_hook( __FILE__, 'wckoban_sync_create_logs_table' );
 
 /**
- * Schedules a daily event to purge logs older than 30 days.
+ * Schedule a daily event to purge logs older than 30 days.
  */
 function wckoban_sync_schedule_cron(): void {
 	if ( ! wp_next_scheduled( 'wckoban_sync_purge_logs' ) ) {
@@ -168,7 +167,7 @@ function wckoban_sync_schedule_cron(): void {
 register_activation_hook( __FILE__, 'wckoban_sync_schedule_cron' );
 
 /**
- * Deletes logs older than 30 days from the database (runs daily).
+ * Delete logs older than 30 days from the database.
  */
 function wckoban_sync_delete_old_logs(): void {
 	global $wpdb;
@@ -187,7 +186,7 @@ function wckoban_sync_delete_old_logs(): void {
 add_action( 'wckoban_sync_purge_logs', 'wckoban_sync_delete_old_logs' );
 
 /**
- * Clears the scheduled cron job when the plugin is deactivated.
+ * Clear the scheduled cron job when the plugin is deactivated.
  */
 function wckoban_sync_deactivate(): void {
 	wp_clear_scheduled_hook( 'wckoban_sync_purge_logs' );
@@ -195,7 +194,7 @@ function wckoban_sync_deactivate(): void {
 register_deactivation_hook( __FILE__, 'wckoban_sync_deactivate' );
 
 /**
- * Adds a shortcut link to the settings page on the Plugins screen.
+ * Add a shortcut link to the settings page on the Plugins screen.
  *
  * @param array $links Existing plugin action links.
  * @return array

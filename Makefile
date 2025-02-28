@@ -1,4 +1,4 @@
-.PHONY: clean fclean tests wp-up wp-up-ci wp-down lint format lint-format test-all
+.PHONY: wp-up wp-up-ci wp-down wp-exec tests format lint lint-format test-all clean fclean po po2mo
 
 DOCKER_DIR=docker
 PLUGIN_DIR=/var/www/html/wp-content/plugins/woocommerce-koban-sync
@@ -69,3 +69,24 @@ clean:
 
 fclean: clean wp-down
 	@echo "Done cleaning artifacts and stopping containers."
+
+po:
+	@echo "Generating .pot file..."
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+	  wp --allow-root i18n make-pot $(PLUGIN_DIR)/src \
+	  $(PLUGIN_DIR)/src/languages/woocommerce-koban-sync.pot --domain=woocommerce-koban-sync \
+	'
+
+	@echo "Merging .pot changes into fr_FR.po..."
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		msgmerge --update \
+		$(PLUGIN_DIR)/src/languages/woocommerce-koban-sync-fr_FR.po \
+		$(PLUGIN_DIR)/src/languages/woocommerce-koban-sync.pot \
+		'
+
+po2mo:
+	@echo "Compiling translation files..."
+	cd $(DOCKER_DIR) && docker compose exec wordpress bash -c '\
+		msgfmt $(PLUGIN_DIR)/src/languages/woocommerce-koban-sync-fr_FR.po \
+		-o $(PLUGIN_DIR)/src/languages/woocommerce-koban-sync-fr_FR.mo \
+	'

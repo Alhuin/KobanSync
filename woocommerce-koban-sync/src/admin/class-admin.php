@@ -32,8 +32,8 @@ class Admin {
 	 */
 	public function add_settings_page(): void {
 		add_menu_page(
-			'Koban Sync Settings',  // Page title.
-			'Koban Sync',           // Menu label.
+			__( 'Koban Sync Settings', 'woocommerce-koban-sync' ),  // Page title.
+			__( 'Koban Sync', 'woocommerce-koban-sync' ),           // Menu label.
 			'manage_options',       // Capability.
 			'wckoban-sync-settings', // Slug.
 			array( $this, 'render_settings_page' ),
@@ -53,14 +53,14 @@ class Admin {
 
 		add_settings_section(
 			'wckoban_sync_section',
-			'Koban API Settings',
+			__( 'Koban Settings', 'woocommerce-koban-sync' ),
 			array( $this, 'render_settings_section' ),
 			'wckoban-sync-settings-page'
 		);
 
 		add_settings_field(
 			'koban_api_key',
-			'API Key',
+			__( 'API Key', 'woocommerce-koban-sync' ),
 			array( $this, 'render_api_key_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
@@ -68,7 +68,7 @@ class Admin {
 
 		add_settings_field(
 			'koban_user_key',
-			'User Key',
+			__( 'User Key', 'woocommerce-koban-sync' ),
 			array( $this, 'render_user_key_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
@@ -76,7 +76,7 @@ class Admin {
 
 		add_settings_field(
 			'koban_api_url',
-			'Koban API URL',
+			__( 'Koban API URL', 'woocommerce-koban-sync' ),
 			array( $this, 'render_api_url_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
@@ -84,7 +84,7 @@ class Admin {
 
 		add_settings_field(
 			'koban_url',
-			'Koban URL',
+			__( 'Koban URL', 'woocommerce-koban-sync' ),
 			array( $this, 'render_url_field' ),
 			'wckoban-sync-settings-page',
 			'wckoban_sync_section'
@@ -95,7 +95,7 @@ class Admin {
 	 * Renders the introductory text for the main settings section.
 	 */
 	public function render_settings_section(): void {
-		echo '<p>Enter your Koban API credentials below.</p>';
+		echo '<p>' . esc_html__( 'Enter your Koban settings below.', 'woocommerce-koban-sync' ) . '</p>';
 	}
 
 	/**
@@ -177,11 +177,11 @@ class Admin {
 			<h2 class="nav-tab-wrapper">
 				<a href="?page=wckoban-sync-settings&tab=settings"
 					class="nav-tab <?php echo 'settings' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					Réglages
+					<?php echo esc_html__( 'Settings', 'woocommerce-koban-sync' ); ?>
 				</a>
 				<a href="?page=wckoban-sync-settings&tab=logs"
 					class="nav-tab <?php echo 'logs' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					Logs
+					<?php echo esc_html__( 'Logs', 'woocommerce-koban-sync' ); ?>
 				</a>
 			</h2>
 		<?php
@@ -191,7 +191,7 @@ class Admin {
 			<?php
 			settings_fields( 'wckoban_sync_settings_group' );
 			do_settings_sections( 'wckoban-sync-settings-page' );
-			submit_button( 'Save Changes' );
+			submit_button( __( 'Save Changes', 'woocommerce-koban-sync' ) );
 			?>
 				</form>
 			<?php
@@ -216,7 +216,7 @@ class Admin {
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$logs = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC LIMIT 50" );
 
-		echo '<h2>Synchronization Logs</h2>';
+		echo '<h2>' . esc_html__( 'Synchronization Logs', 'woocommerce-koban-sync' ) . '</h2>';
 		echo '<table class="widefat fixed" cellspacing="0">';
 		echo '<thead><tr>';
 		echo '<th>ID</th><th>Date/Time</th><th>Level</th><th>Message</th><th>Context</th>';
@@ -235,13 +235,15 @@ class Admin {
 				$context_json    = wp_json_encode( $context_decoded );
 
 				echo '<td>';
-				echo '<button type="button" class="open-context-btn" data-context="' . esc_attr( $context_json ) . '">View Context</button>';
+				echo '<button type="button" class="open-context-btn" data-context="' . esc_attr( $context_json ) . '">';
+				echo esc_html__( 'View Context', 'woocommerce-koban-sync' );
+				echo '</button>';
 				echo '</td>';
 				echo '<tr style="display:none;"><td colspan="5"><pre class="context-content"></pre></td></tr>';
 				echo '</tr>';
 			}
 		} else {
-			echo '<tr><td colspan="5">No logs available.</td></tr>';
+			echo '<tr><td colspan="5">' . esc_html__( 'No logs available.', 'woocommerce-koban-sync' ) . '</td></tr>';
 		}
 		echo '</tbody>';
 		echo '</table>';
@@ -254,6 +256,11 @@ class Admin {
 		?>
 		<script type="text/javascript">
 			document.addEventListener('DOMContentLoaded', function () {
+				const wcKobanI18n = {
+					viewContext: "<?php echo esc_html__( 'View Context', 'woocommerce-koban-sync' ); ?>",
+					hideContext: "<?php echo esc_html__( 'Hide Context', 'woocommerce-koban-sync' ); ?>"
+				};
+
 				document.querySelectorAll('.open-context-btn').forEach(button => {
 					button.addEventListener('click', function () {
 						const contextRow = this.closest('tr').nextElementSibling;
@@ -264,10 +271,10 @@ class Admin {
 
 						if (contextRow.style.display === 'table-row') {
 							contextRow.style.display = 'none';
-							this.textContent = 'View Context';
+							this.textContent = wcKobanI18n.viewContext;
 						} else {
 							contextRow.style.display = 'table-row';
-							this.textContent = 'Hide Context';
+							this.textContent = wcKobanI18n.hideContext;
 						}
 					});
 				});

@@ -30,24 +30,40 @@ function wckoban_serve_protected_pdf() {
 
 	$order_id = isset( $_GET['order_id'] ) ? (int) $_GET['order_id'] : 0;
 	if ( ! $order_id ) {
-		wp_die( 'Invalid order_id.', 'Error', array( 'response' => 400 ) );
+		wp_die(
+			esc_html__( 'Invalid Order ID.', 'woocommerce-koban-sync' ),
+			esc_html__( 'Error', 'woocommerce-koban-sync' ),
+			array( 'response' => 400 )
+		);
 	}
 
 	$order = wc_get_order( $order_id );
 	if ( ! $order ) {
-		wp_die( 'Order not found.', 'Error', array( 'response' => 404 ) );
+		wp_die(
+			esc_html__( 'Order not found.', 'woocommerce-koban-sync' ),
+			esc_html__( 'Error', 'woocommerce-koban-sync' ),
+			array( 'response' => 404 )
+		);
 	}
 
 	$current_user_id = get_current_user_id();
 	$order_user_id   = $order->get_user_id();
 
 	if ( ! current_user_can( 'manage_options' ) && ( $current_user_id !== $order_user_id ) ) {
-		wp_die( 'You are not allowed to view this file.', 'Forbidden', array( 'response' => 403 ) );
+		wp_die(
+			esc_html__( 'You are not allowed to view this file.', 'woocommerce-koban-sync' ),
+			esc_html__( 'Forbidden', 'woocommerce-koban-sync' ),
+			array( 'response' => 403 )
+		);
 	}
 
 	$pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
 	if ( ! $pdf_path || ! file_exists( $pdf_path ) ) {
-		wp_die( 'File not found.', 'Error', array( 'response' => 404 ) );
+		wp_die(
+			esc_html__( 'File not found.', 'woocommerce-koban-sync' ),
+			esc_html__( 'Error', 'woocommerce-koban-sync' ),
+			array( 'response' => 404 )
+		);
 	}
 
 	header( 'Content-Type: application/pdf' );
@@ -81,7 +97,7 @@ function wckoban_add_invoice_action_to_my_orders( array $actions, WC_Order $orde
 
 		$actions['invoice_pdf'] = array(
 			'url'  => $protected_url,
-			'name' => __( 'View Invoice PDF', 'textdomain' ),
+			'name' => __( 'View Invoice PDF', 'woocommerce-koban-sync' ),
 			// 'icon' => 'some-css-class'
 		);
 	}

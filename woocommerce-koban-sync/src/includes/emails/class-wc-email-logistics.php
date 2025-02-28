@@ -26,7 +26,7 @@ class WC_Email_Logistics extends WC_Email {
 	 */
 	public function __construct() {
 		$this->id             = 'wc_email_logistics';
-		$this->description    = 'Sends invoice PDF + shipping label to logistics.';
+		$this->description    = __( 'Sends invoice PDF + shipping label to logistics.', 'woocommerce-koban-sync' );
 		$this->template_html  = 'logistics-email.php';
 		$this->template_plain = 'logistics-email-plain.php';
 		$this->email_type     = 'html';
@@ -34,17 +34,22 @@ class WC_Email_Logistics extends WC_Email {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		$this->recipient = $this->get_option( 'recipient', 'logistics@example.com' );
-		$this->recipient = $this->get_option( 'title', 'Logistics Email' );
-
-		// If the user toggled “Enable/Disable” from the admin
-		$this->enabled = 'yes' === $this->get_option( 'enabled', 'yes' );
+		$this->template_base = untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/';
 
 		parent::__construct();
+
+		$this->recipient = $this->get_option( 'recipient', 'logistics@example.com' );
+		$this->title     = $this->get_option( 'title', __( 'Logistics Email', 'woocommerce-koban-sync' ) );
+
+		if ( 'yes' === $this->get_option( 'enabled', 'yes' ) ) {
+			$this->enabled = 'yes';
+		}
 	}
 
+	/**
+	 * Add WooCommerce setting to define email recipients
+	 */
 	public function init_form_fields() {
-		// parent::init_form_fields() may define default ‘enabled’, ‘subject’, etc.
 		parent::init_form_fields();
 
 		$this->form_fields = array_merge(
@@ -80,7 +85,8 @@ class WC_Email_Logistics extends WC_Email {
 
 		$order_number = $this->object->get_order_number();
 
-		$this->subject                 = "Invoice & Shipping label for order #$order_number";
+		/* translators: %s: the WooCommerce order number */
+		$this->subject                 = sprintf( __( 'Invoice & Shipping label for order #%s', 'woocommerce-koban-sync' ), $order_number );
 		$this->find['order_number']    = '{order_number}';
 		$this->replace['order_number'] = $order_number;
 

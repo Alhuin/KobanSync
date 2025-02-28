@@ -112,18 +112,19 @@ class PaymentComplete {
 		$order = $state->get_data( 'order' );
 
 		if ( ! $order instanceof WC_Order ) {
-			return $state->failed( 'Invalid order ID.' );
+			return $state->failed( __( 'Invalid order.', 'woocommerce-koban-sync' ) );
 		}
 
 		// Early termination if an invoice pdf already exists.
 		if ( MetaUtils::get_koban_invoice_pdf_path( $order ) ) {
-			return $state->stop( 'Order already processed.' );
+			// TODO: Check workflow status instead of pdf.
+			return $state->stop( __( 'Order already processed.', 'woocommerce-koban-sync' ) );
 		}
 
 		// user_id 0 is Guest.
 		$user_id = $order->get_user_id();
 		if ( 0 !== $user_id && ! get_user_by( 'id', $user_id ) ) {
-			return $state->failed( 'Invalid user_id.' );
+			return $state->failed( __( 'Invalid User ID.', 'woocommerce-koban-sync' ) );
 		}
 		return $state->success();
 	}
@@ -143,7 +144,7 @@ class PaymentComplete {
 			$koban_third_guid = MetaUtils::get_koban_third_guid( $user_id );
 			if ( $koban_third_guid ) {
 				return $state->success(
-					'Found Koban GUID in user metadata.',
+					__( 'Found Koban GUID in user metadata.', 'woocommerce-koban-sync' ),
 					array( 'koban_third_guid' => $koban_third_guid )
 				);
 			}
@@ -156,7 +157,7 @@ class PaymentComplete {
 				MetaUtils::set_koban_third_guid( $user_id, $koban_third_guid );
 			}
 			return $state->success(
-				'Found Koban Third with matching email.',
+				__( 'Found Koban Third with matching email.', 'woocommerce-koban-sync' ),
 				array( 'koban_third_guid' => $koban_third_guid )
 			);
 		}
@@ -168,12 +169,12 @@ class PaymentComplete {
 				MetaUtils::set_koban_third_guid( $user_id, $koban_third_guid );
 			}
 			return $state->success(
-				'Created Koban Third.',
+				__( 'Created Koban Third.', 'woocommerce-koban-sync' ),
 				array( 'koban_third_guid' => $koban_third_guid )
 			);
 		}
 
-		return $state->failed( 'Could not create Koban Third.' );
+		return $state->failed( __( 'Could not create Koban Third.', 'woocommerce-koban-sync' ) );
 	}
 
 	/**
@@ -207,11 +208,11 @@ class PaymentComplete {
 			MetaUtils::set_koban_invoice_guid_for_order( $order, $koban_invoice_guid );
 
 			return $state->success(
-				'Created a Koban Invoice',
+				__( 'Created Koban Invoice.', 'woocommerce-koban-sync' ),
 				array( 'koban_invoice_guid' => $koban_invoice_guid )
 			);
 		}
-		return $state->failed( 'Could not create Koban Invoice' );
+		return $state->failed( __( 'Could not create Koban Invoice.', 'woocommerce-koban-sync' ) );
 	}
 
 	/**
@@ -230,9 +231,9 @@ class PaymentComplete {
 		if ( $koban_payment_guid ) {
 			MetaUtils::set_koban_payment_guid_for_order( $order, $koban_payment_guid );
 
-			return $state->success( 'Created Koban Payment' );
+			return $state->success( __( 'Created Koban Payment.', 'woocommerce-koban-sync' ) );
 		}
-		return $state->failed( 'Could not create Koban Payment' );
+		return $state->failed( __( 'Could not create Koban Payment.', 'woocommerce-koban-sync' ) );
 	}
 
 	/**
@@ -249,9 +250,9 @@ class PaymentComplete {
 		if ( $koban_invoice_pdf_path ) {
 			MetaUtils::set_koban_invoice_pdf_path_for_order( $order, $koban_invoice_pdf_path );
 
-			return $state->success( 'Retrieved Koban Invoice PDF' );
+			return $state->success( __( 'Retrieved Koban Invoice PDF.', 'woocommerce-koban-sync' ) );
 		}
-		return $state->failed( 'Could not retrieve Koban Invoice PDF' );
+		return $state->failed( __( 'Could not retrieve Koban Invoice PDF.', 'woocommerce-koban-sync' ) );
 	}
 
 	/**
@@ -265,35 +266,35 @@ class PaymentComplete {
 
 		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
 		if ( ! file_exists( $koban_invoice_pdf_path ) ) {
-			return $state->failed( 'Koban invoice PDF not found' );
+			return $state->failed( __( 'Koban invoice PDF not found.', 'woocommerce-koban-sync' ) );
 		}
 
 		$shipping_data = $order->get_meta( '_wms_chronopost_shipment_data', true );
 		if ( ! $shipping_data ) {
-			return $state->failed( 'No shipping data found for this order' );
+			return $state->failed( __( 'No shipping data found for this order.', 'woocommerce-koban-sync' ) );
 		}
 
 		$tracking_number = $shipping_data['_wms_outward_parcels']['_wms_parcels'][0]['_wms_parcel_skybill_number'] ?? '';
 		if ( ! $tracking_number ) {
-			return $state->failed( 'No tracking number found in shipping data' );
+			return $state->failed( __( 'No tracking number found in shipping data.', 'woocommerce-koban-sync' ) );
 		}
 
 		$chronopost_label_path = WP_CONTENT_DIR . '/uploads/protected-pdfs/chronopost-label-' . $tracking_number . '.pdf';
-		Logger::info( $chronopost_label_path );
 		if ( ! file_exists( $chronopost_label_path ) ) {
-			return $state->failed( 'Chronopost label PDF not found' );
+			return $state->failed( __( 'Chronopost label PDF not found.', 'woocommerce-koban-sync' ) );
 		}
 
+		// TODO: Check if enabled in WC Settings.
 		$mailer = WC()->mailer()->get_emails();
 		if ( isset( $mailer['wc_email_logistics'] ) ) {
 			if ( $mailer['wc_email_logistics']->trigger( $order->get_id(), $koban_invoice_pdf_path, $chronopost_label_path ) ) {
 				// TODO: Unlink after testing
 				// unlink($chronopost_label_path);.
-				return $state->success( 'Email sent to logistics.' );
+				return $state->success( __( 'Email sent to logistics.', 'woocommerce-koban-sync' ) );
 			} else {
-				return $state->failed( 'Could not send email to logistics.' );
+				return $state->failed( __( 'Could not send email to logistics.', 'woocommerce-koban-sync' ) );
 			}
 		}
-		return $state->failed( 'wc_email_logistics not found in mailer' );
+		return $state->failed( __( 'wc_email_logistics not found in mailer.', 'woocommerce-koban-sync' ) );
 	}
 }

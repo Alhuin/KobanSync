@@ -21,6 +21,18 @@ use WCKoban\Logger;
  */
 class StateMachine {
 
+	const STATUS_PROCESSING = 'processing';
+	const STATUS_STOP       = 'stop';
+	const STATUS_SUCCESS    = 'success';
+	const STATUS_FAILED     = 'failed';
+
+	/**
+	 * Status labels for translation.
+	 *
+	 * @var array
+	 */
+	private static array $labels = array();
+
 	/**
 	 * Steps to process, each step is a callable.
 	 *
@@ -69,9 +81,14 @@ class StateMachine {
 		$this->data        = $data;
 		$this->failed_step = $failed_step;
 		$this->state       = array(
-			'status'      => 'processing',
+			'status'      => self::STATUS_PROCESSING,
 			'workflow_id' => $workflow_id,
 		);
+
+		self::$labels[ self::STATUS_STOP ]       = __( 'Stop', 'woocommerce-koban-sync' );
+		self::$labels[ self::STATUS_FAILED ]     = __( 'Failed', 'woocommerce-koban-sync' );
+		self::$labels[ self::STATUS_PROCESSING ] = __( 'Processing', 'woocommerce-koban-sync' );
+		self::$labels[ self::STATUS_SUCCESS ]    = __( 'Success', 'woocommerce-koban-sync' );
 	}
 
 	/**
@@ -116,11 +133,11 @@ class StateMachine {
 		foreach ( $steps as $step ) {
 			$this->current_step = $step[1];
 
-			if ( ! $step( $this ) || 'stop' === $this->state[ $this->current_step ]['status'] ) {
+			if ( ! $step( $this ) || self::STATUS_STOP === $this->state[ $this->current_step ]['status'] ) {
 				break;
 			}
 		}
-		$this->state['status'] = $this->state[ $this->current_step ]['status'] ?? 'processing';
+		$this->state['status'] = $this->state[ $this->current_step ]['status'] ?? self::STATUS_PROCESSING;
 		$this->log();
 	}
 
@@ -146,7 +163,7 @@ class StateMachine {
 	public function success( ?string $message = null, $data = null ): bool {
 		$this->update_state(
 			array(
-				'status'  => 'success',
+				'status'  => self::STATUS_SUCCESS,
 				'message' => $message,
 			)
 		);
@@ -166,7 +183,7 @@ class StateMachine {
 	public function stop( ?string $message = null ): bool {
 		$this->update_state(
 			array(
-				'status'  => 'stop',
+				'status'  => self::STATUS_STOP,
 				'message' => $message,
 			)
 		);
@@ -182,7 +199,7 @@ class StateMachine {
 	public function failed( ?string $message = null ): bool {
 		$this->update_state(
 			array(
-				'status'  => 'failed',
+				'status'  => self::STATUS_FAILED,
 				'message' => $message,
 			)
 		);
@@ -206,6 +223,6 @@ class StateMachine {
 	 * Log final workflow state upon completion.
 	 */
 	private function log(): void {
-		Logger::info( 'Workflow execution finished.', $this->state );
+		Logger::info( __( 'Workflow execution finished.', 'woocommerce-koban-sync' ), $this->state );
 	}
 }
