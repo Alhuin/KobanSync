@@ -33,19 +33,20 @@ if ( ! defined( 'WCKOBAN_TESTING' ) ) {
 
 // Include hooks and serializers.
 require_once __DIR__ . '/includes/hooks/class-statemachine.php';
-require_once __DIR__ . '/includes/hooks/class-paymentcomplete.php';
-require_once __DIR__ . '/includes/hooks/class-customersaveaddress.php';
-require_once __DIR__ . '/includes/hooks/class-productupdate.php';
+require_once __DIR__ . '/includes/hooks/class-paymentcompletehook.php';
+require_once __DIR__ . '/includes/hooks/class-customersaveaddresshook.php';
+require_once __DIR__ . '/includes/hooks/class-productupdatehook.php';
 
-require_once __DIR__ . '/includes/serializers/class-order.php';
-require_once __DIR__ . '/includes/serializers/class-upsertproduct.php';
-require_once __DIR__ . '/includes/serializers/class-upsertthird.php';
+require_once __DIR__ . '/includes/serializers/class-invoiceserializer.php';
+require_once __DIR__ . '/includes/serializers/class-productserializer.php';
+require_once __DIR__ . '/includes/serializers/class-thirdserializer.php';
+require_once __DIR__ . '/includes/serializers/class-paymentserializer.php';
 
 use WCKoban\Admin\Admin;
 use WCKoban\Emails\WC_Email_Logistics;
-use WCKoban\Hooks\CustomerSaveAddress;
-use WCKoban\Hooks\PaymentComplete;
-use WCKoban\Hooks\ProductUpdate;
+use WCKoban\Hooks\CustomerSaveAddressHook;
+use WCKoban\Hooks\PaymentCompleteHook;
+use WCKoban\Hooks\ProductUpdateHook;
 
 /**
  * Check if WooCommerce is active. If not, deactivate.
@@ -93,9 +94,9 @@ if ( wckoban_sync_has_valid_config() ) {
 	}
 
 	// Hooks.
-	( new CustomerSaveAddress() )->register();
-	( new PaymentComplete() )->register();
-	( new ProductUpdate() )->register();
+	( new CustomerSaveAddressHook() )->register();
+	( new PaymentCompleteHook() )->register();
+	( new ProductUpdateHook() )->register();
 
 	// Email Templates.
 	add_filter(

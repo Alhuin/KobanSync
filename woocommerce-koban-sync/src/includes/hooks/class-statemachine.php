@@ -6,7 +6,7 @@
  * Enables partial re-try from a previously failed step, maintains shared data across steps,
  * and logs final workflow state.
  *
- * @package WCKoban\Hooks
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Hooks;

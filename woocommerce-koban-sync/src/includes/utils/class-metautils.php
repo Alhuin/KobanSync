@@ -5,7 +5,7 @@
  * Utility methods for setting and retrieving Koban-related meta data on WooCommerce
  * orders, products, users, and categories.
  *
- * @package WCKoban\Utils
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Utils;

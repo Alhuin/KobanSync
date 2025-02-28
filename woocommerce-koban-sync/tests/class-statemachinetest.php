@@ -3,7 +3,7 @@
  * Tests for the StateMachine workflow logic, verifying step-by-step states
  * and final workflow status (success, stop, fail).
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Tests;

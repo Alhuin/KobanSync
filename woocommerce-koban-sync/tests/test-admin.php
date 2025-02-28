@@ -2,5 +2,5 @@
 /**
  * TODO: Test admin/class-admin.php
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  **/

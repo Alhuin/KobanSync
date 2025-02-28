@@ -4,7 +4,7 @@
  *
  * Contains a simple mock logger for test scenarios.
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Tests\Mocks;

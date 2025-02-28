@@ -3,7 +3,7 @@
  *
  * Contains the MockResponse base class for test mocking.
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Tests\Mocks;
