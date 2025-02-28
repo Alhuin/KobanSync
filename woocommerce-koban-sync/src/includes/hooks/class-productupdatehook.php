@@ -1,6 +1,6 @@
 <?php
 /**
- * ProductUpdate class file.
+ * ProductUpdateHook class file.
  *
  * Handles synchronization of WooCommerce product data with Koban CRM whenever
  * a product is created or updated.
@@ -13,16 +13,16 @@ namespace WCKoban\Hooks;
 use WC_Product;
 use WCKoban\API;
 use WCKoban\Logger;
-use WCKoban\Serializers\UpsertProduct;
+use WCKoban\Serializers\ProductSerializer;
 use WCKoban\Utils\MetaUtils;
 
 /**
- * Class ProductUpdate
+ * Class ProductUpdateHook
  *
  * Attaches to WooCommerce product CRUD actions (creation/updating) to ensure
  * the product information is reflected in Koban CRM.
  */
-class ProductUpdate {
+class ProductUpdateHook {
 
 	/**
 	 * An instance of the Koban API client.
@@ -124,7 +124,7 @@ class ProductUpdate {
 	 */
 	public function upsert_koban_product( StateMachine $state ): bool {
 		$product         = wc_get_product( $state->get_data( 'product_id' ) );
-		$product_payload = ( new UpsertProduct() )->product_to_koban( $product );
+		$product_payload = ( new ProductSerializer() )->from_product( $product );
 
 		if ( isset( $product_payload['Guid'] ) ) {
 			if ( $this->api->update_product( $product_payload ) ) {

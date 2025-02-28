@@ -2,5 +2,5 @@
 /**
  * TODO: Test class-api.php
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  **/

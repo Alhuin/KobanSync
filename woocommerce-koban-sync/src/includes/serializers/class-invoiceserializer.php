@@ -1,6 +1,6 @@
 <?php
 /**
- * CreateInvoice class file.
+ * InvoiceSerializer class file.
  *
  * Builds Koban payloads to create Invoices in Koban CRM.
  *
@@ -13,11 +13,11 @@ use WC_Order;
 use WCKoban\Logger;
 
 /**
- * Class Order
+ * Class InvoiceSerializer
  *
- * Handles serialization for Koban createInvoice and createPayment payloads
+ * Handles serialization for Koban createInvoice payloads
  */
-class Order {
+class InvoiceSerializer {
 	/**
 	 * Serializes a WooCommerce Order into a Koban createInvoice payload.
 	 *
@@ -27,7 +27,7 @@ class Order {
 	 * @return array    The Koban createInvoice payload
 	 * TODO: Tax handling
 	 */
-	public function to_koban_invoice( WC_Order $order, string $koban_third_guid ): array {
+	public function from_order( WC_Order $order, string $koban_third_guid ): array {
 		$invoice_number = $order->get_order_number();
 		$invoice_date   = gmdate( 'Y-m-d\TH:i:s\Z' ); // or from $order->get_date_created().
 
@@ -88,30 +88,6 @@ class Order {
 				'Header'      => null,
 				'AssignedTo'  => array(
 					'FullName' => DEFAULT_ASSIGNEDTO_FULLNAME,
-				),
-			),
-		);
-	}
-
-	/**
-	 * Serializes a WooCommerce Order into a Koban createPayment payload.
-	 *
-	 * @param WC_Order $order               The WooCommerce order.
-	 * @param string   $koban_invoice_guid  The Koban Invoice GUID.
-	 *
-	 * @return array    The Koban createPayment payload
-	 */
-	public function to_koban_payment( WC_Order $order, string $koban_invoice_guid ): array {
-		return array(
-			array(
-				'Extcode'     => PAYMENT_PREFIX . $order->get_order_number(),
-				'Invoice'     => array(
-					'Guid' => $koban_invoice_guid,
-				),
-				'PaymentDate' => gmdate( 'Y-m-d\TH:i:s\Z' ),
-				'Ttc'         => $order->get_total(),
-				'ModeRglt'    => array(
-					'Code' => DEFAULT_PAYMENTMODE_CODE,
 				),
 			),
 		);

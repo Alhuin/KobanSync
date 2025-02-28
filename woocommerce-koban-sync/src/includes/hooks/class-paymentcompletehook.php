@@ -1,8 +1,14 @@
 <?php
 /**
- * PaymentComplete class file.
+ * PaymentCompleteHook class file.
  *
- * Handles synchronization of customer data with Koban after a WooCommerce payment is completed.
+ * Registers and handles the WooCommerce “payment complete” hook. This class
+ *  triggers background tasks to synchronize completed order data with Koban CRM:
+ *   - Finding or creating a Koban “Third” for the customer
+ *   - Generating an Invoice record in Koban
+ *   - Creating a Payment record
+ *   - Downloading the invoice PDF
+ *   - Sending an email to the logistics team
  *
  * @package WooCommerceKobanSync
  */
@@ -13,17 +19,18 @@ use WC;
 use WC_Order;
 use WCKoban\API;
 use WCKoban\Logger;
-use WCKoban\Serializers\Order;
-use WCKoban\Serializers\UpsertThird;
+use WCKoban\Serializers\InvoiceSerializer;
+use WCKoban\Serializers\PaymentSerializer;
+use WCKoban\Serializers\ThirdSerializer;
 use WCKoban\Utils\MetaUtils;
 
 /**
- * Class PaymentComplete
+ * Class PaymentCompleteHook
  *
  * Registers a WooCommerce hook that triggers upon payment completion, then proceeds through
  * a series of steps to ensure the order and customer data are synced to Koban CRM.
  */
-class PaymentComplete {
+class PaymentCompleteHook {
 
 	/**
 	 * An instance of the Koban API client.
@@ -185,7 +192,7 @@ class PaymentComplete {
 	 * @return string|null       The new Koban third GUID, or null on failure.
 	 */
 	public function create_koban_third( WC_Order $order, int $user_id ): ?string {
-		$third_payload    = ( new UpsertThird() )->order_to_koban_third( $order );
+		$third_payload    = ( new ThirdSerializer() )->from_order( $order );
 		$koban_third_guid = $this->api->upsert_user( $third_payload );
 
 		return $koban_third_guid;
@@ -201,7 +208,7 @@ class PaymentComplete {
 		$koban_third_guid = $state->get_data( 'koban_third_guid' );
 		$order            = $state->get_data( 'order' );
 
-		$invoice_payload    = ( new Order() )->to_koban_invoice( $order, $koban_third_guid );
+		$invoice_payload    = ( new InvoiceSerializer() )->from_order( $order, $koban_third_guid );
 		$koban_invoice_guid = $this->api->create_invoice( $invoice_payload );
 
 		if ( $koban_invoice_guid ) {
@@ -225,7 +232,7 @@ class PaymentComplete {
 		$koban_invoice_guid = $state->get_data( 'koban_invoice_guid' );
 		$order              = $state->get_data( 'order' );
 
-		$payment_payload    = ( new Order() )->to_koban_payment( $order, $koban_invoice_guid );
+		$payment_payload    = ( new PaymentSerializer() )->from_order( $order, $koban_invoice_guid );
 		$koban_payment_guid = $this->api->create_payment( $payment_payload );
 
 		if ( $koban_payment_guid ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * UpsertProduct class file.
+ * ThirdSerializer class file.
  *
  * Builds Koban payloads to create or update WooCommerce "Thirds" (accounts) in Koban CRM.
  *
@@ -14,11 +14,11 @@ use WP_User;
 use WCKoban\Logger;
 
 /**
- * Class UpsertThird
+ * Class ThirdSerializer
  *
  * Handles serialization for Koban upsertThird payloads
  */
-class UpsertThird {
+class ThirdSerializer {
 
 	/**
 	 *  WC_Order to Koban Third payload
@@ -27,7 +27,7 @@ class UpsertThird {
 	 *
 	 * @return array The Koban Third payload.
 	 */
-	public function order_to_koban_third( WC_Order $order ): array {
+	public function from_order( WC_Order $order ): array {
 		return $this->billing_to_koban_third(
 			$this->billing_data_from_order( $order )
 		);
@@ -40,7 +40,7 @@ class UpsertThird {
 	 *
 	 * @return array The Koban Third payload.
 	 */
-	public function user_to_koban_third( WP_User $user ): array {
+	public function from_user( WP_User $user ): array {
 		return $this->billing_to_koban_third(
 			$this->billing_data_from_user( $user )
 		);

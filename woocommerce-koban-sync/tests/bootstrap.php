@@ -3,7 +3,7 @@
  * PHPUnit bootstrap file that sets up the testing environment for the WooCommerce Koban Sync plugin.
  * Loads WordPress test libraries, sets up mocks, and prepares the environment for running tests.
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  */
 
 define( 'WCKOBAN_TESTING', true );

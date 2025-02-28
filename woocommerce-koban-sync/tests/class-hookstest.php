@@ -2,14 +2,14 @@
 /**
  * Tests for the WooCommerce Koban Sync plugin hooks.
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  */
 
 namespace WCKoban\Tests;
 
-use WCKoban\Hooks\CustomerSaveAddress;
-use WCKoban\Hooks\ProductUpdate;
-use WCKoban\Hooks\PaymentComplete;
+use WCKoban\Hooks\CustomerSaveAddressHook;
+use WCKoban\Hooks\ProductUpdateHook;
+use WCKoban\Hooks\PaymentCompleteHook;
 use WCKoban\Utils\MetaUtils;
 use WCKoban\Tests\Mocks\CreateInvoiceSuccess;
 use WCKoban\Tests\Mocks\CreatePaymentSuccess;
@@ -68,7 +68,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$order_id    = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
 		$this->setup_shipping_label( $order_id );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
+		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 4 );
 		$this->assertRequests( $expected_requests );
@@ -110,7 +110,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$order_id    = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
 		$this->setup_shipping_label( $order_id );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
+		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 5 );
 		$this->assertRequests( $expected_requests );
@@ -155,7 +155,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$order_id = $this->create_wc_order( array( 'customer_id' => $customer_id ) );
 		$this->setup_shipping_label( $order_id );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
+		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 3 );
 		$this->assertRequests( $expected_requests );
@@ -199,7 +199,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$order_id = $this->create_wc_order();
 		$this->setup_shipping_label( $order_id );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
+		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 4 );
 		$this->assertRequests( $expected_requests );
@@ -239,7 +239,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$order_id = $this->create_wc_order();
 		$this->setup_shipping_label( $order_id );
 
-		( new PaymentComplete() )->handle_payment_complete( $order_id, 'workflow_id' );
+		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 5 );
 		$this->assertRequests( $expected_requests );
@@ -281,7 +281,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 	public function test_customer_save_address_no_guid() {
 		$customer_id = $this->create_wc_customer();
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $customer_id, 'billing', 'workflow_id' );
+		( new CustomerSaveAddressHook() )->handle_customer_save_address( $customer_id, 'billing', 'workflow_id' );
 
 		$this->assertRequestsCount( 0 );
 	}
@@ -293,7 +293,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$customer_id = $this->create_wc_customer();
 		MetaUtils::set_koban_third_guid( $customer_id, 'testKobanGuid' );
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $customer_id, 'shipping', 'workflow_id' );
+		( new CustomerSaveAddressHook() )->handle_customer_save_address( $customer_id, 'shipping', 'workflow_id' );
 		$this->assertRequestsCount( 0 );
 	}
 
@@ -309,7 +309,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$customer_id = $this->create_wc_customer();
 		MetaUtils::set_koban_third_guid( $customer_id, 'testKobanGuid' );
 
-		( new CustomerSaveAddress() )->handle_customer_save_address( $customer_id, 'billing', 'workflow_id' );
+		( new CustomerSaveAddressHook() )->handle_customer_save_address( $customer_id, 'billing', 'workflow_id' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );
@@ -346,7 +346,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 
 		$product_id = $this->create_wp_post_product();
 
-		( new ProductUpdate() )->handle_product_update( $product_id, 'workflow_id' );
+		( new ProductUpdateHook() )->handle_product_update( $product_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );
@@ -371,7 +371,7 @@ class HooksTest extends WCKoban_UnitTestCase {
 		$product_id = $this->create_wp_post_product();
 		MetaUtils::set_koban_product_guid_for_product_id( $product_id, 'test_koban_guid' );
 
-		( new ProductUpdate() )->handle_product_update( $product_id, 'workflow_id' );
+		( new ProductUpdateHook() )->handle_product_update( $product_id, 'workflow_id' );
 
 		$this->assertRequestsCount( 1 );
 		$this->assertRequests( $expected_requests );

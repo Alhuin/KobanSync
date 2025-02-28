@@ -1,6 +1,6 @@
 <?php
 /**
- * UpsertProduct class file.
+ * ProductSerializer class file.
  *
  * Builds Koban payloads to create or update Products in Koban CRM.
  *
@@ -13,11 +13,11 @@ use WC_Product;
 use WCKoban\Utils\MetaUtils;
 
 /**
- * Class UpsertProduct
+ * Class ProductSerializer
  *
  * Handles serialization for Koban upsertProduct payloads
  */
-class UpsertProduct {
+class ProductSerializer {
 
 	/**
 	 * Serializes a WooCommerce product into a Koban upsertProduct payload.
@@ -27,7 +27,7 @@ class UpsertProduct {
 	 * @return array The Koban upsertProduct payload
 	 * TODO: Tax and prices Handling
 	 */
-	public function product_to_koban( WC_Product $product ): array {
+	public function from_product( WC_Product $product ): array {
 		$product_id          = $product->get_id();
 		$koban_product_guid  = MetaUtils::get_koban_product_guid( $product );
 		$categories          = get_the_terms( $product_id, 'product_cat' );

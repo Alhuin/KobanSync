@@ -2,5 +2,5 @@
 /**
  * TODO: Test class-wckoban-serializer.php
  *
- * @package WooCommerceKobanSync\Tests
+ * @package WooCommerceKobanSync
  **/
