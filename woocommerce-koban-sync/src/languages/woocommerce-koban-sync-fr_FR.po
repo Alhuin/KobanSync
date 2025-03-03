@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce Koban Sync 0.0.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/src\n"
-"POT-Creation-Date: 2025-02-28T12:10:06+00:00\n"
+"POT-Creation-Date: 2025-03-03T12:10:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Alhuin <alhuin.git@proton.me>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -67,7 +67,7 @@ msgstr "URL Koban"
 msgid "Enter your Koban settings below."
 msgstr "Renseignez les paramètres Koban ci-dessous."
 
-#: admin/class-admin.php:180 woocommerce-koban-sync.php:206
+#: admin/class-admin.php:180 woocommerce-koban-sync.php:207
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -166,12 +166,12 @@ msgstr ""
 "Envoie le PDF de la facture et l'étiquette de livraison au service "
 "logistique."
 
-#: includes/emails/class-wc-email-logistics.php:38
+#: includes/emails/class-wc-email-logistics.php:42
 msgid "Logistics Email"
 msgstr "Email au service logistique"
 
 #. translators: %s: the WooCommerce order number
-#: includes/emails/class-wc-email-logistics.php:84
+#: includes/emails/class-wc-email-logistics.php:89
 msgid "Invoice & Shipping label for order #%s"
 msgstr "Facture et étiquette de livraison pour la commande n°%s"
 
@@ -201,155 +201,174 @@ msgid "Customer:"
 msgstr "Client :"
 
 #. translators: %s: the WooCommerce Customer ID
-#: includes/hooks/class-customersaveaddress.php:107
+#: includes/hooks/class-customersaveaddresshook.php:118
 msgid "Invalid customer ID: %s"
 msgstr "Customer ID non valide : %s."
 
-#: includes/hooks/class-customersaveaddress.php:128
+#: includes/hooks/class-customersaveaddresshook.php:141
 msgid "Updated Koban Third with new billing details."
 msgstr ""
 "Le Compte Koban a été mis à jour avec les nouvelles informations de "
 "facturation."
 
-#: includes/hooks/class-customersaveaddress.php:130
+#: includes/hooks/class-customersaveaddresshook.php:143
 msgid "Could not update Koban Third."
 msgstr "Impossible de mettre à jour le Compte Koban."
 
-#: includes/hooks/class-customersaveaddress.php:135
+#: includes/hooks/class-customersaveaddresshook.php:148
 msgid ""
 "Update not necessary, user either not synced yet or address was not billing."
 msgstr ""
 "Mise à jour inutile : l'utilisateur n'est pas encore synchronisé ou il ne "
 "s'agit pas d'une adresse de facturation."
 
-#: includes/hooks/class-paymentcomplete.php:115
+#: includes/hooks/class-paymentcompletehook.php:139
 msgid "Invalid order."
 msgstr "Commande non valide."
 
-#: includes/hooks/class-paymentcomplete.php:121
-msgid "Order already processed."
+#. translators: %d: the WooCommerce Order ID
+#: includes/hooks/class-paymentcompletehook.php:149
+#, fuzzy
+msgid "Order #%d already processed."
 msgstr "La commande a déjà été synchronisée."
 
-#: includes/hooks/class-paymentcomplete.php:127
+#. translators: %d: the WooCommerce Customer ID
+#: includes/hooks/class-paymentcompletehook.php:161
 #, fuzzy
-msgid "Invalid User ID."
+msgid "Invalid User ID : %d."
 msgstr "Order ID non valide."
 
-#: includes/hooks/class-paymentcomplete.php:147
-msgid "Found Koban GUID in user metadata."
+#. translators: %s: the Koban Third GUID
+#: includes/hooks/class-paymentcompletehook.php:187
+#, fuzzy
+msgid "Found Koban GUID in user metadata : %s."
 msgstr "Un GUID Koban a été trouvé dans les métadonnées de l'utilisateur."
 
-#: includes/hooks/class-paymentcomplete.php:160
-msgid "Found Koban Third with matching email."
+#. translators: %s: the Koban Third GUID
+#: includes/hooks/class-paymentcompletehook.php:204
+#, fuzzy
+msgid "Found Koban Third with matching email: %s."
 msgstr "Compte Koban correspondant à cet email trouvé."
 
-#: includes/hooks/class-paymentcomplete.php:172
-msgid "Created Koban Third."
+#. translators: %s: the Koban Third GUID
+#: includes/hooks/class-paymentcompletehook.php:220
+#, fuzzy
+msgid "Created Koban Third: %s."
 msgstr "Le Compte Koban a été créé."
 
-#: includes/hooks/class-paymentcomplete.php:177
+#: includes/hooks/class-paymentcompletehook.php:227
 msgid "Could not create Koban Third."
 msgstr "Impossible de créer le Compte Koban."
 
-#: includes/hooks/class-paymentcomplete.php:211
-msgid "Created Koban Invoice."
+#. translators: %s: the Koban Invoice GUID
+#: includes/hooks/class-paymentcompletehook.php:263
+#, fuzzy
+msgid "Created Koban Invoice: %s."
 msgstr "La Facture Koban a été créée."
 
-#: includes/hooks/class-paymentcomplete.php:215
+#: includes/hooks/class-paymentcompletehook.php:269
 msgid "Could not create Koban Invoice."
 msgstr "Impossible de créer la Facture Koban."
 
-#: includes/hooks/class-paymentcomplete.php:234
-msgid "Created Koban Payment."
+#. translators: %s: the Koban Payment GUID
+#: includes/hooks/class-paymentcompletehook.php:291
+#, fuzzy
+msgid "Created Koban Payment: %s."
 msgstr "Le Paiement Koban a été créé."
 
-#: includes/hooks/class-paymentcomplete.php:236
+#: includes/hooks/class-paymentcompletehook.php:296
 msgid "Could not create Koban Payment."
 msgstr "Impossible de créer le Paiement Koban."
 
-#: includes/hooks/class-paymentcomplete.php:253
-msgid "Retrieved Koban Invoice PDF."
+#. translators: %s: the Koban Invoice PDF path
+#: includes/hooks/class-paymentcompletehook.php:316
+#, fuzzy
+msgid "Retrieved Koban Invoice PDF: %s."
 msgstr "Le PDF de la Facture Koban a été récupéré."
 
-#: includes/hooks/class-paymentcomplete.php:255
+#: includes/hooks/class-paymentcompletehook.php:321
 msgid "Could not retrieve Koban Invoice PDF."
 msgstr "Impossible de récupérer le PDF de la Facture Koban."
 
-#: includes/hooks/class-paymentcomplete.php:269
-msgid "Koban invoice PDF not found."
+#. translators: %s: the Koban Invoice PDF path
+#: includes/hooks/class-paymentcompletehook.php:339
+#, fuzzy
+msgid "Koban invoice PDF not found: %s."
 msgstr "Le PDF de la Facture Koban est introuvable."
 
-#: includes/hooks/class-paymentcomplete.php:274
+#: includes/hooks/class-paymentcompletehook.php:348
 msgid "No shipping data found for this order."
 msgstr "Aucune donnée d'expédition trouvée pour cette commande."
 
-#: includes/hooks/class-paymentcomplete.php:279
+#: includes/hooks/class-paymentcompletehook.php:353
 msgid "No tracking number found in shipping data."
 msgstr "Aucun numéro de suivi trouvé dans les données d'expédition."
 
-#: includes/hooks/class-paymentcomplete.php:285
-msgid "Chronopost label PDF not found."
+#. translators: %s: the Chronopost label PDF path
+#: includes/hooks/class-paymentcompletehook.php:361
+#, fuzzy
+msgid "Chronopost label PDF not found: %s."
 msgstr "Étiquette de livraison Chronopost introuvable."
 
-#: includes/hooks/class-paymentcomplete.php:293
+#: includes/hooks/class-paymentcompletehook.php:374
 msgid "Email sent to logistics."
 msgstr "L'email a été envoyé au service logistique."
 
-#: includes/hooks/class-paymentcomplete.php:295
+#: includes/hooks/class-paymentcompletehook.php:376
 msgid "Could not send email to logistics."
 msgstr "Impossible d'envoyer l'email au service logistique."
 
-#: includes/hooks/class-paymentcomplete.php:298
+#: includes/hooks/class-paymentcompletehook.php:379
 msgid "wc_email_logistics not found in mailer."
 msgstr "Template d'email introuvable dans la configuration WooCommerce."
 
 #. translators: %s: the WooCommerce Product ID
-#: includes/hooks/class-productupdate.php:113
+#: includes/hooks/class-productupdatehook.php:128
 msgid "Invalid Product ID: %s."
 msgstr "Product ID non valide : %s."
 
-#: includes/hooks/class-productupdate.php:131
+#: includes/hooks/class-productupdatehook.php:148
 msgid "Updated Koban Product."
 msgstr "Le Produit Koban a été mis à jour."
 
-#: includes/hooks/class-productupdate.php:133
+#: includes/hooks/class-productupdatehook.php:150
 msgid "Could not update Koban Product."
 msgstr "Impossible de mettre à jour le Produit Koban."
 
-#: includes/hooks/class-productupdate.php:139
+#: includes/hooks/class-productupdatehook.php:156
 msgid "Created Koban Product."
 msgstr "Le Produit Koban a été créé."
 
-#: includes/hooks/class-productupdate.php:141
+#: includes/hooks/class-productupdatehook.php:158
 msgid "Could not create Koban Product."
 msgstr "Impossible de créer le Produit Koban."
 
-#: includes/hooks/class-statemachine.php:88
+#: includes/hooks/class-statemachine.php:94
 msgid "Stop"
 msgstr "Arrêt"
 
-#: includes/hooks/class-statemachine.php:89
+#: includes/hooks/class-statemachine.php:95
 msgid "Failed"
 msgstr "Échec"
 
-#: includes/hooks/class-statemachine.php:90
+#: includes/hooks/class-statemachine.php:96
 msgid "Processing"
 msgstr "En cours"
 
-#: includes/hooks/class-statemachine.php:91
+#: includes/hooks/class-statemachine.php:97
 msgid "Success"
 msgstr "Succès"
 
-#: includes/hooks/class-statemachine.php:226
+#: includes/hooks/class-statemachine.php:240
 msgid "Workflow execution finished."
 msgstr "Synchronisation terminée."
 
-#: woocommerce-koban-sync.php:64
+#: woocommerce-koban-sync.php:65
 msgid "WooCommerce Koban Sync requires WooCommerce to be installed and active."
 msgstr ""
 "WooCommerce Koban Sync nécessite que WooCommerce soit installé et activé."
 
-#: woocommerce-koban-sync.php:118
+#: woocommerce-koban-sync.php:119
 msgid ""
 "WooCommerce Koban Sync is inactive because Koban credentials are missing. "
 "Please visit Koban Sync → Settings."

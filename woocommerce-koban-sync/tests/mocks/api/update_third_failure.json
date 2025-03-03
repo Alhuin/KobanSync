@@ -1,0 +1,11 @@
+{
+  "response": {
+    "code": 200
+  },
+  "body": {
+    "Result": null,
+    "Success": false,
+    "Message": null,
+    "Errors": ["dummy error"]
+  }
+}

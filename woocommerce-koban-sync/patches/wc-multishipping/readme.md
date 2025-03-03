@@ -44,6 +44,7 @@ This folder contains patches that modify the **wc-multishipping** plugin to enab
     - **Purpose**:
         - Saves the generated shipping label as a PDF in a protected folder (`protected-pdfs`) if the order has not already been successfully synced.
     - **Additional Info**:
+        - Requires commenting the capabilities check at the top of the function
         - Requires changing the function signature of `abstract_label::save_label_PDF()` to accept `$order`.
         - The method should then be called with `$order` in `abstract_order.php`, for example:
           ```php

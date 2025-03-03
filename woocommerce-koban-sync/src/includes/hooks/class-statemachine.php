@@ -12,6 +12,7 @@
 namespace WCKoban\Hooks;
 
 use WCKoban\Logger;
+use WCKoban\Utils\MetaUtils;
 
 /**
  * Class StateMachine
@@ -45,7 +46,14 @@ class StateMachine {
 	 *
 	 * @var string|null
 	 */
-	private ?string $failed_step;
+	public ?string $failed_step;
+
+	/**
+	 * True if a retry is required, false otherwise.
+	 *
+	 * @var bool
+	 */
+	public bool $retry = true;
 
 	/**
 	 * Overall workflow state, including per-step info and final status.
@@ -72,17 +80,15 @@ class StateMachine {
 	 * Constructor.
 	 *
 	 * @param array   $steps       Callables representing each workflow step.
-	 * @param string  $workflow_id Unique ID for the workflow instance.
 	 * @param array   $data        Initial shared data.
 	 * @param ?string $failed_step Step name where a previous run failed, if any.
 	 */
-	public function __construct( array $steps, string $workflow_id, array $data = array(), ?string $failed_step = null ) {
+	public function __construct( array $steps, array $data = array(), ?string $failed_step = null ) {
 		$this->steps       = $steps;
 		$this->data        = $data;
 		$this->failed_step = $failed_step;
 		$this->state       = array(
-			'status'      => self::STATUS_PROCESSING,
-			'workflow_id' => $workflow_id,
+			'status' => self::STATUS_PROCESSING,
 		);
 
 		self::$labels[ self::STATUS_STOP ]       = __( 'Stop', 'woocommerce-koban-sync' );
@@ -194,15 +200,23 @@ class StateMachine {
 	 * Mark the current step as failed, halting the workflow.
 	 *
 	 * @param string|null $message Optional failure message.
+	 * @param bool        $retry If a retry is required.
+	 *
 	 * @return bool                False always (workflow stops here).
 	 */
-	public function failed( ?string $message = null ): bool {
+	public function failed( ?string $message = null, $retry = true ): bool {
+		$this->failed_step = $this->current_step;
+
 		$this->update_state(
 			array(
 				'status'  => self::STATUS_FAILED,
 				'message' => $message,
 			)
 		);
+
+		if ( ! $retry ) {
+			$this->retry = false;
+		}
 		return false;
 	}
 
@@ -212,7 +226,7 @@ class StateMachine {
 	 * @param string|null $key Specific key to retrieve or null for all.
 	 * @return mixed|null      Value or null if key not found.
 	 */
-	public function get_data( ?string $key ) {
+	public function get_data( ?string $key = null ) {
 		if ( $key ) {
 			return $this->data[ $key ] ?? null;
 		}

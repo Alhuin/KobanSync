@@ -16,6 +16,7 @@ use WCKoban\Logger;
 use WCKoban\Serializers\ProductSerializer;
 use WCKoban\Utils\MetaUtils;
 
+
 /**
  * Class ProductUpdateHook
  *
@@ -23,6 +24,13 @@ use WCKoban\Utils\MetaUtils;
  * the product information is reflected in Koban CRM.
  */
 class ProductUpdateHook {
+
+	/**
+	 * The number of retries allowed before definitive failure.
+	 *
+	 * @var int
+	 */
+	private static int $max_retries = 2;
 
 	/**
 	 * An instance of the Koban API client.
@@ -37,7 +45,7 @@ class ProductUpdateHook {
 	public function register(): void {
 		add_action( 'woocommerce_new_product', array( $this, 'schedule_product_update' ) );
 		add_action( 'woocommerce_update_product', array( $this, 'schedule_product_update' ) );
-		add_action( 'wckoban_handle_product_update', array( $this, 'handle_product_update' ), 10, 2 );
+		add_action( 'wckoban_handle_product_update', array( $this, 'handle_product_update' ), 10, 3 );
 	}
 
 	/**
@@ -56,9 +64,10 @@ class ProductUpdateHook {
 				$workflow_id,
 				"Skipping repeated product update trigger due to transient lock for product: $product_id"
 			);
+			return;
 		}
 
-		set_transient( $transient_key, true, 2 );
+		set_transient( $transient_key, true, 3 );
 		Logger::debug( $workflow_id, "Scheduling background sync for product: {$product_id}" );
 
 		as_enqueue_async_action(
@@ -66,6 +75,7 @@ class ProductUpdateHook {
 			array(
 				'product_id'  => $product_id,
 				'workflow_id' => $workflow_id,
+				'attempt'     => 0,
 			),
 			'koban-sync'
 		);
@@ -77,8 +87,9 @@ class ProductUpdateHook {
 	 *
 	 * @param int    $product_id The WooCommerce Product ID.
 	 * @param string $workflow_id The Workflow ID.
+	 * @param int    $attempt The current retry number, 0 if initial attempt.
 	 */
-	public function handle_product_update( int $product_id, string $workflow_id ): void {
+	public function handle_product_update( int $product_id, string $workflow_id, int $attempt ): void {
 		Logger::debug(
 			$workflow_id,
 			'Detected product create/update',
@@ -90,13 +101,16 @@ class ProductUpdateHook {
 			array( $this, 'upsert_koban_product' ),
 		);
 
-		$data = array( 'product_id' => $product_id );
+		$data = array(
+			'product_id'  => $product_id,
+			'workflow_id' => $workflow_id,
+		);
 
-		// TODO: Get last failed step.
-		$last_failed_step = null;
-		$state            = new StateMachine( $steps, $workflow_id, $data, $last_failed_step );
-		$this->api        = new API( $workflow_id );
+		$failed_step = MetaUtils::get_koban_workflow_failed_step_for_product_id( $product_id );
+		$state       = new StateMachine( $steps, $data, $failed_step );
+		$this->api   = new API( $workflow_id );
 		$state->process_steps();
+		$this->handle_exit( $state, $attempt );
 	}
 
 	/**
@@ -109,8 +123,11 @@ class ProductUpdateHook {
 		$product_id = $state->get_data( 'product_id' );
 
 		if ( ! wc_get_product( $product_id ) instanceof WC_Product ) {
-			/* translators: %s: the WooCommerce Product ID */
-			return $state->failed( sprintf( __( 'Invalid Product ID: %s.', 'woocommerce-koban-sync' ), $product_id ) );
+			return $state->failed(
+				/* translators: %s: the WooCommerce Product ID */
+				sprintf( __( 'Invalid Product ID: %s.', 'woocommerce-koban-sync' ), $product_id ),
+				false
+			);
 		}
 
 		return $state->success();
@@ -139,5 +156,38 @@ class ProductUpdateHook {
 			return $state->success( __( 'Created Koban Product.', 'woocommerce-koban-sync' ) );
 		}
 		return $state->failed( __( 'Could not create Koban Product.', 'woocommerce-koban-sync' ) );
+	}
+
+	/**
+	 * Handles the final state of the workflow, scheduling retries if necessary.
+	 *
+	 * @param StateMachine $state   The workflow state manager.
+	 * @param int          $attempt The current attempt count.
+	 */
+	private function handle_exit( StateMachine $state, int $attempt ): void {
+		$status     = $state->get_status();
+		$data       = $state->get_data();
+		$product_id = $data['product_id'];
+
+		if ( wc_get_product( $product_id ) instanceof WC_Product ) {
+			MetaUtils::set_koban_workflow_status_for_product_id( $product_id, $status );
+		}
+
+		if ( StateMachine::STATUS_FAILED === $status && $state->retry && $attempt < self::$max_retries ) {
+			MetaUtils::set_koban_workflow_failed_step_for_product_id( $product_id, $state->failed_step );
+
+			as_schedule_single_action(
+				time() + 60,
+				'wckoban_handle_product_update',
+				array(
+					'product_id'  => $product_id,
+					'workflow_id' => $data['workflow_id'],
+					'attempt'     => $attempt + 1,
+				),
+				'koban-sync'
+			);
+		} else {
+			MetaUtils::set_koban_workflow_failed_step_for_product_id( $product_id, null );
+		}
 	}
 }

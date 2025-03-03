@@ -10,6 +10,10 @@
  * We also need:
  * - to add $order as a parameter of the function:
  *    public static function save_label_PDF( $tracking_number, $order ) { <- add $order as parameter
+ * - to comment the capabilities check on the first two lines:
+ *   public static function save_label_PDF( $tracking_number, $order ) {
+ * //    if ( ! current_user_can( 'edit_posts' ) )
+ * //        return false;
  * - to call the function with the $order as parameter in  wc-multishipping/inc/admin/classes/abstract_classes/abstract_order.php
  *    $label_pdf_path = $label_class::save_label_PDF( $one_tracking_number, $order ); <- add $order as parameter
  *
@@ -22,19 +26,19 @@
 // ------------------------------------------------------------------------------------------------
 // WCKoban: Save PDF to protected directory (will unlink after email to logistics is sent)
 // ------------------------------------------------------------------------------------------------
-			$upload_dir    = wp_upload_dir();
-			$protected_dir = trailingslashit( $upload_dir['basedir'] ) . 'protected-pdfs';
+$upload_dir    = wp_upload_dir();
+$protected_dir = trailingslashit( $upload_dir['basedir'] ) . 'protected-pdfs';
 
 if ( ! file_exists( $protected_dir ) ) {
 	wp_mkdir_p( $protected_dir );
 	file_put_contents( $protected_dir . '/.htaccess', "Order allow,deny\nDeny from all\n" );
 }
 
-			$filename = 'chronopost-label-' . $tracking_number . '.pdf';
-			$filepath = trailingslashit( $protected_dir ) . $filename;
+$filename = 'chronopost-label-' . $tracking_number . '.pdf';
+$filepath = trailingslashit( $protected_dir ) . $filename;
 
-			// If the label is not already saved and the logistics email has not already been sent, save the label.
-if ( ! file_exists( $filepath ) && 'success' !== $order->get_meta( 'check_sync', true ) ) {
+// If the label is not already saved and the logistics email has not already been sent, save the label.
+if ( ! file_exists( $filepath ) && 'success' !== $order->get_meta( '_koban_workflow_status', true ) ) {
 	file_put_contents( $filepath, $label );
 }
 // ------------------------------------------------------------------------------------------------

@@ -22,6 +22,13 @@ use WCKoban\Utils\MetaUtils;
 class CustomerSaveAddressHook {
 
 	/**
+	 * The number of allowed retries before definitive failure.
+	 *
+	 * @var int
+	 */
+	private static int $max_retries = 2;
+
+	/**
 	 * An instance of the Koban API client.
 	 *
 	 * @var API $api
@@ -33,7 +40,7 @@ class CustomerSaveAddressHook {
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_customer_save_address', array( $this, 'schedule_customer_save_address' ), 20, 2 );
-		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ), 10, 3 );
+		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ), 10, 4 );
 	}
 
 	/**
@@ -53,6 +60,7 @@ class CustomerSaveAddressHook {
 				'customer_id'  => $customer_id,
 				'address_type' => $address_type,
 				'workflow_id'  => $workflow_id,
+				'attempt'      => 0,
 			),
 			'koban-sync'
 		);
@@ -65,14 +73,16 @@ class CustomerSaveAddressHook {
 	 * @param int    $customer_id WordPress User ID.
 	 * @param string $address_type Address type being saved (e.g., 'billing' or 'shipping').
 	 * @param string $workflow_id The Workflow ID.
+	 * @param int    $attempt The current retry number, 0 if initial attempt.
 	 */
-	public function handle_customer_save_address( int $customer_id, string $address_type, string $workflow_id ): void {
+	public function handle_customer_save_address( int $customer_id, string $address_type, string $workflow_id, int $attempt ): void {
 		Logger::debug(
 			$workflow_id,
 			'Detected customer save address',
 			array(
 				'customer_id'  => $customer_id,
 				'address_type' => $address_type,
+				'workflow_id'  => $workflow_id,
 			)
 		);
 
@@ -83,14 +93,14 @@ class CustomerSaveAddressHook {
 		$data  = array(
 			'customer_id'  => $customer_id,
 			'address_type' => $address_type,
+			'workflow_id'  => $workflow_id,
 		);
 
-		// TODO: Get last failed step.
-		$last_failed_step = null;
-		// Run the workflow through our state machine.
-		$state     = new StateMachine( $steps, $workflow_id, $data, $last_failed_step );
-		$this->api = new API( $workflow_id );
+		$failed_step = MetaUtils::get_koban_workflow_failed_step_for_user_id( $customer_id );
+		$state       = new StateMachine( $steps, $data, $failed_step );
+		$this->api   = new API( $workflow_id );
 		$state->process_steps();
+		$this->handle_exit( $state, $attempt );
 	}
 
 	/**
@@ -103,8 +113,11 @@ class CustomerSaveAddressHook {
 		$customer_id = $state->get_data( 'customer_id' );
 
 		if ( ! get_user_by( 'id', $customer_id ) ) {
-			/* translators: %s: the WooCommerce Customer ID */
-			return $state->stop( sprintf( __( 'Invalid customer ID: %s', 'woocommerce-koban-sync' ), $customer_id ) );
+			return $state->failed(
+				/* translators: %s: the WooCommerce Customer ID */
+				sprintf( __( 'Invalid customer ID: %s', 'woocommerce-koban-sync' ), $customer_id ),
+				false
+			);
 		}
 		return $state->success();
 	}
@@ -131,8 +144,40 @@ class CustomerSaveAddressHook {
 		}
 
 		// No update is needed if there's no Koban GUID or it's not a billing address.
-		return $state->success(
+		return $state->stop(
 			__( 'Update not necessary, user either not synced yet or address was not billing.', 'woocommerce-koban-sync' )
 		);
+	}
+
+	/**
+	 * Handles the final state of the workflow, scheduling retries if necessary.
+	 *
+	 * @param StateMachine $state   The workflow state manager.
+	 * @param int          $attempt The current attempt count.
+	 */
+	private function handle_exit( StateMachine $state, int $attempt ): void {
+		$status      = $state->get_status();
+		$data        = $state->get_data();
+		$customer_id = $data['customer_id'];
+
+		MetaUtils::set_koban_workflow_status_for_user_id( $customer_id, $status );
+
+		if ( StateMachine::STATUS_FAILED === $status && $state->retry && $attempt < self::$max_retries ) {
+			MetaUtils::set_koban_workflow_failed_step_for_user_id( $data['customer_id'], $state->failed_step );
+
+			as_schedule_single_action(
+				time() + 60,
+				'wckoban_handle_customer_save_address',
+				array(
+					'customer_id'  => $customer_id,
+					'address_type' => $data['address_type'],
+					'workflow_id'  => $data['workflow_id'],
+					'attempt'      => $attempt + 1,
+				),
+				'koban-sync'
+			);
+		} else {
+			MetaUtils::set_koban_workflow_failed_step_for_user_id( $customer_id, null );
+		}
 	}
 }

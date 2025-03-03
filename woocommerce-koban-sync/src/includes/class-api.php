@@ -115,30 +115,6 @@ class API {
 		$content_type  = wp_remote_retrieve_header( $response, 'content-type' );
 		$response_body = wp_remote_retrieve_body( $response );
 
-		if ( false !== strpos( $content_type, 'application/pdf' ) ) {
-			Logger::debug( $this->workflow_id, 'Received PDF from Koban', array( 'status_code' => $status_code ) );
-			return array(
-				'type' => 'pdf',
-				'data' => $response_body,
-			);
-		}
-
-		Logger::debug(
-			$this->workflow_id,
-			'Received response from Koban',
-			array(
-				'status_code' => $status_code,
-				'body'        => json_decode( $response_body, true ),
-			)
-		);
-
-		if ( false !== strpos( $content_type, 'application/html' ) ) {
-			return array(
-				'error'   => 'received_html_response',
-				'message' => '',
-			);
-		}
-
 		if ( 404 === $status_code ) {
 			return array(
 				'error'   => 404,
@@ -160,6 +136,30 @@ class API {
 			return array(
 				'error'   => $status_code,
 				'message' => $response_body,
+			);
+		}
+
+		if ( false !== strpos( $content_type, 'application/pdf' ) ) {
+			Logger::debug( $this->workflow_id, 'Received PDF from Koban', array( 'status_code' => $status_code ) );
+			return array(
+				'type' => 'pdf',
+				'data' => $response_body,
+			);
+		}
+
+		Logger::debug(
+			$this->workflow_id,
+			'Received response from Koban',
+			array(
+				'status_code' => $status_code,
+				'body'        => json_decode( $response_body, true ),
+			)
+		);
+
+		if ( false !== strpos( $content_type, 'application/html' ) ) {
+			return array(
+				'error'   => 'received_html_response',
+				'message' => '',
 			);
 		}
 
@@ -226,7 +226,7 @@ class API {
 	 * @return string|null        The Third GUID or null on failure.
 	 */
 	public function upsert_user( array $user_payload ): ?string {
-		$url  = $this->api_url . '/ncThird/PostOne?uniqueproperty=Extcode';
+		$url  = $this->api_url . '/ncThird/PostOne?uniqueproperty=Email';
 		$data = $this->make_request_with_retries( $url, 'POST', $user_payload );
 
 		if ( ! isset( $data['Success'] ) || ! $data['Success'] || ! isset( $data['Result'] ) ) {
@@ -277,7 +277,7 @@ class API {
 		$url  = $this->api_url . '/ncInvoice/GetPDF?id=' . $invoice_guid;
 		$data = $this->make_request_with_retries( $url, 'GET' );
 
-		if ( ! $data || ! isset( $data['type'] ) || 'pdf' !== $data['type'] ) {
+		if ( ! $data || ! isset( $data['type'] ) || 'pdf' !== $data['type'] || empty( $data['data'] ) ) {
 			return null;
 		}
 		$pdf_binary    = $data['data'];

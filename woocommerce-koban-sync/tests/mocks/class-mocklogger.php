@@ -92,13 +92,8 @@ class MockLogger {
 			return;
 		}
 
-		$upload_dir = wp_upload_dir( null, false );
-		$log_file   = trailingslashit( $upload_dir['basedir'] ) . 'koban-debug.log';
-
 		$date_str     = gmdate( 'Y-m-d H:i:s' );
 		$context_json = wp_json_encode( $context );
-		$line         = sprintf( "[%s] %s: %s | context=%s\n", $date_str, $workflow_id, $message, $context_json );
-
-		file_put_contents( $log_file, $line, FILE_APPEND | LOCK_EX );
+		printf( "[%s] %s: %s | context=%s\n", $date_str, $workflow_id, $message, $context_json );
 	}
 }
