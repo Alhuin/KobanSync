@@ -5,15 +5,57 @@ It listens for key WooCommerce events—orders, product updates, billing changes
 
 ---
 
-## Key Points
+## Synchronization
+**How it works**:  
+- Koban IDs (GUIDs) or References (“Codes”) are stored in WordPress/WooCommerce metadata:
+  - **WC_Customer** → Koban Third GUID
+  - **WC_Product** → Koban Product GUID
+  - **WP_Term (categories)** → Koban Category Code
+  - **WC_Order** → Koban Invoice GUID, Koban Payment GUID, plus local path of the Invoice PDF
 
-- **Synchronizes Users/Customers**: Upserts Koban “Third” records from WooCommerce customer data.
-- **Generates Invoices**: On order payment completion, creates Koban invoices in Koban.
-- **Creates Invoice Payments**: After the invoice creation, creates the relevant payment in Koban.
-- **Retrieves Invoice PDF Document**: After the payment creation, download the invoice PDF from Koban and store it securely.
-- **Product Upsert**: Syncs WooCommerce products (by SKU or product ID) with Koban.
-- **Koban Links**: Adds links to relevant objects in Koban on User, Order, Product and Category pages.
-- **Logging**: Captures activities in a custom database table for debugging and auditing.
+**When does it sync?**
+- Various WooCommerce hooks trigger background tasks (via ActionScheduler) to sync data with Koban.
+- Each background task is allowed to retry up to 2 times if necessary before definitive failure.
+
+### WooCommerce Payment Complete Flow 
+Trigger: `woocommerce_payment_complete`  
+1. **Find the Koban Third GUID**  
+   - If user meta doesn’t have it, check Koban by email.  
+   - If not found, create a new Koban Third from billing info, then store the GUID locally.  
+2. **Create a Koban Invoice**  
+   - Attach it to the found/created Third, store its GUID in the WC_Order meta.  
+3. **Create a Koban Payment**  
+   - Attach it to that Invoice, store its GUID in the order meta.  
+4. **Download Invoice PDF**  
+   - Store the local PDF path in the order meta.
+5. **Send Logistics Email**
+   - Requires to apply the patches contained in woocommerce-koban-sync/patches to enable wc-multishipping integration
+   - Send an email to the logistics department with the Invoice & Chronopost label PDFs.
+
+### WooCommerce Update/Create Product Flow
+Triggers: `woocommerce_new_product` and `woocommerce_update_product`  
+- Check if WC_Product has a Koban Product GUID.  
+  - If found, update it in Koban.  
+  - If not found, create it in Koban, then store the new GUID locally.
+
+### WooCommerce Update Customer Flow
+Trigger: `woocommerce_customer_save_address`  
+- If `address_type` ≠ `billing`, do nothing.  
+- If there’s no Koban Third GUID in user meta, do nothing.  
+- Otherwise, update the Koban Third with the new billing details.
+
+---
+
+## Koban Links
+**In the WordPress Admin**:  
+- **User profile**: link to the corresponding Koban Third.  
+- **Product editor**: link to the Koban Product.  
+- **Order editor**: 
+  - Link to the Koban Invoice.  
+  - Link to the locally stored Invoice PDF.
+
+**In “My Account”** (WooCommerce front-end):  
+- Each order includes a link to view the stored Invoice PDF.
 
 > When deployed, this plugin **won’t do anything** unless you configure the Koban credentials in **Koban Sync → Settings**.
 > 
