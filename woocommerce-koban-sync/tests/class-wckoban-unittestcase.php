@@ -25,6 +25,13 @@ use WC_Product;
 class WCKoban_UnitTestCase extends WP_UnitTestCase {
 
 	/**
+	 * Reset global mocks before each test
+	 */
+	public function setUp(): void {
+		$this->reset_mocks();
+	}
+
+	/**
 	 * The protected_pdfs path
 	 *
 	 * @var string
@@ -164,27 +171,12 @@ class WCKoban_UnitTestCase extends WP_UnitTestCase {
 	/**
 	 * Create a basic WooCommerce customer and return the user ID.
 	 *
-	 * @param array $data Optional overrides for customer fields.
+	 * @param string $email The customer's email.
 	 * @return int        The created customer's user ID.
 	 */
-	public function create_wc_customer( array $data = array() ): int {
+	public function create_wc_customer( string $email ): int {
 		$customer = new WC_Customer();
-		$customer->set_billing_country( 'US' );
-		$customer->set_first_name( 'Justin' );
-		$customer->set_billing_state( 'PA' );
-		$customer->set_billing_postcode( '19123' );
-		$customer->set_billing_city( 'Philadelphia' );
-		$customer->set_billing_address( '123 South Street' );
-		$customer->set_billing_address_2( 'Apt 1' );
-		$customer->set_shipping_country( 'US' );
-		$customer->set_shipping_state( 'PA' );
-		$customer->set_shipping_postcode( '19123' );
-		$customer->set_shipping_city( 'Philadelphia' );
-		$customer->set_shipping_address( '123 South Street' );
-		$customer->set_shipping_address_2( 'Apt 1' );
-		$customer->set_username( 'username' );
-		$customer->set_password( 'password' );
-		$customer->set_email( 'email@example.com' );
+		$customer->set_email( $email );
 		$customer->save();
 
 		return $customer->get_id();

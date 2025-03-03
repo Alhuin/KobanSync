@@ -9,7 +9,10 @@
         <!-- We don't care about this in the tests directory -->
         <exclude-pattern>*/tests/*</exclude-pattern>
     </rule>
-
+    <rule ref="WordPress.Files.FileName.InvalidClassFileName">
+        <!-- We don't care about this in the tests directory -->
+        <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
     <rule ref="Squiz.Commenting.InlineComment.InvalidEndChar">
         <!-- We don't care about this in the test files -->
         <exclude-pattern>**/test-*.php</exclude-pattern>

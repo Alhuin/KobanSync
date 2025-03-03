@@ -141,6 +141,20 @@ class CreateInvoiceSuccess extends MockResponse {
 }
 
 /**
+ * Failure "createInvoice" response from Koban.
+ */
+class CreateInvoiceFailure extends MockResponse {
+	public string $method    = 'POST';
+	public string $endpoint  = '/ncInvoice';
+	public string $json_path = 'create_invoice_failure.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
  * Successful "getInvoicePDF" response from Koban.
  */
 class GetInvoicePdfSuccess extends MockResponse {
@@ -151,13 +165,38 @@ class GetInvoicePdfSuccess extends MockResponse {
 }
 
 /**
+ * Failure "getInvoicePDF" response from Koban.
+ */
+class GetInvoicePdfFailure extends MockResponse {
+
+	public string $method    = 'GET';
+	public string $endpoint  = '/ncInvoice/GetPDF';
+	public string $json_path = 'get_invoice_pdf_failure.json';
+}
+
+/**
  * Successful "createThird" response from Koban.
  */
 class CreateThirdSuccess extends MockResponse {
 
 	public string $method    = 'POST';
-	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Extcode';
+	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Email';
 	public string $json_path = 'create_third_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
+ * Failure "createThird" response from Koban.
+ */
+class CreateThirdFailure extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Email';
+	public string $json_path = 'create_third_failure.json';
 
 	public function __construct() {
 		parent::__construct();
@@ -171,8 +210,23 @@ class CreateThirdSuccess extends MockResponse {
 class UpdateThirdSuccess extends MockResponse {
 
 	public string $method    = 'POST';
-	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Extcode';
+	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Email';
 	public string $json_path = 'update_third_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
+ * Failure "updateThird" response from Koban.
+ */
+class UpdateThirdFailure extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncThird/PostOne?uniqueproperty=Email';
+	public string $json_path = 'update_third_failure.json';
 
 	public function __construct() {
 		parent::__construct();
@@ -196,6 +250,21 @@ class CreateProductSuccess extends MockResponse {
 }
 
 /**
+ * Failure "createProduct" response from Koban.
+ */
+class CreateProductFailure extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Reference';
+	public string $json_path = 'create_product_failure.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
  * Successful "updateProduct" response from Koban.
  */
 class UpdateProductSuccess extends MockResponse {
@@ -203,6 +272,21 @@ class UpdateProductSuccess extends MockResponse {
 	public string $method    = 'POST';
 	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Guid';
 	public string $json_path = 'update_product_success.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
+	}
+}
+
+/**
+ * Failure "updateProduct" response from Koban.
+ */
+class UpdateProductFailure extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncProduct/PostOne?uniqueproperty=Guid';
+	public string $json_path = 'update_product_failure.json';
 
 	public function __construct() {
 		parent::__construct();
@@ -222,5 +306,20 @@ class CreatePaymentSuccess extends MockResponse {
 	public function __construct() {
 		parent::__construct();
 		$this->guid = $this->body['Result'][0];
+	}
+}
+
+/**
+ * Failure "createPayment" response from Koban.
+ */
+class CreatePaymentFailure extends MockResponse {
+
+	public string $method    = 'POST';
+	public string $endpoint  = 'ncPayment/PostMany?uniqueproperty=Number&invoiceuniqueproperty=Guid';
+	public string $json_path = 'create_payment_failure.json';
+
+	public function __construct() {
+		parent::__construct();
+		$this->guid = $this->body['Result'];
 	}
 }

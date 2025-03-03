@@ -33,6 +33,13 @@ use WCKoban\Utils\MetaUtils;
 class PaymentCompleteHook {
 
 	/**
+	 * The number of retries allowed before definitive failure.
+	 *
+	 * @var int
+	 */
+	private static int $max_retries = 2;
+
+	/**
 	 * An instance of the Koban API client.
 	 *
 	 * @var API
@@ -45,7 +52,7 @@ class PaymentCompleteHook {
 	public function register(): void {
 		// Execute flow in the background with WooCommerce ActionScheduler.
 		add_action( 'woocommerce_payment_complete', array( $this, 'schedule_payment_complete' ) );
-		add_action( 'wckoban_handle_payment_complete', array( $this, 'handle_payment_complete' ), 10, 2 );
+		add_action( 'wckoban_handle_payment_complete', array( $this, 'handle_payment_complete' ), 10, 3 );
 	}
 
 	/**
@@ -63,6 +70,7 @@ class PaymentCompleteHook {
 			array(
 				'order_id'    => $order_id,
 				'workflow_id' => $workflow_id,
+				'attempt'     => 0,
 			),
 			'koban-sync'
 		);
@@ -79,8 +87,9 @@ class PaymentCompleteHook {
 	 *
 	 * @param int    $order_id The WC_Order ID.
 	 * @param string $workflow_id The Workflow ID.
+	 * @param int    $attempt The current retry number, 0 if initial attempt.
 	 */
-	public function handle_payment_complete( int $order_id, string $workflow_id ): void {
+	public function handle_payment_complete( int $order_id, string $workflow_id, int $attempt ): void {
 		Logger::debug(
 			$workflow_id,
 			'Detected payment complete',
@@ -98,15 +107,22 @@ class PaymentCompleteHook {
 
 		$order = wc_get_order( $order_id );
 		$data  = array(
-			'order' => $order,
+			'order'       => $order,
+			'workflow_id' => $workflow_id,
 		);
 
-		// TODO: Get last failed step.
-		$last_failed_step = null;
+		if ( 0 !== $attempt ) {
+			$data['koban_third_guid']   = MetaUtils::get_koban_third_guid( $order->get_user_id() );
+			$data['koban_invoice_guid'] = MetaUtils::get_koban_invoice_guid( $order );
+		}
+
+		$failed_step = MetaUtils::get_koban_workflow_failed_step_for_order( $order );
+
 		// Run the workflow through our state machine.
-		$state     = new StateMachine( $steps, $workflow_id, $data, $last_failed_step );
+		$state     = new StateMachine( $steps, $data, $failed_step );
 		$this->api = new API( $workflow_id );
 		$state->process_steps();
+		$this->handle_exit( $state, $attempt );
 	}
 
 	/**
@@ -119,19 +135,34 @@ class PaymentCompleteHook {
 		$order = $state->get_data( 'order' );
 
 		if ( ! $order instanceof WC_Order ) {
-			return $state->failed( __( 'Invalid order.', 'woocommerce-koban-sync' ) );
+			return $state->failed(
+				__( 'Invalid order.', 'woocommerce-koban-sync' ),
+				false
+			);
 		}
 
 		// Early termination if an invoice pdf already exists.
-		if ( MetaUtils::get_koban_invoice_pdf_path( $order ) ) {
-			// TODO: Check workflow status instead of pdf.
-			return $state->stop( __( 'Order already processed.', 'woocommerce-koban-sync' ) );
+		if ( in_array( MetaUtils::get_koban_workflow_status_for_order( $order ), array( StateMachine::STATUS_SUCCESS, StateMachine::STATUS_STOP ) ) ) {
+			return $state->stop(
+				sprintf(
+				/* translators: %d: the WooCommerce Order ID */
+					__( 'Order #%d already processed.', 'woocommerce-koban-sync' ),
+					$order->get_id()
+				)
+			);
 		}
 
 		// user_id 0 is Guest.
 		$user_id = $order->get_user_id();
 		if ( 0 !== $user_id && ! get_user_by( 'id', $user_id ) ) {
-			return $state->failed( __( 'Invalid User ID.', 'woocommerce-koban-sync' ) );
+			return $state->failed(
+				sprintf(
+				/* translators: %d: the WooCommerce Customer ID */
+					__( 'Invalid User ID : %d.', 'woocommerce-koban-sync' ),
+					$order->get_user_id()
+				),
+				false
+			);
 		}
 		return $state->success();
 	}
@@ -151,7 +182,11 @@ class PaymentCompleteHook {
 			$koban_third_guid = MetaUtils::get_koban_third_guid( $user_id );
 			if ( $koban_third_guid ) {
 				return $state->success(
-					__( 'Found Koban GUID in user metadata.', 'woocommerce-koban-sync' ),
+					sprintf(
+					/* translators: %s: the Koban Third GUID */
+						__( 'Found Koban GUID in user metadata : %s.', 'woocommerce-koban-sync' ),
+						$koban_third_guid
+					),
 					array( 'koban_third_guid' => $koban_third_guid )
 				);
 			}
@@ -164,7 +199,11 @@ class PaymentCompleteHook {
 				MetaUtils::set_koban_third_guid( $user_id, $koban_third_guid );
 			}
 			return $state->success(
-				__( 'Found Koban Third with matching email.', 'woocommerce-koban-sync' ),
+				sprintf(
+				/* translators: %s: the Koban Third GUID */
+					__( 'Found Koban Third with matching email: %s.', 'woocommerce-koban-sync' ),
+					$koban_third_guid
+				),
 				array( 'koban_third_guid' => $koban_third_guid )
 			);
 		}
@@ -176,7 +215,11 @@ class PaymentCompleteHook {
 				MetaUtils::set_koban_third_guid( $user_id, $koban_third_guid );
 			}
 			return $state->success(
-				__( 'Created Koban Third.', 'woocommerce-koban-sync' ),
+				sprintf(
+				/* translators: %s: the Koban Third GUID */
+					__( 'Created Koban Third: %s.', 'woocommerce-koban-sync' ),
+					$koban_third_guid
+				),
 				array( 'koban_third_guid' => $koban_third_guid )
 			);
 		}
@@ -215,7 +258,11 @@ class PaymentCompleteHook {
 			MetaUtils::set_koban_invoice_guid_for_order( $order, $koban_invoice_guid );
 
 			return $state->success(
-				__( 'Created Koban Invoice.', 'woocommerce-koban-sync' ),
+				sprintf(
+				/* translators: %s: the Koban Invoice GUID */
+					__( 'Created Koban Invoice: %s.', 'woocommerce-koban-sync' ),
+					$koban_invoice_guid
+				),
 				array( 'koban_invoice_guid' => $koban_invoice_guid )
 			);
 		}
@@ -238,7 +285,13 @@ class PaymentCompleteHook {
 		if ( $koban_payment_guid ) {
 			MetaUtils::set_koban_payment_guid_for_order( $order, $koban_payment_guid );
 
-			return $state->success( __( 'Created Koban Payment.', 'woocommerce-koban-sync' ) );
+			return $state->success(
+				sprintf(
+				/* translators: %s: the Koban Payment GUID */
+					__( 'Created Koban Payment: %s.', 'woocommerce-koban-sync' ),
+					$koban_payment_guid
+				)
+			);
 		}
 		return $state->failed( __( 'Could not create Koban Payment.', 'woocommerce-koban-sync' ) );
 	}
@@ -257,7 +310,13 @@ class PaymentCompleteHook {
 		if ( $koban_invoice_pdf_path ) {
 			MetaUtils::set_koban_invoice_pdf_path_for_order( $order, $koban_invoice_pdf_path );
 
-			return $state->success( __( 'Retrieved Koban Invoice PDF.', 'woocommerce-koban-sync' ) );
+			return $state->success(
+				sprintf(
+				/* translators: %s: the Koban Invoice PDF path */
+					__( 'Retrieved Koban Invoice PDF: %s.', 'woocommerce-koban-sync' ),
+					$koban_invoice_pdf_path
+				)
+			);
 		}
 		return $state->failed( __( 'Could not retrieve Koban Invoice PDF.', 'woocommerce-koban-sync' ) );
 	}
@@ -269,26 +328,41 @@ class PaymentCompleteHook {
 	 * @return bool True on success; false on failure.
 	 */
 	public function send_email_to_logistics( StateMachine $state ): bool {
-		$order = $state->get_data( 'order' );
+		$order       = $state->get_data( 'order' );
+		$workflow_id = $state->get_data( 'workflow_id' );
 
 		$koban_invoice_pdf_path = MetaUtils::get_koban_invoice_pdf_path( $order );
 		if ( ! file_exists( $koban_invoice_pdf_path ) ) {
-			return $state->failed( __( 'Koban invoice PDF not found.', 'woocommerce-koban-sync' ) );
+			return $state->failed(
+				sprintf(
+				/* translators: %s: the Koban Invoice PDF path */
+					__( 'Koban invoice PDF not found: %s.', 'woocommerce-koban-sync' ),
+					$koban_invoice_pdf_path
+				),
+				false
+			);
 		}
 
 		$shipping_data = $order->get_meta( '_wms_chronopost_shipment_data', true );
 		if ( ! $shipping_data ) {
-			return $state->failed( __( 'No shipping data found for this order.', 'woocommerce-koban-sync' ) );
+			return $state->failed( __( 'No shipping data found for this order.', 'woocommerce-koban-sync' ), false );
 		}
 
 		$tracking_number = $shipping_data['_wms_outward_parcels']['_wms_parcels'][0]['_wms_parcel_skybill_number'] ?? '';
 		if ( ! $tracking_number ) {
-			return $state->failed( __( 'No tracking number found in shipping data.', 'woocommerce-koban-sync' ) );
+			return $state->failed( __( 'No tracking number found in shipping data.', 'woocommerce-koban-sync' ), false );
 		}
 
 		$chronopost_label_path = WP_CONTENT_DIR . '/uploads/protected-pdfs/chronopost-label-' . $tracking_number . '.pdf';
 		if ( ! file_exists( $chronopost_label_path ) ) {
-			return $state->failed( __( 'Chronopost label PDF not found.', 'woocommerce-koban-sync' ) );
+			return $state->failed(
+				sprintf(
+				/* translators: %s: the Chronopost label PDF path */
+					__( 'Chronopost label PDF not found: %s.', 'woocommerce-koban-sync' ),
+					$chronopost_label_path
+				),
+				false
+			);
 		}
 
 		// TODO: Check if enabled in WC Settings.
@@ -302,6 +376,45 @@ class PaymentCompleteHook {
 				return $state->failed( __( 'Could not send email to logistics.', 'woocommerce-koban-sync' ) );
 			}
 		}
-		return $state->failed( __( 'wc_email_logistics not found in mailer.', 'woocommerce-koban-sync' ) );
+		return $state->failed( __( 'wc_email_logistics not found in mailer.', 'woocommerce-koban-sync' ), false );
+	}
+
+	/**
+	 * Handles the final state of the workflow, scheduling retries if necessary.
+	 *
+	 * @param StateMachine $state   The workflow state manager.
+	 * @param int          $attempt The current attempt count.
+	 */
+	private function handle_exit( StateMachine $state, int $attempt ): void {
+		$status = $state->get_status();
+		$data   = $state->get_data();
+		$order  = $data['order'];
+
+		MetaUtils::set_koban_workflow_status_for_order( $order, $status );
+
+		Logger::info(
+			'exit',
+			array(
+				'status'  => $status,
+				'retry'   => $state->retry,
+				'attempt' => $attempt,
+			)
+		);
+		if ( StateMachine::STATUS_FAILED === $status && $state->retry && $attempt < self::$max_retries ) {
+			MetaUtils::set_koban_workflow_failed_step_for_order( $order, $state->failed_step );
+
+			as_schedule_single_action(
+				time() + 60,
+				'wckoban_handle_payment_complete',
+				array(
+					'order_id'    => $order->get_id(),
+					'workflow_id' => $data['workflow_id'],
+					'attempt'     => $attempt + 1,
+				),
+				'koban-sync'
+			);
+		} else {
+			MetaUtils::set_koban_workflow_failed_step_for_order( $order, null );
+		}
 	}
 }

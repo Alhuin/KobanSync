@@ -190,4 +190,139 @@ class MetaUtils {
 	public static function get_koban_category_code( int $category_id ): ?string {
 		return get_term_meta( $category_id, KOBAN_CATEGORY_CODE_META_KEY, true );
 	}
+
+	/**
+	 * Set a StateMachine failed step on an oder.
+	 *
+	 * @param WC_Order $order The WooCommerce Oder.
+	 * @param ?string  $failed_step The failed_step, if any.
+	 */
+	public static function set_koban_workflow_failed_step_for_order( WC_Order $order, ?string $failed_step ): void {
+		$order->update_meta_data( KOBAN_WORKFLOW_FAILED_STEP_META_KEY, $failed_step );
+		$order->save();
+	}
+
+	/**
+	 * Get a StateMachine failed step from an order.
+	 *
+	 * @param WC_Order $order The WooCommerce Order.
+	 * @return ?string The failed step, if any.
+	 */
+	public static function get_koban_workflow_failed_step_for_order( WC_Order $order ): ?string {
+		return $order->get_meta( KOBAN_WORKFLOW_FAILED_STEP_META_KEY, true );
+	}
+
+	/**
+	 * Set a StateMachine status on an oder.
+	 *
+	 * @param WC_Order $order The WooCommerce Oder.
+	 * @param string   $status The status.
+	 */
+	public static function set_koban_workflow_status_for_order( WC_Order $order, string $status ): void {
+		$order->update_meta_data( KOBAN_WORKFLOW_STATUS_META_KEY, $status );
+		$order->save();
+	}
+
+	/**
+	 * Get a StateMachine status from an order.
+	 *
+	 * @param WC_Order $order The WooCommerce Order.
+	 * @return ?string The status, if any.
+	 */
+	public static function get_koban_workflow_status_for_order( WC_Order $order ): ?string {
+		return $order->get_meta( KOBAN_WORKFLOW_STATUS_META_KEY, true );
+	}
+
+	/**
+	 * Set a StateMachine failed step on a user from its ID.
+	 *
+	 * @param int     $user_id The user ID.
+	 * @param ?string $failed_step The failed_step, if any.
+	 */
+	public static function set_koban_workflow_failed_step_for_user_id( int $user_id, ?string $failed_step ): void {
+		update_user_meta( $user_id, KOBAN_WORKFLOW_FAILED_STEP_META_KEY, $failed_step );
+	}
+
+	/**
+	 * Get a StateMachine failed step from a user ID.
+	 *
+	 * @param int $user_id the user ID.
+	 * @return ?string The failed step, if any.
+	 */
+	public static function get_koban_workflow_failed_step_for_user_id( int $user_id ): ?string {
+		return get_user_meta( $user_id, KOBAN_WORKFLOW_FAILED_STEP_META_KEY, true );
+	}
+
+	/**
+	 * Set a StateMachine status on a user from its ID.
+	 *
+	 * @param int    $user_id The user ID.
+	 * @param string $status The status.
+	 */
+	public static function set_koban_workflow_status_for_user_id( int $user_id, string $status ): void {
+		update_user_meta( $user_id, KOBAN_WORKFLOW_STATUS_META_KEY, $status );
+	}
+
+	/**
+	 * Get a StateMachine status from a user ID.
+	 *
+	 * @param int $user_id the user ID.
+	 * @return string The status, if any.
+	 */
+	public static function get_koban_workflow_status_for_user_id( int $user_id ): ?string {
+		return get_user_meta( $user_id, KOBAN_WORKFLOW_STATUS_META_KEY, true );
+	}
+
+	/**
+	 * Set a StateMachine failed step on a product from its ID.
+	 *
+	 * @param int     $product_id The product ID.
+	 * @param ?string $failed_step The failed_step, if any.
+	 */
+	public static function set_koban_workflow_failed_step_for_product_id( int $product_id, ?string $failed_step ): void {
+		$product = wc_get_product( $product_id );
+
+		if ( $product ) {
+			$product->update_meta_data( KOBAN_WORKFLOW_FAILED_STEP_META_KEY, $failed_step );
+			$product->save();
+		}
+	}
+
+	/**
+	 * Get a StateMachine failed step from a product ID.
+	 *
+	 * @param int $product_id the product ID.
+	 * @return ?string The failed step, if any.
+	 */
+	public static function get_koban_workflow_failed_step_for_product_id( int $product_id ): ?string {
+		$product = wc_get_product( $product_id );
+		return $product ? $product->get_meta( KOBAN_WORKFLOW_FAILED_STEP_META_KEY, true ) : null;
+	}
+
+	/**
+	 * Set a StateMachine status on a product from its ID.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param string $status The status.
+	 */
+	public static function set_koban_workflow_status_for_product_id( $product_id, string $status ): void {
+		$product = wc_get_product( $product_id );
+
+		if ( $product ) {
+			$product->update_meta_data( KOBAN_WORKFLOW_STATUS_META_KEY, $status );
+			$product->save();
+		}
+	}
+
+	/**
+	 * Get a StateMachine status from a user ID.
+	 *
+	 * @param int $product_id the user ID.
+	 * @return ?string The status, if any.
+	 */
+	public static function get_koban_workflow_status_for_product_id( $product_id ): ?string {
+		$product = wc_get_product( $product_id );
+
+		return $product ? $product->get_meta( KOBAN_WORKFLOW_STATUS_META_KEY, true ) : null;
+	}
 }

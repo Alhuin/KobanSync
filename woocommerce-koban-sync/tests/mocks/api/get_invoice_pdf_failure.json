@@ -1,0 +1,9 @@
+{
+  "headers": {
+    "content-type" : "application/pdf"
+  },
+  "response": {
+    "code": 404
+  },
+  "body": ""
+}
