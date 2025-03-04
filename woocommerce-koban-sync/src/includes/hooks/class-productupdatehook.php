@@ -90,6 +90,7 @@ class ProductUpdateHook {
 	 * @param int    $attempt The current retry number, 0 if initial attempt.
 	 */
 	public function handle_product_update( int $product_id, string $workflow_id, int $attempt ): void {
+		remove_action( 'woocommerce_update_product', array( $this, 'schedule_product_update' ) );
 		Logger::debug(
 			$workflow_id,
 			'Detected product create/update',
@@ -111,6 +112,7 @@ class ProductUpdateHook {
 		$this->api   = new API( $workflow_id );
 		$state->process_steps();
 		$this->handle_exit( $state, $attempt );
+		add_action( 'woocommerce_update_product', array( $this, 'schedule_product_update' ) );
 	}
 
 	/**
