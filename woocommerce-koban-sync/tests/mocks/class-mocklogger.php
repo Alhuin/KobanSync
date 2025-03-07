@@ -111,7 +111,7 @@ class MockLogger {
 			return;
 		}
 
-		printf("worfklow: %s, action: %s: %s", $workflow_id, $action_type, $message);
+		printf( 'worfklow: %s, action: %s: %s', $workflow_id, $action_type, $message );
 	}
 
 	/**
@@ -125,7 +125,7 @@ class MockLogger {
 		if ( ! self::$debug_mode ) {
 			return;
 		}
-		printf( "worfklow: %s, status %s", $workflow_id, $final_status);
+		printf( 'worfklow: %s, status %s', $workflow_id, $final_status );
 		print_r( $steps_array );
 	}
 }

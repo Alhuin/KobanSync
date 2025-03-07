@@ -93,7 +93,13 @@ class TestStateMachine extends WP_UnitTestCase {
 			array( $this, 'step_one_success' ),
 			array( $this, 'step_two_success' ),
 		);
-		$machine = new StateMachine( $steps, array( 'workflow_id' => $this->workflow_id, 'initial' => 'initVal' ) );
+		$machine = new StateMachine(
+			$steps,
+			array(
+				'workflow_id' => $this->workflow_id,
+				'initial'     => 'initVal',
+			)
+		);
 
 		$machine->process_steps();
 
@@ -190,7 +196,14 @@ class TestStateMachine extends WP_UnitTestCase {
 		$this->assertSame( 'step_might_fail', $machine1->failed_step );
 
 		// Second attempt: skip step_one_success, start from step_might_fail.
-		$machine2 = new StateMachine( $steps, array( 'resumed' => 'data', 'workflow_id' => $this->workflow_id ), 'step_might_fail' );
+		$machine2 = new StateMachine(
+			$steps,
+			array(
+				'resumed'     => 'data',
+				'workflow_id' => $this->workflow_id,
+			),
+			'step_might_fail'
+		);
 		$machine2->process_steps();
 
 		$this->assertSame( StateMachine::STATUS_SUCCESS, $machine2->get_status() );
