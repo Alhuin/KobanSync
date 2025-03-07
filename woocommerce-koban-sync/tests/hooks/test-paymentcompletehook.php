@@ -448,7 +448,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 0 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 0 );
 
 		$order = wc_get_order( $order_id );
 
@@ -488,7 +490,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 1 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 1 );
 
 		$order = wc_get_order( $order_id );
 
@@ -531,7 +535,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 0 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 0 );
 
 		$order = wc_get_order( $order_id );
 
@@ -569,7 +575,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 1 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 1 );
 
 		$order = wc_get_order( $order_id );
 
@@ -613,7 +621,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 0 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 0 );
 
 		$order = wc_get_order( $order_id );
 
@@ -651,7 +661,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 1 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 1 );
 
 		$order = wc_get_order( $order_id );
 
@@ -696,7 +708,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 0 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 0 );
 
 		$order = wc_get_order( $order_id );
 
@@ -732,7 +746,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 1 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 1 );
 
 		$order = wc_get_order( $order_id );
 
@@ -775,7 +791,9 @@ class TestPaymentCompleteHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new PaymentCompleteHook() )->handle_payment_complete( $order_id, $this->workflow_id, 0 );
+		$hook               = new PaymentCompleteHook();
+		$hook::$max_retries = 1;
+		$hook->handle_payment_complete( $order_id, $this->workflow_id, 0 );
 
 		$order = wc_get_order( $order_id );
 

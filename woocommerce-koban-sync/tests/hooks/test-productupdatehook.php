@@ -193,7 +193,9 @@ class TestProductUpdateHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new ProductUpdateHook() )->handle_product_update(
+		$hook               = new ProductUpdateHook();
+		$hook::$max_retries = 1;
+		$hook->handle_product_update(
 			$this->product_with_guid_id,
 			$this->workflow_id,
 			0
@@ -231,7 +233,9 @@ class TestProductUpdateHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new ProductUpdateHook() )->handle_product_update(
+		$hook               = new ProductUpdateHook();
+		$hook::$max_retries = 1;
+		$hook->handle_product_update(
 			$this->product_with_guid_id,
 			$this->workflow_id,
 			1
@@ -273,7 +277,10 @@ class TestProductUpdateHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new ProductUpdateHook() )->handle_product_update(
+		$hook               = new ProductUpdateHook();
+		$hook::$max_retries = 1;
+
+		$hook->handle_product_update(
 			$this->product_without_guid_id,
 			$this->workflow_id,
 			0
@@ -311,7 +318,10 @@ class TestProductUpdateHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new ProductUpdateHook() )->handle_product_update(
+		$hook               = new ProductUpdateHook();
+		$hook::$max_retries = 1;
+
+		$hook->handle_product_update(
 			$this->product_without_guid_id,
 			$this->workflow_id,
 			1

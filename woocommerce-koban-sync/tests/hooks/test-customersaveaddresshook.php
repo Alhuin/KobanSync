@@ -230,7 +230,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new CustomerSaveAddressHook() )->handle_customer_save_address(
+		$hook               = new CustomerSaveAddressHook();
+		$hook::$max_retries = 1;
+		$hook->handle_customer_save_address(
 			$this->customer_with_guid_id,
 			'billing',
 			'workflow_id',
@@ -270,7 +272,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			)
 		);
 
-		( new CustomerSaveAddressHook() )->handle_customer_save_address(
+		$hook               = new CustomerSaveAddressHook();
+		$hook::$max_retries = 1;
+		$hook->handle_customer_save_address(
 			$this->customer_with_guid_id,
 			'billing',
 			'workflow_id',

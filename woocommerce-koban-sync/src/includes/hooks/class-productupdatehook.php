@@ -30,7 +30,7 @@ class ProductUpdateHook {
 	 *
 	 * @var int
 	 */
-	private static int $max_retries = 2;
+	public static int $max_retries = 0;
 
 	/**
 	 * An instance of the Koban API client.
