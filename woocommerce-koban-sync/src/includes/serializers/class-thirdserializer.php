@@ -9,9 +9,8 @@
 
 namespace WCKoban\Serializers;
 
+use WC_Customer;
 use WC_Order;
-use WP_User;
-use WCKoban\Logger;
 
 /**
  * Class ThirdSerializer
@@ -34,13 +33,13 @@ class ThirdSerializer {
 	}
 
 	/**
-	 *  WP_User to Koban Third payload
+	 *  WC_Customer to Koban Third payload
 	 *
-	 * @param WP_User $user The WordPress User.
+	 * @param WC_Customer $user The WooCommerce Customer.
 	 *
 	 * @return array The Koban Third payload.
 	 */
-	public function from_user( WP_User $user ): array {
+	public function from_user( WC_Customer $user ): array {
 		return $this->billing_to_koban_third(
 			$this->billing_data_from_user( $user )
 		);
@@ -62,7 +61,6 @@ class ThirdSerializer {
 			'address_1'  => '',
 			'address_2'  => '',
 			'city'       => '',
-			'state'      => '',
 			'postcode'   => '',
 			'country'    => '',
 		);
@@ -77,40 +75,43 @@ class ThirdSerializer {
 		$status_code = CUSTOMER_THIRD_STATUS_CODE;
 		$type_code   = CUSTOMER_COUNTRY_THIRD_TYPE_CODE_MAPPER[ $billing['country'] ] ?? 'Particuliers (Autre)';
 
+		$billing_address = array(
+			'Name'      => $billing['last_name'],
+			'FirstName' => $billing['first_name'],
+			'Phone'     => $billing['phone'],
+			'Street'    => trim( $billing['address_1'] . ' ' . $billing['address_2'] ),
+			'ZipCode'   => $billing['postcode'],
+			'City'      => $billing['city'],
+			'Country'   => $billing['country'] ? mb_strtoupper( $billing['country'], 'utf-8' ) : 'FR',
+		);
+
 		return array(
-			'Label'      => $label,
-			'FirstName'  => $billing['first_name'],
-			'Status'     => array(
+			'Label'          => $label,
+			'FirstName'      => $billing['first_name'],
+			'Status'         => array(
 				'Code' => $status_code,
 			),
-			'Type'       => array(
+			'Type'           => array(
 				'Code' => $type_code,
 			),
-			'Address'    => array(
-				'Name'      => $billing['last_name'],
-				'FirstName' => $billing['first_name'],
-				'Phone'     => $billing['phone'],
-				'Street'    => trim( $billing['address_1'] . ' ' . $billing['address_2'] ),
-				'ZipCode'   => $billing['postcode'],
-				'City'      => $billing['city'],
-				'Country'   => $billing['country'] ? mb_strtoupper( $billing['country'], 'utf-8' ) : 'FR',
-			),
-			'EMail'      => $billing['email'],
-			'AssignedTo' => array(
+			'Address'        => $billing_address,
+			'InvoiceAddress' => $billing_address,
+			'EMail'          => $billing['email'],
+			'AssignedTo'     => array(
 				'FullName' => DEFAULT_ASSIGNEDTO_FULLNAME,
 			),
-			'Optin'      => true,
+			'Optin'          => true,
 		);
 	}
 
 	/**
 	 * Extracts relevant billing fields from a WordPress User.
 	 *
-	 * @param WP_User $user The WordPress user object.
+	 * @param WC_Customer $user The WooCommerce Customer.
 	 *
 	 * @return array An associative array of billing data.
 	 */
-	protected static function billing_data_from_user( WP_User $user ): array {
+	protected static function billing_data_from_user( WC_Customer $user ): array {
 		return array(
 			'first_name' => $user->get_billing_first_name(),
 			'last_name'  => $user->get_billing_last_name(),
@@ -119,7 +120,6 @@ class ThirdSerializer {
 			'address_1'  => $user->get_billing_address_1(),
 			'address_2'  => $user->get_billing_address_2(),
 			'city'       => $user->get_billing_city(),
-			'state'      => $user->get_billing_state(),
 			'postcode'   => $user->get_billing_postcode(),
 			'country'    => $user->get_billing_country(),
 		);
@@ -141,7 +141,6 @@ class ThirdSerializer {
 			'address_1'  => $order->get_billing_address_1(),
 			'address_2'  => $order->get_billing_address_2(),
 			'city'       => $order->get_billing_city(),
-			'state'      => $order->get_billing_state(),
 			'postcode'   => $order->get_billing_postcode(),
 			'country'    => $order->get_billing_country(),
 		);
