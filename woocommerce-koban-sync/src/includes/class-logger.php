@@ -16,6 +16,60 @@ class Logger {
 
 
 	/**
+	 * Record the scheduling of a new workflow in the custom logs table.
+	 *
+	 * @param string $workflow_id  The unique identifier for this workflow.
+	 * @param string $action_type  Label of the action type, eg 'Payment Complete'.
+	 * @param string $message      Information about the scheduling.
+	 *
+	 * @return void
+	 */
+	public static function record_workflow_schedule( string $workflow_id, string $action_type, string $message ): void {
+		global $wpdb;
+
+		// Check if we already have a row for this workflow_id.
+		$table = $wpdb->prefix . 'koban_sync_logs';
+
+		// Insert a new row with minimal data.
+		$wpdb->insert(
+			$table,
+			array(
+				'workflow_id'        => $workflow_id,
+				'action_type'        => $action_type,
+				'status'             => 'scheduled',
+				'time'               => current_time( 'mysql' ),
+				'scheduling_message' => $message,
+			),
+			array( '%s', '%s', '%s', '%s', '%s' )
+		);
+	}
+
+	/**
+	 * Finalize workflow: store the final JSON payload, set final status, update time.
+	 *
+	 * @param string $workflow_id The workflow ID.
+	 * @param string $final_status e.g. success of failed.
+	 * @param array  $steps_array The big array of steps & statuses.
+	 */
+	public static function record_workflow_completion( string $workflow_id, string $final_status, array $steps_array ): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'koban_sync_logs';
+
+		$json_payload = wp_json_encode( $steps_array );
+
+		$wpdb->update(
+			$table,
+			array(
+				'status'  => $final_status,
+				'payload' => $json_payload,
+			),
+			array( 'workflow_id' => $workflow_id ),
+			array( '%s', '%s', '%s' ),
+			array( '%s' )
+		);
+	}
+
+	/**
 	 * Generic log method that inserts a record into the custom logs table, if available.
 	 *
 	 * @param string $level   The severity level (e.g., info, error).

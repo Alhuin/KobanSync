@@ -63,7 +63,7 @@ class PaymentCompleteHook {
 	public function schedule_payment_complete( int $order_id ): void {
 		$workflow_id = uniqid( 'wkf_', true );
 
-		Logger::debug( $workflow_id, "Scheduling background sync for order: {$order_id}" );
+		Logger::record_workflow_schedule( $workflow_id, 'Payment Complete', "Scheduling background sync for order: {$order_id}" );
 
 		as_enqueue_async_action(
 			'wckoban_handle_payment_complete',
