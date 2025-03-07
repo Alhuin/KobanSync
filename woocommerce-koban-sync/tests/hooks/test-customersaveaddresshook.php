@@ -51,12 +51,26 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 		wp_delete_user( $this->customer_without_guid_id );
 		as_unschedule_all_actions( 'wckoban_handle_customer_save_address' );
 	}
+
 	/**
 	 * Trigger woocommerce_customer_save_address hook
-	 * Should schedule background handler action
+	 * Should not schedule background handler action if the address is not billing
 	 */
-	public function test_customer_save_address_action_scheduled() {
+	public function test_customer_save_address_action_not_scheduled_if_not_billing_address() {
 		do_action( 'woocommerce_customer_save_address', $this->customer_with_guid_id, 'address_type' );
+
+		$this->assertFalse(
+			as_has_scheduled_action( 'wckoban_handle_customer_save_address' ),
+			'Expected wckoban_handle_customer_save_address to be scheduled.'
+		);
+	}
+
+	/**
+	 * Trigger woocommerce_customer_save_address hook
+	 * Should schedule background handler action if the address is billing
+	 */
+	public function test_customer_save_address_action_scheduled_if_billing_address() {
+		do_action( 'woocommerce_customer_save_address', $this->customer_with_guid_id, 'billing' );
 
 		$this->assertNotFalse(
 			as_has_scheduled_action( 'wckoban_handle_customer_save_address' ),

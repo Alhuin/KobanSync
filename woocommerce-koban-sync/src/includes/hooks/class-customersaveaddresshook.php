@@ -52,18 +52,22 @@ class CustomerSaveAddressHook {
 	public function schedule_customer_save_address( int $customer_id, string $address_type ): void {
 		$workflow_id = uniqid( 'wkf_', true );
 
-		Logger::debug( $workflow_id, "Scheduling background billing address sync for customer: {$customer_id}" );
+		if ( 'billing' === $address_type ) {
+			Logger::record_workflow_schedule( $workflow_id, 'Customer Address', "Scheduling background sync for user: {$customer_id}" );
 
-		as_enqueue_async_action(
-			'wckoban_handle_customer_save_address',
-			array(
-				'customer_id'  => $customer_id,
-				'address_type' => $address_type,
-				'workflow_id'  => $workflow_id,
-				'attempt'      => 0,
-			),
-			'koban-sync'
-		);
+			as_enqueue_async_action(
+				'wckoban_handle_customer_save_address',
+				array(
+					'customer_id'  => $customer_id,
+					'address_type' => $address_type,
+					'workflow_id'  => $workflow_id,
+					'attempt'      => 0,
+				),
+				'koban-sync'
+			);
+		} else {
+			Logger::debug( $workflow_id, "Skipping customer save address for address_type == {$address_type}" );
+		}
 	}
 
 	/**
