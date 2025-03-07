@@ -2,16 +2,17 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Koban Sync 0.0.1\n"
+"Project-Id-Version: WooCommerce Koban Sync 0.0.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/src\n"
-"POT-Creation-Date: 2025-03-03T12:10:57+00:00\n"
+"POT-Creation-Date: 2025-03-07T10:16:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Alhuin <alhuin.git@proton.me>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: woocommerce-koban-sync\n"
 
@@ -34,66 +35,78 @@ msgstr ""
 msgid "Alhuin"
 msgstr "Alhuin"
 
-#: admin/class-admin.php:35
+#: admin/class-admin.php:36
 msgid "Koban Sync Settings"
 msgstr "Paramètres Koban Sync"
 
-#: admin/class-admin.php:36 admin/meta-fields.php:25 admin/meta-fields.php:185
+#: admin/class-admin.php:37 admin/meta-fields.php:25 admin/meta-fields.php:185
 #: admin/meta-fields.php:360
 msgid "Koban Sync"
 msgstr "Koban Sync"
 
-#: admin/class-admin.php:56
+#: admin/class-admin.php:57
 msgid "Koban Settings"
 msgstr "Paramètres Koban"
 
-#: admin/class-admin.php:63
+#: admin/class-admin.php:64
 msgid "API Key"
 msgstr "Clé API"
 
-#: admin/class-admin.php:71
+#: admin/class-admin.php:72
 msgid "User Key"
 msgstr "Clé Utilisateur"
 
-#: admin/class-admin.php:79
+#: admin/class-admin.php:80
 msgid "Koban API URL"
 msgstr "URL de l'API Koban"
 
-#: admin/class-admin.php:87
+#: admin/class-admin.php:88
 msgid "Koban URL"
 msgstr "URL Koban"
 
-#: admin/class-admin.php:98
+#: admin/class-admin.php:99
 msgid "Enter your Koban settings below."
 msgstr "Renseignez les paramètres Koban ci-dessous."
 
-#: admin/class-admin.php:180 woocommerce-koban-sync.php:207
+#: admin/class-admin.php:179 woocommerce-koban-sync.php:221
 msgid "Settings"
 msgstr "Paramètres"
 
-#: admin/class-admin.php:184
+#: admin/class-admin.php:183
 msgid "Logs"
 msgstr "Journaux"
 
-#: admin/class-admin.php:194
+#: admin/class-admin.php:192
 msgid "Save Changes"
 msgstr "Enregistrer les changements"
 
-#: admin/class-admin.php:219
-msgid "Synchronization Logs"
-msgstr "Journaux de synchronisation"
+#: admin/class-admin.php:221
+msgid "Action Type"
+msgstr ""
 
-#: admin/class-admin.php:239 admin/class-admin.php:260
-msgid "View Context"
-msgstr "Afficher le contexte"
+#: admin/class-admin.php:222
+msgid "Workflow ID"
+msgstr ""
 
-#: admin/class-admin.php:246
-msgid "No logs available."
-msgstr "Aucune entrée disponible."
+#: admin/class-admin.php:223
+msgid "Status"
+msgstr ""
 
-#: admin/class-admin.php:261
-msgid "Hide Context"
-msgstr "Masquer le contexte"
+#: admin/class-admin.php:224
+msgid "Time"
+msgstr ""
+
+#: admin/class-admin.php:256
+msgid "Initial Scheduling"
+msgstr ""
+
+#: admin/class-admin.php:295
+msgid "View Debug Logs"
+msgstr ""
+
+#: admin/class-admin.php:302
+msgid "No workflow logs found."
+msgstr ""
 
 #: admin/meta-fields.php:49
 msgid "Koban Product GUID"
@@ -201,23 +214,23 @@ msgid "Customer:"
 msgstr "Client :"
 
 #. translators: %s: the WooCommerce Customer ID
-#: includes/hooks/class-customersaveaddresshook.php:118
+#: includes/hooks/class-customersaveaddresshook.php:123
 msgid "Invalid customer ID: %s"
 msgstr "Customer ID non valide : %s."
 
-#: includes/hooks/class-customersaveaddresshook.php:141
+#: includes/hooks/class-customersaveaddresshook.php:146
 msgid "Updated Koban Third with new billing details."
 msgstr ""
 "Le Compte Koban a été mis à jour avec les nouvelles informations de "
 "facturation."
 
-#: includes/hooks/class-customersaveaddresshook.php:143
+#: includes/hooks/class-customersaveaddresshook.php:148
 msgid "Could not update Koban Third."
 msgstr "Impossible de mettre à jour le Compte Koban."
 
-#: includes/hooks/class-customersaveaddresshook.php:148
-msgid ""
-"Update not necessary, user either not synced yet or address was not billing."
+#: includes/hooks/class-customersaveaddresshook.php:153
+#, fuzzy
+msgid "Update not necessary, user not synced yet."
 msgstr ""
 "Mise à jour inutile : l'utilisateur n'est pas encore synchronisé ou il ne "
 "s'agit pas d'une adresse de facturation."
@@ -323,23 +336,23 @@ msgid "wc_email_logistics not found in mailer."
 msgstr "Template d'email introuvable dans la configuration WooCommerce."
 
 #. translators: %s: the WooCommerce Product ID
-#: includes/hooks/class-productupdatehook.php:128
+#: includes/hooks/class-productupdatehook.php:130
 msgid "Invalid Product ID: %s."
 msgstr "Product ID non valide : %s."
 
-#: includes/hooks/class-productupdatehook.php:148
+#: includes/hooks/class-productupdatehook.php:150
 msgid "Updated Koban Product."
 msgstr "Le Produit Koban a été mis à jour."
 
-#: includes/hooks/class-productupdatehook.php:150
+#: includes/hooks/class-productupdatehook.php:152
 msgid "Could not update Koban Product."
 msgstr "Impossible de mettre à jour le Produit Koban."
 
-#: includes/hooks/class-productupdatehook.php:156
+#: includes/hooks/class-productupdatehook.php:158
 msgid "Created Koban Product."
 msgstr "Le Produit Koban a été créé."
 
-#: includes/hooks/class-productupdatehook.php:158
+#: includes/hooks/class-productupdatehook.php:160
 msgid "Could not create Koban Product."
 msgstr "Impossible de créer le Produit Koban."
 
@@ -359,16 +372,12 @@ msgstr "En cours"
 msgid "Success"
 msgstr "Succès"
 
-#: includes/hooks/class-statemachine.php:240
-msgid "Workflow execution finished."
-msgstr "Synchronisation terminée."
-
-#: woocommerce-koban-sync.php:65
+#: woocommerce-koban-sync.php:76
 msgid "WooCommerce Koban Sync requires WooCommerce to be installed and active."
 msgstr ""
 "WooCommerce Koban Sync nécessite que WooCommerce soit installé et activé."
 
-#: woocommerce-koban-sync.php:119
+#: woocommerce-koban-sync.php:130
 msgid ""
 "WooCommerce Koban Sync is inactive because Koban credentials are missing. "
 "Please visit Koban Sync → Settings."

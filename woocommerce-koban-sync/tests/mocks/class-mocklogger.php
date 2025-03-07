@@ -96,4 +96,36 @@ class MockLogger {
 		$context_json = wp_json_encode( $context );
 		printf( "[%s] %s: %s | context=%s\n", $date_str, $workflow_id, $message, $context_json );
 	}
+
+	/**
+	 * Record the scheduling of a new workflow in the custom logs table.
+	 *
+	 * @param string $workflow_id  The unique identifier for this workflow.
+	 * @param string $action_type  Label of the action type, eg 'Payment Complete'.
+	 * @param string $message      Information about the scheduling.
+	 *
+	 * @return void
+	 */
+	public static function record_workflow_schedule( string $workflow_id, string $action_type, string $message ): void {
+		if ( ! self::$debug_mode ) {
+			return;
+		}
+
+		printf( 'worfklow: %s, action: %s: %s', $workflow_id, $action_type, $message );
+	}
+
+	/**
+	 * Finalize workflow: store the final JSON payload, set final status, update time.
+	 *
+	 * @param string $workflow_id The workflow ID.
+	 * @param string $final_status e.g. success of failed.
+	 * @param array  $steps_array The big array of steps & statuses.
+	 */
+	public static function record_workflow_completion( string $workflow_id, string $final_status, array $steps_array ): void {
+		if ( ! self::$debug_mode ) {
+			return;
+		}
+		printf( 'worfklow: %s, status %s', $workflow_id, $final_status );
+		print_r( $steps_array );
+	}
 }

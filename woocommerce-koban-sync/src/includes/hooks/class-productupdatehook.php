@@ -68,7 +68,7 @@ class ProductUpdateHook {
 		}
 
 		set_transient( $transient_key, true, 3 );
-		Logger::debug( $workflow_id, "Scheduling background sync for product: {$product_id}" );
+		Logger::record_workflow_schedule( $workflow_id, 'product_update', "Scheduling background sync for product: {$product_id}" );
 
 		as_enqueue_async_action(
 			'wckoban_handle_product_update',

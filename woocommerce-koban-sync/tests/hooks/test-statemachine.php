@@ -20,6 +20,13 @@ use WP_UnitTestCase;
 class TestStateMachine extends WP_UnitTestCase {
 
 	/**
+	 * The StateMachine Worfklow ID.
+	 *
+	 * @var string
+	 */
+	private string $workflow_id = 'workflow_id';
+
+	/**
 	 * Step that adds keyA to the workflow data and succeeds.
 	 *
 	 * @param  StateMachine $state Workflow state machine.
@@ -86,7 +93,13 @@ class TestStateMachine extends WP_UnitTestCase {
 			array( $this, 'step_one_success' ),
 			array( $this, 'step_two_success' ),
 		);
-		$machine = new StateMachine( $steps, array( 'initial' => 'initVal' ) );
+		$machine = new StateMachine(
+			$steps,
+			array(
+				'workflow_id' => $this->workflow_id,
+				'initial'     => 'initVal',
+			)
+		);
 
 		$machine->process_steps();
 
@@ -111,7 +124,7 @@ class TestStateMachine extends WP_UnitTestCase {
 			array( $this, 'step_stop_early' ),
 			array( $this, 'step_two_success' ),
 		);
-		$machine = new StateMachine( $steps );
+		$machine = new StateMachine( $steps, array( 'workflow_id' => $this->workflow_id ) );
 
 		$machine->process_steps();
 
@@ -132,7 +145,7 @@ class TestStateMachine extends WP_UnitTestCase {
 			array( $this, 'step_fail_now' ),
 			array( $this, 'step_two_success' ),
 		);
-		$machine = new StateMachine( $steps );
+		$machine = new StateMachine( $steps, array( 'workflow_id' => $this->workflow_id ) );
 
 		$machine->process_steps();
 
@@ -152,7 +165,7 @@ class TestStateMachine extends WP_UnitTestCase {
 			array( $this, 'step_fail_no_retry' ),
 			array( $this, 'step_two_success' ),
 		);
-		$machine = new StateMachine( $steps );
+		$machine = new StateMachine( $steps, array( 'workflow_id' => $this->workflow_id ) );
 
 		$machine->process_steps();
 
@@ -176,14 +189,21 @@ class TestStateMachine extends WP_UnitTestCase {
 		);
 
 		// First attempt: fails on step_might_fail.
-		$machine1 = new StateMachine( $steps );
+		$machine1 = new StateMachine( $steps, array( 'workflow_id' => $this->workflow_id ) );
 		$machine1->process_steps();
 
 		$this->assertSame( StateMachine::STATUS_FAILED, $machine1->get_status() );
 		$this->assertSame( 'step_might_fail', $machine1->failed_step );
 
 		// Second attempt: skip step_one_success, start from step_might_fail.
-		$machine2 = new StateMachine( $steps, array( 'resumed' => 'data' ), 'step_might_fail' );
+		$machine2 = new StateMachine(
+			$steps,
+			array(
+				'resumed'     => 'data',
+				'workflow_id' => $this->workflow_id,
+			),
+			'step_might_fail'
+		);
 		$machine2->process_steps();
 
 		$this->assertSame( StateMachine::STATUS_SUCCESS, $machine2->get_status() );

@@ -48,6 +48,17 @@ use WCKoban\Hooks\CustomerSaveAddressHook;
 use WCKoban\Hooks\PaymentCompleteHook;
 use WCKoban\Hooks\ProductUpdateHook;
 
+add_action(
+	'plugins_loaded',
+	function () {
+		load_plugin_textdomain(
+			'woocommerce-koban-sync',
+			false,
+			dirname( plugin_basename( __FILE__ ) ) . '/languages'
+		);
+	}
+);
+
 /**
  * Check if WooCommerce is active. If not, deactivate.
  */
@@ -145,12 +156,15 @@ function wckoban_sync_create_logs_table(): void {
 	$sql = "CREATE TABLE IF NOT EXISTS $table_name (
 		id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 		workflow_id VARCHAR(64) DEFAULT NULL,
+		action_type VARCHAR(50) DEFAULT NULL,
+		status VARCHAR(20) DEFAULT NULL,
 		time DATETIME NOT NULL,
-		level VARCHAR(20) NOT NULL,
-		message TEXT NOT NULL,
-		context TEXT NULL,
-		PRIMARY KEY (id)
-	) $charset_collate;";
+		scheduling_message TEXT DEFAULT NULL,
+		payload LONGTEXT DEFAULT NULL,
+		PRIMARY KEY (id),
+		KEY idx_workflow_id (workflow_id),
+		KEY idx_time (time)
+	) ENGINE=InnoDB $charset_collate;";
 
 	include_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	dbDelta( $sql );

@@ -237,6 +237,10 @@ class StateMachine {
 	 * Log final workflow state upon completion.
 	 */
 	private function log(): void {
-		Logger::info( __( 'Workflow execution finished.', 'woocommerce-koban-sync' ), $this->state );
+		Logger::record_workflow_completion(
+			$this->get_data( 'workflow_id' ),
+			$this->get_status(),
+			$this->get_state()
+		);
 	}
 }
