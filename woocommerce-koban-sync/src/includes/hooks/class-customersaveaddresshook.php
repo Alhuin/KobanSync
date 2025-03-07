@@ -9,6 +9,7 @@
 
 namespace WCKoban\Hooks;
 
+use WC_Customer;
 use WCKoban\API;
 use WCKoban\Logger;
 use WCKoban\Serializers\ThirdSerializer;
@@ -40,7 +41,7 @@ class CustomerSaveAddressHook {
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_customer_save_address', array( $this, 'schedule_customer_save_address' ), 20, 2 );
-		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ), 10, 4 );
+		add_action( 'wckoban_handle_customer_save_address', array( $this, 'handle_customer_save_address' ), 10, 3 );
 	}
 
 	/**
@@ -58,10 +59,9 @@ class CustomerSaveAddressHook {
 			as_enqueue_async_action(
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $customer_id,
-					'address_type' => $address_type,
-					'workflow_id'  => $workflow_id,
-					'attempt'      => 0,
+					'customer_id' => $customer_id,
+					'workflow_id' => $workflow_id,
+					'attempt'     => 0,
 				),
 				'koban-sync'
 			);
@@ -75,18 +75,16 @@ class CustomerSaveAddressHook {
 	 * Initiates a small workflow to update Koban if it's a billing address.
 	 *
 	 * @param int    $customer_id WordPress User ID.
-	 * @param string $address_type Address type being saved (e.g., 'billing' or 'shipping').
 	 * @param string $workflow_id The Workflow ID.
 	 * @param int    $attempt The current retry number, 0 if initial attempt.
 	 */
-	public function handle_customer_save_address( int $customer_id, string $address_type, string $workflow_id, int $attempt ): void {
+	public function handle_customer_save_address( int $customer_id, string $workflow_id, int $attempt ): void {
 		Logger::debug(
 			$workflow_id,
 			'Detected customer save address',
 			array(
-				'customer_id'  => $customer_id,
-				'address_type' => $address_type,
-				'workflow_id'  => $workflow_id,
+				'customer_id' => $customer_id,
+				'workflow_id' => $workflow_id,
 			)
 		);
 
@@ -95,9 +93,8 @@ class CustomerSaveAddressHook {
 			array( $this, 'update_koban_third' ),
 		);
 		$data  = array(
-			'customer_id'  => $customer_id,
-			'address_type' => $address_type,
-			'workflow_id'  => $workflow_id,
+			'customer_id' => $customer_id,
+			'workflow_id' => $workflow_id,
 		);
 
 		$failed_step = MetaUtils::get_koban_workflow_failed_step_for_user_id( $customer_id );
@@ -134,14 +131,13 @@ class CustomerSaveAddressHook {
 	 */
 	public function update_koban_third( StateMachine $state ): bool {
 		$customer_id      = $state->get_data( 'customer_id' );
-		$address_type     = $state->get_data( 'address_type' );
 		$koban_third_guid = MetaUtils::get_koban_third_guid( $customer_id );
 
-		// Only update Koban if a GUID already exists and the address is billing.
-		if ( $koban_third_guid && 'billing' === $address_type ) {
-			$third_payload = ( new ThirdSerializer() )->from_user( get_user_by( 'id', $customer_id ) );
+		// Only update Koban if a GUID already exists.
+		if ( $koban_third_guid ) {
+			$third_payload = ( new ThirdSerializer() )->from_user( new WC_Customer( $customer_id ) );
 
-			if ( $this->api->upsert_user( $third_payload, $koban_third_guid ) ) {
+			if ( $this->api->upsert_user( $third_payload ) ) {
 				return $state->success( __( 'Updated Koban Third with new billing details.', 'woocommerce-koban-sync' ) );
 			}
 			return $state->failed( __( 'Could not update Koban Third.', 'woocommerce-koban-sync' ) );
@@ -173,10 +169,9 @@ class CustomerSaveAddressHook {
 				time() + 60,
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $customer_id,
-					'address_type' => $data['address_type'],
-					'workflow_id'  => $data['workflow_id'],
-					'attempt'      => $attempt + 1,
+					'customer_id' => $customer_id,
+					'workflow_id' => $data['workflow_id'],
+					'attempt'     => $attempt + 1,
 				),
 				'koban-sync'
 			);

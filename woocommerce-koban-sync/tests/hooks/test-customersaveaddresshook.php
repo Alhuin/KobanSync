@@ -81,7 +81,7 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 	/**
 	 * Customer with Koban GUID billing address modification
 	 */
-	public function test_customer_save_address_billing_with_guid() {
+	public function test_customer_save_address_with_guid() {
 		$customer_id = $this->customer_with_guid_id;
 
 		$expected_requests = array(
@@ -91,7 +91,6 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 
 		( new CustomerSaveAddressHook() )->handle_customer_save_address(
 			$customer_id,
-			'billing',
 			'workflow_id',
 			0
 		);
@@ -103,10 +102,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			as_next_scheduled_action(
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $this->customer_with_guid_id,
-					'address_type' => 'billing',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 1,
+					'customer_id' => $this->customer_with_guid_id,
+					'workflow_id' => 'workflow_id',
+					'attempt'     => 1,
 				),
 				'koban-sync'
 			),
@@ -117,10 +115,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 	/**
 	 * Customer without Koban GUID billing address modification
 	 */
-	public function test_customer_save_address_billing_no_guid() {
+	public function test_customer_save_addressg_no_guid() {
 		( new CustomerSaveAddressHook() )->handle_customer_save_address(
 			$this->customer_without_guid_id,
-			'billing',
 			'workflow_id',
 			0
 		);
@@ -142,49 +139,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			as_next_scheduled_action(
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $this->customer_with_guid_id,
-					'address_type' => 'billing',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 1,
-				),
-				'koban-sync'
-			),
-			'Expected no scheduling after stop.'
-		);
-	}
-
-	/**
-	 * Customer with Koban GUID shipping address modification
-	 */
-	public function test_customer_save_address_shipping_with_guid() {
-		( new CustomerSaveAddressHook() )->handle_customer_save_address(
-			$this->customer_with_guid_id,
-			'shipping',
-			'workflow_id',
-			0
-		);
-
-		$this->assertRequestsCount( 0 );
-
-		$this->assertSame(
-			StateMachine::STATUS_STOP,
-			MetaUtils::get_koban_workflow_status_for_user_id( $this->customer_with_guid_id ),
-			'Expected the workflow to stop with shipping address.'
-		);
-
-		$this->assertEmpty(
-			MetaUtils::get_koban_workflow_failed_step_for_user_id( $this->customer_with_guid_id ),
-			'Expected failed_step to be cleared if not retrying.'
-		);
-
-		$this->assertFalse(
-			as_next_scheduled_action(
-				'wckoban_handle_customer_save_address',
-				array(
-					'customer_id'  => $this->customer_with_guid_id,
-					'address_type' => 'shipping',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 1,
+					'customer_id' => $this->customer_with_guid_id,
+					'workflow_id' => 'workflow_id',
+					'attempt'     => 1,
 				),
 				'koban-sync'
 			),
@@ -198,7 +155,6 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 	public function test_customer_save_address_check_data_integrity_fails_no_retries() {
 		( new CustomerSaveAddressHook() )->handle_customer_save_address(
 			123,
-			'billing',
 			'workflow_id',
 			0
 		);
@@ -208,10 +164,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			as_next_scheduled_action(
 				'wckoban_customer_save_address',
 				array(
-					'customer_id'  => 123,
-					'address_type' => 'billing',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 1,
+					'customer_id' => 123,
+					'workflow_id' => 'workflow_id',
+					'attempt'     => 1,
 				),
 				'koban-sync'
 			),
@@ -234,7 +189,6 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 		$hook::$max_retries = 1;
 		$hook->handle_customer_save_address(
 			$this->customer_with_guid_id,
-			'billing',
 			'workflow_id',
 			0
 		);
@@ -255,10 +209,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			as_next_scheduled_action(
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $this->customer_with_guid_id,
-					'address_type' => 'billing',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 1,
+					'customer_id' => $this->customer_with_guid_id,
+					'workflow_id' => 'workflow_id',
+					'attempt'     => 1,
 				),
 				'koban-sync'
 			),
@@ -276,7 +229,6 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 		$hook::$max_retries = 1;
 		$hook->handle_customer_save_address(
 			$this->customer_with_guid_id,
-			'billing',
 			'workflow_id',
 			1
 		);
@@ -296,10 +248,9 @@ class TestCustomerSaveAddressHook extends WCKoban_UnitTestCase {
 			as_next_scheduled_action(
 				'wckoban_handle_customer_save_address',
 				array(
-					'customer_id'  => $this->customer_with_guid_id,
-					'address_type' => 'billing',
-					'workflow_id'  => 'workflow_id',
-					'attempt'      => 2,
+					'customer_id' => $this->customer_with_guid_id,
+					'workflow_id' => 'workflow_id',
+					'attempt'     => 2,
 				),
 				'koban-sync'
 			),
